@@ -1,0 +1,221 @@
+{
+  "schematics": {
+    "6f3ef016715143ff99fb995200bbe34a": {
+      "name": "Schematic1",
+      "sheets": [
+        {
+          "name": "P1",
+          "id": 1,
+          "uuid": "fc8768f912954c1da2e4921402854c44"
+        }
+      ]
+    }
+  },
+  "pcbs": {
+    "cf58ee04729f4a848561ce2d48cd4260": "PCB1"
+  },
+  "panels": {},
+  "symbols": {
+    "e3525ca31c384fd18992c32958e80753": {
+      "source": "e9f9c3edb7794acb8f8c81315974a942|0819f05c4eef4c71ace90d822a990e87",
+      "desc": "",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "custom_tags": "[\"连接器\",\"FFC/FPC连接器\"]",
+      "title": "AFC01-S08FCA-00",
+      "version": "1719080329",
+      "type": 2
+    },
+    "90618ae9be814337a460bb6e2c06aae0": {
+      "source": "6f8cc47a30c240bbb979c211cee8d9f2|0819f05c4eef4c71ace90d822a990e87",
+      "desc": "",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "custom_tags": "[]",
+      "title": "Sheet-Symbol_A3",
+      "version": "1689644849",
+      "type": 20
+    },
+    "dd832849c79b4c7f9211c499684e8321": {
+      "source": "ed2b3208f6554d2b864abf30bef58710|0819f05c4eef4c71ace90d822a990e87",
+      "desc": "",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "custom_tags": "[\"连接器\",\"排针\"]",
+      "title": "X6521WVS-2*04H-C60D74",
+      "version": "1721023839",
+      "type": 2
+    }
+  },
+  "footprints": {
+    "3b7490587ee54b73b0361c5eaa364bd0": {
+      "title": "FPC-SMD_P0.50-8P_FGS-XJ-H2.0",
+      "source": "5bc22991f4c04ca9be2aae9f658fe572|0819f05c4eef4c71ace90d822a990e87",
+      "version": "1700128359",
+      "type": 4,
+      "desc": ";SMD,P=0.5mm,卧贴",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "custom_tags": "[\"FPC-SMD\"]"
+    },
+    "6897d910d5b94dceb0c69ec033942226": {
+      "title": "HDR-SMD_8P-P2.54-V-M-R2-C5-S7.4",
+      "source": "6dc2a6498e7a47239118c9b18e5fe040|0819f05c4eef4c71ace90d822a990e87",
+      "version": "1677127864",
+      "type": 4,
+      "desc": ";SMD,P=2.54mm;SMT2.54mm加高弯针2X4总高15.2mm",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "custom_tags": "[\"HDR-SMD\"]"
+    }
+  },
+  "devices": {
+    "1c119a67b06c432688b5c9d602a04088": {
+      "title": "AFC01-S08FCA-00",
+      "attributes": {
+        "LCSC Part Name": "间距:0.5mm P数:8P 翻盖式 下接",
+        "Supplier Part": "C262657",
+        "Manufacturer": "JS(钜硕电子)",
+        "Manufacturer Part": "AFC01-S08FCA-00",
+        "Supplier Footprint": "SMD,P=0.5mm,卧贴",
+        "JLCPCB Part Class": "扩展库",
+        "Datasheet": "https://atta.szlcsc.com/upload/public/pdf/source/20190816/C413942_2A72D1AC756EAE17EEDF756A339D4500.pdf",
+        "Supplier": "LCSC",
+        "Add into BOM": "yes",
+        "Convert to PCB": "yes",
+        "Symbol": "e3525ca31c384fd18992c32958e80753",
+        "Designator": "FPC?",
+        "Footprint": "3b7490587ee54b73b0361c5eaa364bd0",
+        "3D Model": "63d94c6eff1e475caf0fe453b286c19b",
+        "3D Model Title": "FPC-SMD_P0.50-8P_FGS-XJ-H2.0",
+        "3D Model Transform": "334.645,240.157,0,0,0,0,0,57.047,0",
+        "Locking Feature": "翻盖式",
+        "Contact Type": "下接",
+        "Number of Contacts": "8P",
+        "Pitch": "0.5mm",
+        "Mounting Type": "卧贴",
+        "FFC, FCB Thickness": "0.3mm",
+        "Height Above Board": "2mm",
+        "Name": "={Manufacturer Part}",
+        "Description": "锁定特性:翻盖式;触点类型:下接;触点数量:8P;间距:0.5mm;安装类型:卧贴;"
+      },
+      "description": "锁定特性:翻盖式;触点类型:下接;触点数量:8P;间距:0.5mm;安装类型:卧贴;",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "images": [
+        "https://alimg.szlcsc.com/upload/public/product/middle/20230108/4B1E6791DCFF5271A1131259AC05B1C3.jpg"
+      ],
+      "source": "09fc1b3478614e1ea0e41a996edc0bb8|0819f05c4eef4c71ace90d822a990e87",
+      "version": "1649759633",
+      "custom_tags": "[\"连接器\",\"FFC/FPC连接器\"]"
+    },
+    "597fd99f842e4464a6f96218c57f13c8": {
+      "title": "Sheet-Symbol_A3",
+      "attributes": {
+        "Symbol": "90618ae9be814337a460bb6e2c06aae0",
+        "@Page Name": "",
+        "@Create Date": "",
+        "@Page Count": "",
+        "@Page No": "",
+        "@Project Name": "",
+        "@Schematic Name": "",
+        "@Update Date": "",
+        "Company": "嘉立创EDA",
+        "Device": "",
+        "Drawed": "",
+        "Page Size": "A3",
+        "Part Number": "",
+        "Reviewed": "",
+        "Version": "V1.0",
+        "Footprint": "",
+        "Description": ""
+      },
+      "description": "",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "images": [
+        ""
+      ],
+      "source": "25d1e29c59cf4041907f5908f56317a1|0819f05c4eef4c71ace90d822a990e87",
+      "version": "1664282581",
+      "custom_tags": "[\"\",\"\"]"
+    },
+    "5b83621d51574d4db5665b5a9fcc11fd": {
+      "title": "X6521WVS-2x04H-C60D74",
+      "attributes": {
+        "LCSC Part Name": "2x4P 间距:2.54mm 方针",
+        "Supplier Part": "C780053",
+        "Manufacturer": "XKB Connection(中国星坤)",
+        "Manufacturer Part": "X6521WVS-2x04H-C60D74",
+        "Supplier Footprint": "SMD,P=2.54mm",
+        "JLCPCB Part Class": "扩展库",
+        "Datasheet": "https://atta.szlcsc.com/upload/public/pdf/source/20211009/E3239EE5247E6BAFECB8B74A4FCF9AB8.pdf",
+        "Supplier": "LCSC",
+        "Add into BOM": "yes",
+        "Convert to PCB": "yes",
+        "Symbol": "dd832849c79b4c7f9211c499684e8321",
+        "Designator": "H?",
+        "Footprint": "6897d910d5b94dceb0c69ec033942226",
+        "3D Model": "0039183ea4bd460198add24eea8d9e1c",
+        "3D Model Title": "HDR-SMD_8P-P2.54-M-LS-2X4P",
+        "3D Model Transform": "399.999,275.59,0,0,0,0,0,0.001,0",
+        "Pin Structure": "2x4P",
+        "Pitch": "2.54mm",
+        "Row Spacing": "2.54mm",
+        "Circluar Pins/Square Pins": "方针",
+        "Mounting Type": "-",
+        "Number of Rows": "双排",
+        "Number of Pins": "8P",
+        "Current Rating (Max)": "3A",
+        "Voltage Rating (Max)": "250V",
+        "Length of Mating Pin": "-",
+        "Insulation Height": "2.5mm",
+        "Length of End Connection Pin": "-",
+        "Contact Material": "黄铜",
+        "Contact Plating": "金",
+        "Operating Temperature Range": "-40℃~+105℃",
+        "Soldering Temperature(Max)": "260℃",
+        "Color": "黑色",
+        "Name": "={Manufacturer Part}",
+        "Description": "插针结构:2x4P;间距:2.54mm;行距:2.54mm;圆针/方针:方针;安装类型:-;排数:双排;总PIN位数:8P;额定电流:3A;额定电压:250V;配合针长度:-;塑高:2.5mm;端接针长度:-;触头材质:黄铜;触头镀层:金;工作温度范围:-40℃~+105℃;焊接温度(最大值):260℃;颜色:黑色;"
+      },
+      "description": "插针结构:2x4P;间距:2.54mm;行距:2.54mm;圆针/方针:方针;安装类型:-;排数:双排;总PIN位数:8P;额定电流:3A;额定电压:250V;配合针长度:-;塑高:2.5mm;端接针长度:-;触头材质:黄铜;触头镀层:金;工作温度范围:-40℃~+105℃;焊接温度(最大值):260℃;颜色:黑色;",
+      "tags": {
+        "parent_tag": [],
+        "child_tag": []
+      },
+      "images": [
+        "https://alimg.szlcsc.com/upload/public/product/middle/20230104/160048574E99E1D2C1B2558E96118F9C.jpg"
+      ],
+      "source": "81a93304a716450482ecee3f2eb168c4|0819f05c4eef4c71ace90d822a990e87",
+      "version": "1657866030",
+      "custom_tags": "[\"连接器\",\"排针\"]"
+    }
+  },
+  "boards": {
+    "Board1": {
+      "schematic": "6f3ef016715143ff99fb995200bbe34a",
+      "pcb": "cf58ee04729f4a848561ce2d48cd4260"
+    }
+  },
+  "config": {
+    "title": "线性CCD转接板",
+    "cbbProject": false,
+    "defaultSheet": "597fd99f842e4464a6f96218c57f13c8",
+    "editorVersion": "2.2.43.4"
+  }
+}

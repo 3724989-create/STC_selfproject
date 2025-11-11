@@ -1,0 +1,30 @@
+A251 MACRO ASSEMBLER  ISR                                                                   10/11/25 12:45:43 PAGE     1
+
+
+MACRO ASSEMBLER A251 V4.69.13.0
+OBJECT MODULE PLACED IN .\OUT\ISR.obj
+ASSEMBLER INVOKED BY: D:\MDK\C251\BIN\A251.EXE USER\ISR.asm MODSRC INTR2 SET(XSMALL) DEBUG PRINT(.\OUT\ISR.lst) OBJECT(.
+                      \OUT\ISR.obj) EP
+
+LOC    OBJ             LINE     SOURCE
+
+0001D3                    1             CSEG            AT 01D3H
+0001D3 02006B             2             LJMP            006BH
+0001DB                    3             CSEG            AT 01DBH
+0001DB 02006B             4             LJMP            006BH
+                          5             
+                          6             END
+A251 MACRO ASSEMBLER  ISR                                                                   10/11/25 12:45:43 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A MT Y P E  V A L U E     ATTRIBUTES
+
+
+
+REGISTER BANK(S) USED: 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S).

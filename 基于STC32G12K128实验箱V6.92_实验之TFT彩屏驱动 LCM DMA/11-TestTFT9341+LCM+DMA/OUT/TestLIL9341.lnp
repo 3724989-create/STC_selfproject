@@ -1,0 +1,9 @@
+".\OUT\Main.obj",
+".\OUT\LCD9341.obj",
+".\OUT\STC32G_SYS.obj",
+".\OUT\ISR.obj" 
+TO ".\OUT\TestLIL9341" 
+PRINT(".\OUT\TestLIL9341.map") CASE 
+REMOVEUNUSED 
+CLASSES (EDATA (0x0-0xFFF), 
+HDATA (0x0-0xFFF)) 

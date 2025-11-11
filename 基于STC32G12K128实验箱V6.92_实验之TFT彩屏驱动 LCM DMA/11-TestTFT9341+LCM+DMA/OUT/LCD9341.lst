@@ -1,0 +1,828 @@
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LCD9341
+OBJECT MODULE PLACED IN .\OUT\LCD9341.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE USER\LCD9341.C XSMALL INTR2 OPTIMIZE(3,SPEED) BROWSE INCDIR(.\USER;.\STC32
+                    -GLIB) DEBUG PRINT(.\OUT\LCD9341.lst) OBJECT(.\OUT\LCD9341.obj) 
+
+stmt  level    source
+
+    1          //=================================================================================================
+    2          // 文件名称: LCD_ILI9341.C
+    3          // 功能说明: 液晶屏模块驱动程序  2.4寸彩色显示屏 240*320 8位并行口模式
+    4          // 基于电路: STC32G 实验箱V9.62 
+    5          // 实验目的: 采用LCM+DMA模式清屏和显示BMP图片 
+    6          // 整理改编: 浦晓明(浦江一水) 2024-08-27
+    7          //=== 硬件连接 ====================================================================================
+    8          //=========================================电源接线================================================//
+    9          //VDD接DC 3.3V电源
+   10          //GND接地
+   11          //=======================================液晶屏数据线接线==========================================//
+   12          //本模块数据总线类型为8位并口
+   13          //液晶屏模块               STC32G
+   14          // LCD_D0~D7     接       P60~P67        //液晶屏8位数据线
+   15          //=======================================液晶屏控制线接线==========================================//
+   16          //液晶屏模块               STC32G
+   17          // LCD_RS        接        P45           //数据/命令选择控制信号
+   18          // LCD_RD        接        P44           //读控制信号
+   19          // LCD_RST       接        P43           //复位信号
+   20          // LCD_WR        接        P42           //写控制信号
+   21          // LCD_CS        接        P34           //片选控制信号
+   22          //================================================================================================//
+   23          // 本实验测试使用的2.4寸320*240的并口彩屏，淘宝店 https://kcer001.taobao.com/提供的样品彩屏上测试通过
+   24          //**************************************************************************************************/
+   25          #include "STC32G.H"
+   26          #include "LCD9341.H"
+   27          #include "ASCII.H"
+   28          #include "LCD_HZK.H"
+   29          
+   30          //定义LCD尺寸(原始0方向)全局变量
+   31          unsigned int LCD_W=240;
+   32          unsigned int LCD_H=320;
+   33          
+   34          #define DMA_AMT_LEN  2047    //n+1 = 2048  //DAM每次发送的字长
+   35          
+   36          u16 DMA_TxCount;  //DMA发送次数 
+   37          u16 xdata LCD_Buf[DMA_AMT_LEN];//DMA数据发送缓存区 LCD_Buf(16位字缓存区)
+   38          bit LcmFlag;      //LCM标志
+   39          
+   40          /* 彩色表色号定义 */
+   41          const unsigned int COLOR[]={
+   42            0x0000,   //0黑色  00000 000000 00000
+   43            0x0008,   //1蓝色  00000 000000 01000
+   44            0x0200,   //2绿色  00000 010000 00000
+   45            0x0208,   //3青色  00000 010000 01000
+   46            0x5042,   //4红色  01010 000010 00010
+   47            0x5052,   //5紫色  01010 000010 10010
+   48            0xA484,   //6橙色  10100 100100 00100
+   49            0x8410,   //7灰色  10000 100000 10000
+   50            0xC618,   //8亮灰  11000 110000 11000
+   51            0x001F,   //9亮蓝  00000 000000 11111 
+   52            0x07E0,   //10亮绿 GREEN
+   53            0x07FF,   //11亮青 00000 111111 11111
+   54            0xF800,   //12亮红 RED
+   55            0xF81F,   //13亮紫 MAGENTA
+   56            0xFFE0,   //14黄色 YELLOW
+   57            0xFFFF,   //15白色
+   58            0x2104,   //16深灰
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 2   
+
+   59            0x0006,   //17暗蓝
+   60            0x79EF,   //18浅紫
+   61            0x8408,   //19土黄
+   62            0x0180,   //20暗绿 0000 0001 1000 0000 
+   63            0x041F,   //21河蓝
+   64            0x0210,   //22蓝黑
+   65            0x801F,   //23紫色
+   66            0x8200,   //24咖啡
+   67            0xF81F,   //25亮紫
+   68            0xFFF0,   //26浅黄
+   69            0x0700,   //27翠绿 0000 0111 0000 0000
+   70            0xC7FF,   //28亮青 1100 0111 1111 1111
+   71            0x841F,   //29青灰
+   72            0xF810,   //30殷红
+   73            0xFC08,   //31橙色
+   74            0x001F,   //BLUE
+   75            0xF81F,   //BRED     
+   76            0xFFE0,   //GRED        
+   77            0x07FF,   //GBLUE
+   78            0x7FFF,   //CYAN
+   79            0xBC40,   //BROWN 棕色
+   80            0xFC07,   //BRRED 棕红色
+   81            0x8430,   //GRAY  灰色
+   82            0x01CF,   //DARKBLUE  深蓝色
+   83            0x7D7C,   //LIGHTBLUE 浅蓝色  
+   84            0x5458,   //GRAYBLUE   灰蓝色
+   85            0x841F,   //LIGHTGREEN 浅绿色
+   86            0xC618,   //LGRAY 浅灰色(PANNEL),窗体背景色
+   87            0xA651,   //LGRAYBLUE 浅灰蓝色(中间层颜色)
+   88            0x2B12,   //LBBLUE    浅棕蓝色(选择条目的反色)
+   89          };
+   90          
+   91          /*****************************************************************************
+   92           * @name       :void LCM_Config(void)
+   93           * @date       :2018-11-13 
+   94           * @function   :Config LCM
+   95           * @parameters :None
+   96           * @retvalue   :None
+   97          ******************************************************************************/ 
+   98          void LCM_Config(void)
+   99          {
+  100   1              LCMIFCFG  = 0x84;       //bit7 1:Enable Interrupt, bit1 0:8bit mode; bit0 0:8080,1:6800
+  101   1              LCMIFCFG2 = 0x09;       //RS:P45,RD:P44,WR:P42; Setup Time=2,HOLD Time=1
+  102   1              LCMIFSTA  = 0x00;
+  103   1      }
+  104          
+  105          /*****************************************************************************
+  106           * @name       :void DMA_Config(void)
+  107           * @date       :2020-12-09 
+  108           * @function   :Config DMA
+  109           * @parameters :None
+  110           * @retvalue   :None
+  111          ******************************************************************************/  
+  112          void DMA_Config(void)
+  113          {
+  114   1        DMA_LCM_AMT  = (u8)DMA_AMT_LEN;          //设置传输总字节数(低8位)：n+1
+  115   1        DMA_LCM_AMTH = (u8)(DMA_AMT_LEN>>8);     //设置传输总字节数(高8位)：n+1
+  116   1        DMA_LCM_TXAH = (u8)((u16)&LCD_Buf >> 8); //发送区地址高位字节
+  117   1        DMA_LCM_TXAL = (u8)((u16)&LCD_Buf);      //发送区地址低位字节
+  118   1      //  DMA_LCM_RXAH = (u8)((u16)&Buffer >> 8);
+  119   1      //  DMA_LCM_RXAL = (u8)((u16)&Buffer);
+  120   1        DMA_LCM_CFG = 0x82;   //使能DMA,较高优先级 
+  121   1        DMA_LCM_STA = 0x00;   //状态字
+  122   1        DMA_LCM_CR  = 0x00;   //初始控制寄存器
+  123   1      }
+  124          
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 3   
+
+  125          //内部函数: 延时Nms
+  126          void delayms(int Nms)  // /* x1ms */
+  127          { u16 i;
+  128   1        do
+  129   1        { i = MAIN_Fosc / 6000;
+  130   2          while(--i);
+  131   2        } while(--Nms);
+  132   1      }
+  133          //内部函数: 延时Nus
+  134          void delayus(int Nus)  // /* x1us */
+  135          { int i,j;
+  136   1        for(i=0;i<Nus;i++)
+  137   1        for(j=0;j<1;j++);
+  138   1      }
+  139          /*****************************************************************************
+  140           * 函数: void LCD_WR_CMD(u8 CMD)  
+  141           * 功能: Write an 8-bit command to the LCD screen  写命令
+  142          ******************************************************************************/
+  143          void LCD_WR_CMD(u8 CMD)   
+  144          {  
+  145   1      #if (USE_LCM==1)
+  146   1        LCMIFDATL = CMD;
+  147   1        LCD_CS=0;
+  148   1        LCMIFCR = 0x84;   //Enable interface, write command out
+  149   1        //while(!LCD_CS);
+  150   1        while(LcmFlag);
+  151   1        LCD_CS = 1 ;
+  152   1      #else
+                 LCD_RS = 0;      //写命令
+                 LCD_CS = 0;
+                 LCD_WR = 0;
+                 LCD_Port = CMD;
+                 LCD_WR = 1;
+                 LCD_CS = 1;
+               #endif 
+  160   1      } 
+  161          /*****************************************************************************
+  162           * 函数: void LCD_WR_DAT(u8 CMD)  
+  163           * 功能: Write an 8-bit data to the LCD screen  写数据
+  164          ******************************************************************************/
+  165          void LCD_WR_DAT(u8 DAT)
+  166          {
+  167   1      #if (USE_LCM==1)
+  168   1        LCMIFDATL = DAT;
+  169   1        LCD_CS=0;
+  170   1        LCMIFCR = 0x85;    //Enable interface, write data out
+  171   1        //while(!LCD_CS);
+  172   1        while(LcmFlag);
+  173   1        LCD_CS = 1 ;
+  174   1      #else
+                 LCD_RS = 1;       //写数据
+                 LCD_CS = 0;
+                 LCD_WR = 0;
+                 LCD_Port = DAT;
+                 LCD_WR = 1;
+                 LCD_CS = 1;
+               #endif 
+  182   1      }
+  183          /*****************************************************************************
+  184           * 函数: void LCD_WR_DAT(u16 CMD)  
+  185           * 功能: Write an 8-bit data to the LCD screen  写16位数据
+  186          ******************************************************************************/
+  187          void LCD_WR_DAT_16Bit(u16 Data)
+  188          {
+  189   1      #if (USE_LCM==1)
+  190   1        LCD_WR_DAT((u8)(Data>>8));
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 4   
+
+  191   1        LCD_WR_DAT((u8)Data);
+  192   1      #else
+                 LCD_RS = 1;     //写数据 
+                 LCD_CS = 0;
+                 LCD_WR = 0;
+                 LCD_Port = Data >> 8;
+                 LCD_WR = 1;
+                 LCD_WR = 0;
+                 LCD_Port = Data&0xFF;
+                 LCD_WR = 1;
+                 LCD_CS = 1;
+               #endif
+  203   1      }
+  204          
+  205          u16 Color_To_565(u8 r, u8 g, u8 b)
+  206          {
+  207   1        return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
+  208   1      }
+  209          /*****************************************************************************
+  210           * 函数: LCD_SetWindow(u16 SX,u16 SY,u16 EX,u16 EY);
+  211           * 功能: 设置显示窗口
+  212           * 参数: u16 SX,u16 SY,u16 EX,u16 EY 起始XY坐标,结束XY坐标
+  213          ******************************************************************************/
+  214          void LCD_SetWindow(u16 SX,u16 SY,u16 EX,u16 EY)
+  215          {
+  216   1        LCD_WR_CMD(0x2A);    //定X水平起止坐标
+  217   1        LCD_WR_DAT((u8)(SX>>8));
+  218   1        LCD_WR_DAT(0xFF&SX);    
+  219   1        LCD_WR_DAT((u8)(EX>>8));
+  220   1        LCD_WR_DAT(0xFF&EX);
+  221   1        LCD_WR_CMD(0x2B);     //定Y垂直起止坐标 
+  222   1        LCD_WR_DAT((u8)(SY>>8));
+  223   1        LCD_WR_DAT(0xFF&SY);    
+  224   1        LCD_WR_DAT((u8)(EY>>8));
+  225   1        LCD_WR_DAT(0xFF&EY);  
+  226   1        LCD_WR_CMD(0x2C);     //开始连续写入
+  227   1      }
+  228          /*****************************************************************************
+  229           * @name       :void LCD_Set_GPIO(void)
+  230           * @date       :2018-11-13 
+  231           * @function   :Set the gpio to push-pull mode
+  232           * @parameters :None
+  233           * @retvalue   :None
+  234          ******************************************************************************/  
+  235          void LCD_Set_GPIO(void)
+  236          {
+  237   1        //P0.4,P0.5口设置成高阻输入
+  238   1        P0M1=0x30;P0M0=0x00;
+  239   1        //P1.4,P1.5口设置成高阻输入
+  240   1        P1M1=0x30;P1M0=0x00;
+  241   1        //P2口设置成准双向口
+  242   1        P2M1=0x00;P2M0=0x00;
+  243   1        //P3.4口设置成推挽输出
+  244   1        P3M1=0x00;P3M0=0x10;
+  245   1        //P4.2~P4.5口设置成推挽输出
+  246   1        P4M1=0x00;P4M0=0x3C;
+  247   1        //P6口设置成推挽输出
+  248   1        P6M1=0x00;P6M0=0xFF;
+  249   1      }
+  250          
+  251          /*****************************************************************************
+  252           * @name       :void LCD_RST(void)
+  253           * @date       :2018-08-09 
+  254           * @function   :RST LCD screen
+  255           * @parameters :None
+  256           * @retvalue   :None
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 5   
+
+  257          ******************************************************************************/  
+  258          void LCDRST(void)
+  259          {
+  260   1        delayms(50);  
+  261   1        LCD_RST=0;
+  262   1        delayms(50);
+  263   1        LCD_RST=1;
+  264   1        delayms(50);
+  265   1      }
+  266          
+  267          /*****************************************************************************
+  268           * @name       :void LCD_Init(void)
+  269           * @date       :2018-08-09 
+  270           * @function   :Initialization LCD screen
+  271           * @parameters :None
+  272           * @retvalue   :None
+  273          ******************************************************************************/      
+  274          void LCD_Init(void)
+  275          {
+  276   1        LCD_Set_GPIO();
+  277   1        LCDRST(); //初始化之前复位
+  278   1      //#if (USE_LCM==1)    //void LCM_Config(void)
+  279   1      //  LCMIFCFG = 0x84;  //bit7 1:Enable Interrupt, bit1 0:8bit mode; bit0 0:8080,1:6800
+  280   1      //  LCMIFCFG2= 0x09;  //RS:P45,RD:P44,WR:P42; Setup Time=2,HOLD Time=1
+  281   1      //  LCMIFSTA = 0x00;
+  282   1      //  EA = 1;  //开中断
+  283   1      //#endif
+  284   1      //#if (USE_DMA==1)    //void DMA_Config(void)
+  285   1      //  DMA_Config(); 
+  286   1      //#endif
+  287   1        //*************2.4inch ILI9341初始化**********//  
+  288   1        LCD_WR_CMD(0x28); //display off 关显示 
+  289   1        delayms(20);
+  290   1        LCD_WR_CMD(0xCF); LCD_WR_DAT(0x00); LCD_WR_DAT(0xD9); LCD_WR_DAT(0x30); //0xD9/0xC1 
+  291   1        LCD_WR_CMD(0xED); LCD_WR_DAT(0x64); LCD_WR_DAT(0x03); LCD_WR_DAT(0x12); LCD_WR_DAT(0x81); 
+  292   1        LCD_WR_CMD(0xE8); LCD_WR_DAT(0x85); LCD_WR_DAT(0x10); LCD_WR_DAT(0x7A); 
+  293   1        LCD_WR_CMD(0xCB); LCD_WR_DAT(0x39); LCD_WR_DAT(0x2C); LCD_WR_DAT(0x00); LCD_WR_DAT(0x34); LCD_WR_DAT(0x
+             -02); 
+  294   1        LCD_WR_CMD(0xF7); LCD_WR_DAT(0x20); 
+  295   1        LCD_WR_CMD(0xEA); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); 
+  296   1        LCD_WR_CMD(0xC0); LCD_WR_DAT(0x1B); //Power control //VRH[5:0] 
+  297   1        LCD_WR_CMD(0xC1); LCD_WR_DAT(0x12); //Power control //SAP[2:0];BT[3:0] 0x01
+  298   1        LCD_WR_CMD(0xC5); LCD_WR_DAT(0x08); LCD_WR_DAT(0x26);//VCM control //30 //30
+  299   1        LCD_WR_CMD(0xC7); LCD_WR_DAT(0XB7); //VCM control2 
+  300   1        LCD_WR_CMD(0x36); LCD_WR_DAT(0x08); //Memory Access Control 
+  301   1        LCD_WR_CMD(0x3A); LCD_WR_DAT(0x55); 
+  302   1        LCD_WR_CMD(0xB1); LCD_WR_DAT(0x00); LCD_WR_DAT(0x1A); 
+  303   1        LCD_WR_CMD(0xB6); LCD_WR_DAT(0x0A); LCD_WR_DAT(0xA2); // Display Function Control 
+  304   1        LCD_WR_CMD(0xF2); LCD_WR_DAT(0x00); //3Gamma Function Disable 
+  305   1        LCD_WR_CMD(0x26); LCD_WR_DAT(0x01); //Gamma curve selected 
+  306   1        LCD_WR_CMD(0xE0); LCD_WR_DAT(0x0F); LCD_WR_DAT(0x1D); LCD_WR_DAT(0x1A); LCD_WR_DAT(0x0A);  //Set Gamma 
+  307   1                          LCD_WR_DAT(0x0D); LCD_WR_DAT(0x07); LCD_WR_DAT(0x49); LCD_WR_DAT(0X66); 
+  308   1                          LCD_WR_DAT(0x3B); LCD_WR_DAT(0x07); LCD_WR_DAT(0x11); LCD_WR_DAT(0x01); 
+  309   1                          LCD_WR_DAT(0x09); LCD_WR_DAT(0x05); LCD_WR_DAT(0x04);      
+  310   1        LCD_WR_CMD(0xE1); LCD_WR_DAT(0x00); LCD_WR_DAT(0x18); LCD_WR_DAT(0x1D); LCD_WR_DAT(0x02); //Set Gamma 
+  311   1                          LCD_WR_DAT(0x0F); LCD_WR_DAT(0x04); LCD_WR_DAT(0x36); LCD_WR_DAT(0x13); 
+  312   1                          LCD_WR_DAT(0x4C); LCD_WR_DAT(0x07); LCD_WR_DAT(0x13); LCD_WR_DAT(0x0F); 
+  313   1                          LCD_WR_DAT(0x2E); LCD_WR_DAT(0x2F); LCD_WR_DAT(0x05); 
+  314   1        LCD_WR_CMD(0x2A); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); LCD_WR_DAT(0xEF); //宽度  
+  315   1        LCD_WR_CMD(0x2B); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); LCD_WR_DAT(0x01); LCD_WR_DAT(0x3F); //高度
+  316   1        LCD_WR_CMD(0x11);    //Exit Sleep 退出睡眠
+  317   1        delayms(120);
+  318   1        LCD_WR_CMD(0x29);    //display on 开显示 
+  319   1        //设置LCD属性参数
+  320   1        LCD_SetDIR(LCD_DIR); //设置LCD显示方向 (设置窗口,包含宽高度)
+  321   1        //LCD_BL=1;          //点亮背光   
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 6   
+
+  322   1      }
+  323          /*****************************************************************************
+  324          * 函数:void LCD_SetDIR(u8 dir)
+  325          * 参数: 0原始 1:转90度 2:转180 3:转270度 (实验箱V9.62)
+  326          ******************************************************************************/ 
+  327          void LCD_SetDIR(u8 dir)
+  328          { 
+  329   1        switch(dir)
+  330   1        { case 0:
+  331   2            LCD_W=240; LCD_H=320;
+  332   2            LCD_WR_CMD(0x36);
+  333   2            LCD_WR_DAT(0x08);  //(1<<3));
+  334   2            break;
+  335   2          case 1:
+  336   2            LCD_W=320; LCD_H=240;
+  337   2            LCD_WR_CMD(0x36);
+  338   2            LCD_WR_DAT(0xB8);  //((1<<3)|(1<<7)|(1<<5)|(1<<4));
+  339   2            break;
+  340   2          case 2:
+  341   2            LCD_W=240; LCD_H=320;  
+  342   2            LCD_WR_CMD(0x36);
+  343   2            LCD_WR_DAT(0xD8);  //((1<<3)|(1<<4)|(1<<6)|(1<<7));
+  344   2            break;
+  345   2          case 3:
+  346   2            LCD_W=320; LCD_H=240;
+  347   2            LCD_WR_CMD(0x36);
+  348   2            LCD_WR_DAT(0x68);  //((1<<3)|(1<<5)|(1<<6));
+  349   2            break;  
+  350   2          default: break;
+  351   2        }
+  352   1        LCD_SetWindow(0,0,LCD_W,LCD_H);  //   
+  353   1      }
+  354          /*****************************************************************************
+  355          * 函数: void LCD_SetXY(u16 X, u16 Y)  指定当前坐标点
+  356          * 参数: X水平坐标 Y垂直坐标. 当前方向范围内
+  357          ******************************************************************************/ 
+  358          void LCD_SetXY(u16 X, u16 Y)
+  359          { LCD_SetWindow(X,Y,X,Y);
+  360   1        LCD_SetWindow(X,Y,LCD_W,LCD_H);  
+  361   1      } 
+  362          /*****************************************************************************
+  363          * 函数:void LCD_DrawPoint(u16 X,u16 Y,u8 Color)
+  364          * 参数:X:水平坐标 Y:垂直坐标 Color:色号
+  365          ******************************************************************************/  
+  366          void LCD_Point(u16 X,u16 Y,u8 Color)
+  367          { //LCD_SetXY(X,Y); //设置光标位置 
+  368   1        LCD_SetWindow(X,Y,X,Y);  
+  369   1        LCD_WR_DAT_16Bit(COLOR[Color]); //画一色点
+  370   1      }    
+  371          /*****************************************************************************
+  372          * 函数:void LCD_LineH(u16 X, u16 Y,u16 W,u8 Color)
+  373          * 参数: 0原始 1:转90度 2:转180 3:转270度 (实验箱V9.62)
+  374          ******************************************************************************/ 
+  375          void LCD_LineH(u16 X, u16 Y,u16 W,u8 Color)
+  376          { u16 i;
+  377   1        LCD_SetWindow(X,Y,X+W,Y);  
+  378   1        for(i=0;i<W;i++)LCD_WR_DAT_16Bit(COLOR[Color]); //连续画色点
+  379   1      }
+  380          /*****************************************************************************
+  381          * 函数:void LCD_LineV(u16 X, u16 Y,u16 W,u8 Color)
+  382          * 参数: 0原始 1:转90度 2:转180 3:转270度 (实验箱V9.62)
+  383          ******************************************************************************/ 
+  384          void LCD_LineV(u16 X, u16 Y,u16 H,u8 Color)
+  385          { u16 i;
+  386   1        LCD_SetWindow(X,Y,X,Y+H);
+  387   1        for(i=0;i<H;i++)LCD_WR_DAT_16Bit(COLOR[Color]); //连续画色点
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 7   
+
+  388   1        LCD_SetWindow(X,Y,LCD_W,LCD_H);  
+  389   1      }
+  390          /*****************************************************************************
+  391          * 函数:void LCD_LineH(u16 X0, u16 Y0,u16 X1, u16 Y1,u8 Color)
+  392          * 参数: X0起点 Y0起点 X1终点 Y1终点 Color: 色号
+  393          ******************************************************************************/ 
+  394          void LCD_Line(u16 X0, u16 Y0,u16 X1, u16 Y1,u8 Color)
+  395          { 
+  396   1        u16 x,y;
+  397   1        u16 XX,YY;
+  398   1        u16 dx,dy;
+  399   1        
+  400   1        if(X0==X1){ LCD_LineH(X0, Y0,X1-X0,Color); return; }  //画水平线
+  401   1        if(Y0==Y1){ LCD_LineV(X0, Y0,Y1-Y0,Color); return; }  //画垂直线
+  402   1        if(X0>X1){ x=X0;X0=X1;X1=x; y=Y0;Y0=Y1;Y1=y; }        //为从左到右而交换坐标.
+  403   1        dx=X1-X0;
+  404   1        if(Y1>Y0)dy=Y1-Y0;else dy=Y0-Y1;
+  405   1        if(dx>dy)
+  406   1        { for(x=0;x<dx;x++ )
+  407   2          { XX=X0+x;
+  408   3            if(Y1>Y0)YY=Y0+(float)x*(float)dy/dx;
+  409   3            else     YY=Y0-(float)x*(float)dy/dx;
+  410   3            LCD_Point(XX,YY,Color);
+  411   3          }
+  412   2        }     
+  413   1        else  
+  414   1        { for(y=0;y<dy;y++ )
+  415   2          { if(Y0<Y1)YY=Y0+y;
+  416   3            else     YY=Y0-y;
+  417   3            XX=X0+(float)y*(float)dx/dy;
+  418   3            LCD_Point(XX,YY,Color);
+  419   3          }
+  420   2        }
+  421   1      }
+  422          /*****************************************************************************
+  423          * 函数:void LCD_Line0(u16 X, u16 Y,u16 L,u8 Fc,u8 Bc);   //画一水平虚线
+  424          * 参数: X起点 Y起点 L长度 Fc:Bc 色号  w:间隔
+  425          ******************************************************************************/ 
+  426          void LCD_LineH0(u16 X, u16 Y,u16 L,u8 w,u8 Fc,u8 Bc)
+  427          { u16 i;
+  428   1        LCD_SetWindow(X,Y,X+L,Y);
+  429   1        for(i=0;i<L;i++)
+  430   1        { if(i%w==0)LCD_WR_DAT_16Bit(COLOR[Fc]); //前景色点
+  431   2          else      LCD_WR_DAT_16Bit(COLOR[Bc]); //背景色点
+  432   2        }
+  433   1      }
+  434          /*****************************************************************************
+  435          * 函数:void LCD_Line0(u16 X, u16 Y,u16 L,u8 Fc,u8 Bc);   //画一垂直虚线
+  436          * 参数: X起点 Y起点 L长度 Fc:Bc 色号  w:间隔
+  437          ******************************************************************************/ 
+  438          void LCD_LineV0(u16 X, u16 Y,u16 L,u8 w,u8 Fc,u8 Bc)
+  439          { u16 i;
+  440   1        LCD_SetWindow(X,Y,X,Y+L);
+  441   1        for(i=0;i<L;i++)
+  442   1        { if(i%w==0)LCD_WR_DAT_16Bit(COLOR[Fc]); //前景色点
+  443   2          else      LCD_WR_DAT_16Bit(COLOR[Bc]); //背景色点
+  444   2        }
+  445   1      }
+  446          /***********************************************************************************
+  447          * 函数: 画彩色线方框程序 LCD_Box(u16 X,u16 Y,u16 W,u16 H,u8 C1,u8 C2,u8 BC);
+  448          * 参数: 起始点X列 Y行,宽度w 高度h, 左上边色C1,右下边色C2,背景色BC(约定80为透明)
+  449          ************************************************************************************/
+  450          void LCD_Box(u16 X,u16 Y,u16 W,u16 H,u8 C1,u8 C2,u8 BC)
+  451          { u16 l; 
+  452   1        LCD_LineH(X,Y,W,C1);  LCD_LineV(X,Y,H,C1);
+  453   1        LCD_LineH(X,Y+H,W,C2);LCD_LineV(X+W,Y,H+1,C2);
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 8   
+
+  454   1        if(BC!=80)
+  455   1        for(l=1;l<H;l++)LCD_LineH(X+1,Y+l,W-1,BC);
+  456   1      }
+  457          /*****************************************************************************
+  458          * 函数:void LCD_Box(u16 X, u16 Y,u16 W,u16 H,u8 Color)//画一方框
+  459          * 参数: X起点 Y起点 W宽度 H高度 Color: 色号 
+  460          *       mode: 0:方框 1:上圆角框 2:下圆角框 3:上下圆角框
+  461          ******************************************************************************/ 
+  462          void LCD_Box0(u16 X, u16 Y,u16 W,u16 H,u8 mode,u8 Color)
+  463          { 
+  464   1        switch(mode)
+  465   1        { case 0: LCD_LineH(X,Y,W,Color);      LCD_LineV(X,Y,H,Color);
+  466   2                  LCD_LineH(X,Y+H-1,W,Color);  LCD_LineV(X+W-1,Y,H,Color);
+  467   2                  break;
+  468   2          case 1: LCD_LineH(X+3,Y,W-6,Color);  LCD_LineV(X,Y+3,H-3,Color);
+  469   2                  LCD_Point(X+2,Y+1,Color);    LCD_Point(X+W-3,Y+1,Color);
+  470   2                  LCD_Point(X+1,Y+2,Color);    LCD_Point(X+W-2,Y+2,Color);
+  471   2                  LCD_LineH(X,Y+H-1,W,Color);  LCD_LineV(X+W-1,Y+3,H-3,Color); 
+  472   2                  break;
+  473   2          case 2: LCD_LineH(X,Y,W,Color);      LCD_LineV(X,Y,H-3,Color); 
+  474   2                  LCD_Point(X+1,Y+H-3,Color);  LCD_Point(X+W-2,Y+H-3,Color);
+  475   2                  LCD_Point(X+2,Y+H-2,Color);  LCD_Point(X+W-3,Y+H-2,Color);
+  476   2                  LCD_LineH(X+3,Y+H-1,W-6,Color);LCD_LineV(X+W-1,Y,H-3,Color);     
+  477   2                  break;
+  478   2          case 3: LCD_LineH(X+3,Y,W-6,Color);  LCD_LineV(X,Y+3,H-6,Color); 
+  479   2                  LCD_Point(X+2,Y+1,Color);    LCD_Point(X+W-3,Y+1,Color);
+  480   2                  LCD_Point(X+1,Y+2,Color);    LCD_Point(X+W-2,Y+2,Color);
+  481   2                  LCD_Point(X+1,Y+H-3,Color);  LCD_Point(X+W-2,Y+H-3,Color);
+  482   2                  LCD_Point(X+2,Y+H-2,Color);  LCD_Point(X+W-3,Y+H-2,Color);
+  483   2                  LCD_LineH(X+3,Y+H-1,W-6,Color);LCD_LineV(X+W-1,Y+3,H-6,Color); 
+  484   2                  break;
+  485   2        }
+  486   1      }
+  487          /*****************************************************************************
+  488          * 函数:void LCD_FillRBox(u16 X, u16 Y,u16 W,u16 H,u8 Color) //填充圆角方框
+  489          * 参数: X起点 Y起点 W宽度 H高度 Color: 色号 mode 圆角分类(便于做下拉菜单)
+  490          *       mode: 0:方框 1:上圆角框 2:下圆角框 3:上下圆角框
+  491          ******************************************************************************/ 
+  492          void LCD_BoxF(u16 X, u16 Y,u16 W,u16 H,u8 mode,u8 Color)
+  493          { u16 n;
+  494   1        switch(mode)
+  495   1        { case 0: for(n=0;n<H;n++)LCD_LineH(X,Y+n,W,Color);   break;            //矩形无圆角
+  496   2          case 1: LCD_LineH(X+2,Y+0,W-4,Color);   LCD_LineH(X+1,Y+1,W-2,Color); //仅上圆角
+  497   2                  for(n=2;n<H;n++)LCD_LineH(X,Y+n,W,Color);   break; 
+  498   2          case 2: LCD_LineH(X+1,Y+H-1,W-2,Color); LCD_LineH(X+2,Y+H,W-4,Color); //仅下圆角
+  499   2                  for(n=0;n<H-1;n++)LCD_LineH(X,Y+n,W,Color); break; 
+  500   2          case 3: LCD_LineH(X+2,Y+0,W-4,Color);   LCD_LineH(X+1,Y+1,W-2,Color); //上下圆角
+  501   2                  LCD_LineH(X+1,Y+H-1,W-2,Color); LCD_LineH(X+2,Y+H,W-4,Color);
+  502   2                  for(n=2;n<H-1;n++)LCD_LineH(X,Y+n,W,Color); break;
+  503   2        }
+  504   1      }
+  505          /*=======================================================================================================
+             -=======
+  506          * 在液晶显示屏显示一个5*7点阵ASC字符函数(占用6*8点阵)
+  507          * 参数: 坐标 水平列X(0-239) 垂直行Y(0-319), * str串指针,Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
+  508          =========================================================================================================
+             -======*/
+  509          void LCD_A08(u16 X,u16 Y,u8 Ch,u8 Fc,u8 Bc)
+  510          { unsigned char i,n,buf,A;
+  511   1        A=Ch-32;                    /* 取字符的ASC码 */
+  512   1        for(i=0;i<8;i++)            /* 要写8行    */
+  513   1        { buf = ASC8[A][i];         /* 取字模     */
+  514   2          LCD_SetXY(X,Y+i);         /* 定显示地址 */
+  515   2          for(n=0;n<6;n++)          /* 横向显示6点*/
+  516   2          { if((buf&0x80)==0x80)LCD_WR_DAT_16Bit(COLOR[Fc]); /* 字模点为1显示前景色 */
+  517   3            else                                             /* 字模点为0显示原底色或背景色 */
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 9   
+
+  518   3            { if(Bc==80){ LCD_SetXY(X+n,Y+i); }              /* 透明显示模式:仅做地址+1定位 */
+  519   4              else LCD_WR_DAT_16Bit(COLOR[Bc]);              /* 正常显示模式:背景色 */
+  520   4            }
+  521   3            buf = buf << 1;          /* 水平移位取点 */
+  522   3          }                          /* 水平6点显示毕*/
+  523   2        } /* 一个6*8点阵西文字符显示完毕 */
+  524   1      }   /* P8()   */
+  525          /*=======================================================================================================
+             -=======
+  526          * 在液晶显示屏显示一个8*12点阵ASC字符函数(占用8*12点阵)
+  527          * 参数: 坐标 水平列X(0-239) 垂直行Y(0-319), * str串指针,Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
+  528          =========================================================================================================
+             -======*/
+  529          void LCD_A12(u16 X,u16 Y,u8 Ch,u8 Fc,u8 Bc)
+  530          { unsigned char i,n,buf,A;
+  531   1        A=Ch-32;                    /* 取字符的ASC码 */
+  532   1        for(i=0;i<12;i++)            /* 要写8行    */
+  533   1        { buf = ASC12[A][i];         /* 取字模     */
+  534   2          LCD_SetXY(X,Y+i);         /* 定显示地址 */
+  535   2          for(n=0;n<8;n++)          /* 横向显示6点*/
+  536   2          { if((buf&0x80)==0x80)LCD_WR_DAT_16Bit(COLOR[Fc]); /* 字模点为1显示前景色 */
+  537   3            else                                             /* 字模点为0显示原底色或背景色 */
+  538   3            { if(Bc==80){ LCD_SetXY(X+n,Y+i); }              /* 透明显示模式:仅做地址+1定位 */
+  539   4              else LCD_WR_DAT_16Bit(COLOR[Bc]);              /* 正常显示模式:背景色 */
+  540   4            }
+  541   3            buf = buf << 1;          /* 水平移位取点 */
+  542   3          }                          /* 水平6点显示毕*/
+  543   2        } /* 一个8*12点阵西文字符显示完毕 */
+  544   1      }   /* A12()   */
+  545          /*=======================================================================================================
+             -=======
+  546          * 在液晶显示屏显示一个8*16点阵ASC字符函数(占用8*16点阵)
+  547          * 参数: 坐标 水平列X(0-239) 垂直行Y(0-319), * str串指针,Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
+  548          =========================================================================================================
+             -======*/
+  549          void LCD_A16(u16 X,u16 Y,u8 Ch,u8 Fc,u8 Bc)
+  550          { unsigned char i,n,buf,A;
+  551   1        A=Ch-32;                    /* 取字符的ASC码 */
+  552   1        for(i=0;i<16;i++)           /* 要写8行    */
+  553   1        { buf = ASC16[A][i];        /* 取字模     */
+  554   2          LCD_SetXY(X,Y+i);         /* 定显示地址 */
+  555   2          for(n=0;n<8;n++)          /* 横向显示6点*/
+  556   2          { if((buf&0x80)==0x80)LCD_WR_DAT_16Bit(COLOR[Fc]); /* 字模点为1显示前景色 */
+  557   3            else                                             /* 字模点为0显示原底色或背景色 */
+  558   3            { if(Bc==80){ LCD_SetXY(X+n,Y+i); }              /* 透明显示模式:仅做地址+1定位 */
+  559   4              else LCD_WR_DAT_16Bit(COLOR[Bc]);              /* 正常显示模式:背景色 */
+  560   4            }
+  561   3            buf = buf << 1;          /* 水平移位取点 */
+  562   3          }                          /* 水平6点显示毕*/
+  563   2        } /* 一个8*16点阵西文字符显示完毕 */
+  564   1      }   /* A16()   */
+  565          /*===================================================================================================
+  566          ** LCD液晶显示屏显示12*24点阵单个字符
+  567          ** 调用参数: X列Y行坐标, * str串指针, Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
+  568          =====================================================================================================*/
+  569          void LCD_A24(u16 X,u16 Y,u8 Ch,u8 Fc,u8 Bc)
+  570          { 
+  571   1        unsigned int i,j,ZM;
+  572   1        
+  573   1        for(j=0;j<24;j++)
+  574   1        { /* 写24行 */
+  575   2          ZM=ASC24[Ch-32][j*2];           /* 取字模码1 */
+  576   2          ZM=ZM*256+ASC24[Ch-32][j*2+1];  /* 取字模码2 */
+  577   2          LCD_SetXY(X,Y+j);               /* 定显示地址 */
+  578   2          for(i=0;i<12;i++)
+  579   2          { if((ZM&0x8000)==0x8000)LCD_WR_DAT_16Bit(COLOR[Fc]);/* 字模点为1显示前景色 */
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 10  
+
+  580   3            else                                               /* 字模点为0显示原底色或背景色 */
+  581   3            { if(Bc==80) { LCD_SetXY(X+i,Y+j); }               /* 透明显示模式: 仅地址+1定位 */
+  582   4              else LCD_WR_DAT_16Bit(COLOR[Bc]);                /* 正常显示模式:背景色 */
+  583   4            }
+  584   3            ZM = ZM << 1; 
+  585   3          } /* 水平12点显示完毕 */
+  586   2        }   /* 一位字符显示完毕  */
+  587   1      }    /* A24()   */
+  588          //========================================================================
+  589          // 函数: LCD_HZ16
+  590          // 功能: 显示一个16*16汉字
+  591          // 参数: X: 水平坐标列 Y: 垂直坐标行
+  592          //========================================================================
+  593          void LCD_HZ16(u16 X,u16 Y,u8 *Hz,u8 Fc,u8 Bc)
+  594          { unsigned char i,j; 
+  595   1        unsigned int m,HZM;
+  596   1        //查找字库汉字表
+  597   1        for(m=0;m<TotalHZ16;m++)
+  598   1        { if((Hz[0]==HZ16M[m][0])&&(Hz[1]==HZ16M[m][1]))break; }
+  599   1        if(m>=TotalHZ16)return; //查无汉字...返回.
+  600   1        //显示汉字...传输点阵字模32字节
+  601   1        for( j=0;j<16;j++ )     //16行
+  602   1        { 
+  603   2          HZM=256*(HZ16[m][j*2])+(unsigned char)(HZ16[m][j*2+1]);     //取字模
+  604   2          LCD_SetXY(X,Y+j);     /* 定显示地址 */
+  605   2          for( i=0;i<16;i++ )   //画16点
+  606   2          { if((HZM&0x8000)==0x8000)LCD_WR_DAT_16Bit(COLOR[Fc]); /* 字模点为1显示前景色 */
+  607   3            else
+  608   3            { if(Bc==80){ LCD_SetXY(X+i,Y+j); }        /* 透明显示模式:仅做地址+1定位 */
+  609   4              else LCD_WR_DAT_16Bit(COLOR[Bc]);        /* 字模点0显示背景色 */
+  610   4            } HZM=HZM<<1; 
+  611   3          } 
+  612   2        }
+  613   1      }
+  614          //========================================================================
+  615          // 函数: LCD_HZ24
+  616          // 功能: 显示一个24*24汉字
+  617          // 参数: X: 水平坐标列 Y: 垂直坐标行
+  618          //========================================================================
+  619          void LCD_HZ24(u16 X,u16 Y,u8 *Hz,u8 Fc,u8 Bc)
+  620          { unsigned char i,j; 
+  621   1        unsigned int m;
+  622   1        unsigned long HZM;
+  623   1        //查找字库汉字表
+  624   1        for(m=0;m<TotalHZ16;m++)
+  625   1        { if((Hz[0]==HZ24M[m][0])&&(Hz[1]==HZ24M[m][1]))break; }
+  626   1        if(m>=TotalHZ24)return; //查无汉字...返回.
+  627   1        //显示汉字...传输点阵字模32字节
+  628   1        for( j=0;j<24;j++ )     //16行
+  629   1        { //循环24行
+  630   2          HZM = HZ24[m][j*3];        /* 取字模码 */
+  631   2          HZM = HZM*256+(unsigned char)(HZ24[m][j*3+1]);
+  632   2          HZM = HZM*256+(unsigned char)(HZ24[m][j*3+2]);  //合成24位
+  633   2          LCD_SetXY(X,Y+j);     /* 定显示地址 */
+  634   2          for( i=0;i<24;i++ )   //画16点
+  635   2          { if((HZM&0x800000)==0x800000)LCD_WR_DAT_16Bit(COLOR[Fc]); /* 字模点为1显示前景色 */
+  636   3            else
+  637   3            { if(Bc==80){ LCD_SetXY(X+i,Y+j); }        /* 透明显示模式:仅做地址+1定位 */
+  638   4              else LCD_WR_DAT_16Bit(COLOR[Bc]);        /* 字模点0显示背景色 */
+  639   4            } HZM=HZM<<1; 
+  640   3          } 
+  641   2        }
+  642   1      }  
+  643          /*=======================================================================================================
+             -=======
+  644          * 在液晶显示屏显示一个6*8点阵ASC字符串函数(占用8*16点阵)(自动换行)
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 11  
+
+  645          * 参数: 坐标 水平列X(0-239) 垂直行Y(0-319), * str串指针,Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
+  646          =========================================================================================================
+             -======*/
+  647          void LCD_Str8(u16 X,u16 Y,u8 * str,u8 Fc,u8 Bc)
+  648          {
+  649   1        while(*str)
+  650   1        { LCD_A08(X,Y,*str,Fc,Bc); X+=6; str++; if(X>LCD_W-6){ X=0;Y+=8; } }
+  651   1      }
+  652          /*=======================================================================================================
+             -=======
+  653          * 在液晶显示屏显示一个16*16点阵中西文字符串函数(自动换行)
+  654          * 参数: 坐标 水平列X(0-239) 垂直行Y(0-319), * str串指针,Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
+  655          =========================================================================================================
+             -======*/
+  656          void LCD_Str16(u16 X,u16 Y,u8 * str,u8 Fc,u8 Bc)
+  657          { u8 ch[3];
+  658   1        while(*str)
+  659   1        { if(*str>0x80)
+  660   2          { ch[0]=*str;ch[1]=*(str+1);
+  661   3            LCD_HZ16(X,Y,ch,Fc,Bc); 
+  662   3            X+=16; str+=2;
+  663   3          } 
+  664   2          else
+  665   2          { LCD_A16(X,Y,*str,Fc,Bc); X+=8; str++; }
+  666   2          if(X>LCD_W-8){ X=0;Y+=16; }
+  667   2        }
+  668   1      }
+  669          /*=======================================================================================================
+             -=======
+  670          * 在液晶显示屏显示一个24*24点阵中西文字符串函数(自动换行)
+  671          * 参数: 坐标 水平列X(0-239) 垂直行Y(0-319), * str串指针,Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
+  672          =========================================================================================================
+             -======*/
+  673          void LCD_Str24(u16 X,u16 Y,u8 * str,u8 Fc,u8 Bc)
+  674          { u8 ch[3];
+  675   1        while(*str)
+  676   1        { if(*str>0x80)
+  677   2          { ch[0]=*str;ch[1]=*(str+1);
+  678   3            LCD_HZ24(X,Y,ch,Fc,Bc); 
+  679   3            X+=24; str+=2;
+  680   3          } 
+  681   2          else
+  682   2          { LCD_A24(X,Y,*str,Fc,Bc); X+=12; str++; }
+  683   2          if(X>LCD_W-12){ X=0;Y+=24; }
+  684   2        }
+  685   1      }
+  686          /*****************************************************************************
+  687          * 函数:void LCD_BMP(u16 X, u16 Y,u16 W,u16 H,u8 Color) //显示图片
+  688          * 参数: X起点 Y起点 W宽度 H高度 Color: 色号
+  689          * 说明: 采用DMA方式时,图片像素必须是256的倍数.
+  690          ******************************************************************************/ 
+  691          void LCD_BMP(u16 X,u16 Y,u8 W,u8 H,u8* pic)
+  692          { u16 i,Col;
+  693   1        u8 h,l;
+  694   1        LCD_SetWindow(X,Y,X+W-1,Y+H-1);  //设置显示窗口
+  695   1        for(i=0;i< W*H;i++)              //< W*H=像素点
+  696   1        { l=pic[2*i]; h=pic[2*i+1];      //图像数据:低位在前/高位在后
+  697   2          Col=256*h+l;                   //组成颜色字(16位)
+  698   2          LCD_WR_DAT_16Bit(Col);         //显示彩色点(高位在前)
+  699   2        }
+  700   1      }
+  701          
+  702          /*****************************************************************************
+  703           * @name       :void LCD_Clear(u16 Color)
+  704           * @date       :2018-08-09 
+  705           * @function   :Full screen filled LCD screen
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 12  
+
+  706           * @parameters :color:Filled color
+  707           * @retvalue   :None
+  708          ******************************************************************************/  
+  709          void LCD_CLS(u8 Color)
+  710          { u16 i,j;
+  711   1        LCD_SetWindow(0,0,LCD_W-1,LCD_H-1);  
+  712   1      #if (USE_DMA==1)           //若使用DMA方式
+  713   1        for(j=0,i=0;i<=DMA_AMT_LEN;i++)LCD_Buf[i] = COLOR[Color]; //先向缓存区填颜色字
+  714   1        DMA_TxCount = 75;   //确定发送次数: (320 * 240 * 2) / 2048 = 75 总字节数/缓存区大小=循环次数
+  715   1        LCD_CS=0;           //片选中,让DMA向显示屏发送数据...
+  716   1        DMA_LCM_CR = 0xA0;  //(Write dat 写数据) 使能LCM_DMA / 启动发送数据模式操作 / 引发中断
+  717   1        while(!LCD_CS);     //等待中断操作完成... (试验不等待...)
+  718   1      #else
+                 for(i=0;i<LCD_W;i++)
+                 { for (j=0;j<LCD_H;j++)
+                   { LCD_WR_DAT_16Bit(COLOR[Color]); }
+                 }
+               #endif  
+  724   1      }
+  725          
+  726          /*****************************************************************************
+  727           * @name       :void LCM_Interrupt(void)
+  728           * @date       :2018-11-13 
+  729           * @function   :None
+  730           * @parameters :None
+  731           * @retvalue   :
+  732          ******************************************************************************/ 
+  733          void LCMIF_DMA_Interrupt(void) interrupt 13
+  734          { 
+  735   1        if(LCMIFSTA & 0x01)
+  736   1        {
+  737   2          LCMIFSTA = 0x00;
+  738   2                      LcmFlag = 0;           //LCD_CS=1;
+  739   2        }
+  740   1        
+  741   1        if(DMA_LCM_STA & 0x01)   //若是DMA发送完毕中断...
+  742   1        { 
+  743   2           DMA_TxCount--;        //发送次数倒计数
+  744   2           if(DMA_TxCount==0)
+  745   2           { 
+  746   3              DMA_LCM_CR=0;
+  747   3              LCD_CS=1;
+  748   3           }    
+  749   2           else 
+  750   2           {
+  751   3              DMA_LCM_CR=0xA0;   //82 Write dat 继续传数据...结束后再次引发中断 DMA_LCM_STA = 1;
+  752   3           }
+  753   2          DMA_LCM_STA = 0;       //状态字复位
+  754   2        }
+  755   1      }
+  756          
+  757          //***** LCD9341.C END ********************************************************
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      5854     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =      4094     ------
+  xdata-const size     =    ------     ------
+  edata size           =         6        133
+  bit size             =         1     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+C251 COMPILER V5.60.0,  LCD9341                                                            10/11/25  12:45:43  PAGE 13  
+
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =      9004     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
