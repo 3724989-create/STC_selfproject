@@ -1,0 +1,105 @@
+C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  20:39:37  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE my_uart
+OBJECT MODULE PLACED IN .\out_file\my_uart.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\my_uart.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BRO
+                    -WSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;.
+                    -.\user;..\code) DEBUG PRINT(.\out_file\my_uart.lst) OBJECT(.\out_file\my_uart.obj) 
+
+stmt  level    source
+
+    1          #include "my_uart.h"
+    2          
+    3          uint8       uart_get_data[64] = {0};                                                  // 串口接收数�
+             -��缓冲区
+    4          uint8       fifo_get_data[64] = {0};                                                 // fifo 输出读出
+             -缓冲区
+    5          
+    6          
+    7          uint32      fifo_data_count = 0;                                                // fifo 数据个数
+    8          
+    9          fifo_struct uart_data_fifo = {0};
+   10          
+   11          void uart_rx_interrupt_handler (uint8 dat)
+   12          {
+   13   1      //    get_data = uart_read_byte(UART_INDEX);                                      // 接收数据 while �
+             -��待式 不建议在中断使用
+   14   1          uart_query_byte(UART_INDEX, &dat);                                     // 接收数据 查询式 有�
+             -��据会返回 TRUE 没有数据会返回 FALSE
+   15   1          fifo_write_buffer(&uart_data_fifo, &dat, 1);                           // 将数据写入 fifo 中
+   16   1      }
+   17          
+   18          
+   19          void self_UART_init()
+   20          {
+   21   1          fifo_init(&uart_data_fifo, FIFO_DATA_8BIT, uart_get_data, 64);              // 初始化 fifo 挂载�
+             -��冲区
+   22   1      
+   23   1          uart_init(UART_INDEX, UART_BAUDRATE, UART_TX_PIN, UART_RX_PIN);             // 初始化串口
+   24   1          
+   25   1              // UART1的中断优先级不能设置，为最低优先级值0
+   26   1              uart_rx_interrupt(UART_INDEX, ZF_ENABLE);                                   // 开启 UART_INDEX 的接�
+             -��中断
+   27   1          
+   28   1      
+   29   1              // 设置中断回调函数
+   30   1              uart1_irq_handler = uart_rx_interrupt_handler;
+   31   1              
+   32   1              
+   33   1              uart_write_string(UART_INDEX, "UART Text.");                                // 输出测试信息
+   34   1          uart_write_byte(UART_INDEX, '\r');                                          // 输出回车
+   35   1          uart_write_byte(UART_INDEX, '\n');                                          // 输出换行
+   36   1      
+   37   1      }
+   38          
+   39          void self_UART_process()
+   40          {
+   41   1              // fifo_data_count = fifo_used(&uart_data_fifo);                           // 查看 fifo 是否�
+             -��数据
+   42   1              // if(fifo_data_count != 0)                                                // 读取到数据了
+   43   1              // {
+   44   1              //    fifo_read_buffer(&uart_data_fifo, fifo_get_data, &fifo_data_count, FIFO_READ_AND_CLEAN);   
+             - // 将 fifo 中数据读出并清空 fifo 挂载的缓冲
+   45   1              //    uart_write_string(UART_INDEX, "UART get data:");                     // 输出测试信息
+   46   1              //    uart_write_buffer(UART_INDEX, fifo_get_data, (uint16)fifo_data_count);       // 将读取�
+             -�的数据发送出去
+   47   1              //    uart_write_string(UART_INDEX, "\r\n");                               // 输出测试信息
+   48   1              // }
+C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  20:39:37  PAGE 2   
+
+   49   1              uint32 time=0;
+   50   1      
+   51   1              time=pit_read();
+   52   1              printf("the time now is:%d",time);
+   53   1              printf("\r\n");
+   54   1      
+   55   1              system_delay_ms(1000);
+   56   1              // 此处编写需要循环执行的
+   57   1      }
+   58          
+*** WARNING C183 IN LINE 49 OF ..\code\my_uart.c: dead assignment eliminated
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       208     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =       155          1
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =       208     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

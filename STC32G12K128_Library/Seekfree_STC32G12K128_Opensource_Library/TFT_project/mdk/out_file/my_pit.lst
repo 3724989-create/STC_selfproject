@@ -1,0 +1,88 @@
+C251 COMPILER V5.60.0,  my_pit                                                             12/11/25  20:39:37  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE my_pit
+OBJECT MODULE PLACED IN .\out_file\my_pit.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\my_pit.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROW
+                    -SE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..
+                    -\user;..\code) DEBUG PRINT(.\out_file\my_pit.lst) OBJECT(.\out_file\my_pit.obj) 
+
+stmt  level    source
+
+    1          #include "my_pit.h"
+    2          
+    3          
+    4          static volatile uint32 systick_count=0;
+    5          
+    6          uint8 pit_state = 0;
+    7          
+    8          void pit_handler ();
+    9          
+   10          void self_pit_init(void)
+   11          {
+   12   1          gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);              // 初始化 LED1 输出 默认低电平 推挽输�
+             -��模式
+   13   1              
+   14   1          pit_ms_init(PIT_CH, 1);                             // 初始化 PIT_CH0 为周期中断 1000ms 周期
+   15   1                      
+   16   1          interrupt_set_priority(PIT_PRIORITY, 0);                    // 设置 PIT1 对周期中断的中断优先级
+             -为 0，0为最低优先级
+   17   1          
+   18   1              tim0_irq_handler = pit_handler;                                                 // 设置定时器0周期中断回调函数     
+   19   1      }
+   20          
+   21          void pit_process(void)
+   22          {
+   23   1              if(pit_state)
+   24   1              {
+   25   2                  gpio_toggle_level(LED1);
+   26   2                  pit_state = 0;                                                      // 清空周期中断触�
+             -��标志位
+   27   2              }
+   28   1                      
+   29   1      }
+   30          
+   31          void led_process(void)
+   32          {
+   33   1          gpio_toggle_level(LED1);
+   34   1          system_delay_ms(1000);
+   35   1      }
+   36          
+   37          //读取时间常量
+   38          uint32 pit_read(void)
+   39          {
+   40   1          return      systick_count;
+   41   1      }
+   42          
+   43          void pit_handler (void)
+   44          {
+   45   1          //pit_state = 1;                                                              // 周期中断触发 �
+             -��志位置位
+   46   1          systick_count++;
+   47   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       127     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+C251 COMPILER V5.60.0,  my_pit                                                             12/11/25  20:39:37  PAGE 2   
+
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =         5     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        15     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
