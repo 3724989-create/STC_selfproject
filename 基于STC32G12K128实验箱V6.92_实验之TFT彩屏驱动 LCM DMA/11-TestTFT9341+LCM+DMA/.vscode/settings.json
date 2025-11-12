@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "Main.C": "cpp"
+        "Main.C": "cpp",
+        "LCD9341.C": "cpp",
+        "STC32G_SYS.C": "cpp"
     }
 }

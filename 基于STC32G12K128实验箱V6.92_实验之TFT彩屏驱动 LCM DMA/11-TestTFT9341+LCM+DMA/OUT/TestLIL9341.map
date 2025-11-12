@@ -1,4 +1,4 @@
-L251 LINKER/LOCATER V4.66.93.0                                                          11/10/2025  12:45:54  PAGE 1
+L251 LINKER/LOCATER V4.66.93.0                                                          11/12/2025  16:41:55  PAGE 1
 
 
 L251 LINKER/LOCATER V4.66.93.0, INVOKED BY:
@@ -67,7 +67,7 @@ FF0000H     FF0000H     FFFFFFH     00A87BH   CODE
 FF0000H     FF0000H     FFFFFFH     000004H   CONST
 000000H     000000H     00007FH     000008H   DATA
 
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 2
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 2
 
 
 
@@ -135,7 +135,7 @@ FFA78DH   FFA7AEH   000022H   BYTE   INSEG    CODE           ?PR?LCD_WR_CMD?LCD9
 FFA7AFH   FFA7D0H   000022H   BYTE   INSEG    CODE           ?PR?LCD_WR_DAT?LCD9341
 FFA7D1H   FFA7F1H   000021H   BYTE   INSEG    CODE           ?PR?LCD_SETXY?LCD9341
 FFA7F2H   FFA80DH   00001CH   BYTE   INSEG    CODE           ?PR?STRCAT?_?STRCAT
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 3
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 3
 
 
 FFA80EH   FFA827H   00001AH   BYTE   INSEG    CODE           ?PR?LCDRST?LCD9341
@@ -203,7 +203,7 @@ main/Main                        ----- -----
   +--> LCD_Box0/LCD9341
   +--> LCD_A08/LCD9341
 
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 4
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 4
 
 
 SYS_Init/STC32G_SYS              ----- -----
@@ -271,7 +271,7 @@ LCD_A16/LCD9341                  0092H 0097H
   +--> LCD_SetXY/LCD9341
   +--> LCD_WR_DAT_16Bit/LCD9341
 
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 5
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 5
 
 
 strcat?_/STRCAT                  ----- -----
@@ -339,7 +339,7 @@ LCD_Str8/LCD9341                 0079H 007EH
 
 LCD_A08/LCD9341                  007FH 0084H
   +--> LCD_SetXY/LCD9341
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 6
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 6
 
 
   +--> LCD_WR_DAT_16Bit/LCD9341
@@ -407,7 +407,7 @@ PUBLIC SYMBOLS OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FFB385H   HCONST   ---       ASC24
       00FFAC05H   HCONST   ---       ASC8
 *SFR* 000000EFH   DATA     BYTE      AUXINTIF
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 7
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 7
 
 
 *SFR* 0000008EH   DATA     BYTE      AUXR
@@ -475,7 +475,7 @@ PUBLIC SYMBOLS OF MODULE:  .\OUT\TestLIL9341 (Main)
       00000008H   EDATA    WORD      LCD_W
       00FFA78DH   CODE     ---       LCD_WR_CMD
       00FFA7AFH   CODE     ---       LCD_WR_DAT
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 8
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 8
 
 
       00FFA87CH   CODE     ---       LCD_WR_DAT_16Bit
@@ -543,7 +543,7 @@ PUBLIC SYMBOLS OF MODULE:  .\OUT\TestLIL9341 (Main)
 *SFR* 00000088H.4 DATA     BIT       TR0
 *SFR* 000000F4H   DATA     BYTE      USBCON
 *SFR* 000000C1H   DATA     BYTE      WDT_CONTR
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 9
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 9
 
 
 *SFR* 000000E9H   DATA     BYTE      WTST
@@ -611,7 +611,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       000000A8H   SFRSYM    DATA     BYTE      IE
       000000BBH   SFRSYM    DATA     BYTE      P_SW3
       000000BAH   SFRSYM    DATA     BYTE      P_SW2
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 10
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 10
 
 
       000000A2H   SFRSYM    DATA     BYTE      P_SW1
@@ -679,7 +679,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FF923AH   LINE      CODE     ---       #113
       00FF9264H   LINE      CODE     ---       #114
       00FF928CH   LINE      CODE     ---       #115
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 11
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 11
 
 
       00FF92A2H   LINE      CODE     ---       #116
@@ -747,7 +747,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FF8EC0H   LINE      CODE     ---       #179
       00FF8ED1H   LINE      CODE     ---       #180
       00FF8F1FH   LINE      CODE     ---       #181
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 12
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 12
 
 
       00FF8F1FH   LINE      CODE     ---       #182
@@ -815,7 +815,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FFAF05H   PUBLIC    HCONST   ---       ASC12
       00FFB385H   PUBLIC    HCONST   ---       ASC24
       00FFC585H   PUBLIC    HCONST   ---       ASC16
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 13
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 13
 
 
       00FFCB85H   PUBLIC    HCONST   ---       HZ24M
@@ -883,7 +883,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       000000B0H   SFRSYM    DATA     BYTE      P3
       000000B3H   SFRSYM    DATA     BYTE      P4M1
       000000A0H   SFRSYM    DATA     BYTE      P2
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 14
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 14
 
 
       000000B1H   SFRSYM    DATA     BYTE      P3M1
@@ -951,7 +951,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FFA7B1H   LINE      CODE     ---       #168
       00FFA7BCH   LINE      CODE     ---       #169
       00FFA7BEH   LINE      CODE     ---       #170
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 15
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 15
 
 
       00FFA7CBH   LINE      CODE     ---       #172
@@ -1019,7 +1019,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FF9699H   LINE      CODE     ---       #289
       00FF96A0H   LINE      CODE     ---       #290
       00FF96B3H   LINE      CODE     ---       #291
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 16
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 16
 
 
       00FF96CCH   LINE      CODE     ---       #292
@@ -1087,7 +1087,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       WR12        REGSYM    ---      WORD      X
       WR14        REGSYM    ---      WORD      Y
       00FFA7D1H   LINE      CODE     ---       #358
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 17
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 17
 
 
       00FFA7D7H   LINE      CODE     ---       #359
@@ -1155,7 +1155,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FF9879H   LINE      CODE     ---       #400
       00FF9895H   LINE      CODE     ---       #401
       00FF98B1H   LINE      CODE     ---       #402
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 18
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 18
 
 
       00FF98D9H   LINE      CODE     ---       #403
@@ -1223,7 +1223,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       WR14        REGSYM    ---      WORD      Y
       00000089H   SYMBOL    EDATA    WORD      W
       0000008BH   SYMBOL    EDATA    WORD      H
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 19
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 19
 
 
       0000008DH   SYMBOL    EDATA    BYTE      C1
@@ -1291,7 +1291,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FF9C59H   LINE      CODE     ---       #496
       00FF9C81H   LINE      CODE     ---       #497
       00FF9CB5H   LINE      CODE     ---       #498
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 20
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 20
 
 
       00FF9CE5H   LINE      CODE     ---       #499
@@ -1359,7 +1359,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FFA0B0H   LINE      CODE     ---       #560
       00FFA0B0H   LINE      CODE     ---       #561
       00FFA0BAH   LINE      CODE     ---       #562
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 21
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 21
 
 
       00FFA0CCH   LINE      CODE     ---       #563
@@ -1427,7 +1427,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FF9A3FH   BLOCK     CODE     ---       LVL=0
       WR12        REGSYM    ---      WORD      X
       WR14        REGSYM    ---      WORD      Y
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 22
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 22
 
 
       REG=2       REGSYM    ---      ---       Hz
@@ -1495,7 +1495,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
 
       00FFA0E4H   BLOCK     CODE     ---       LVL=0
       00000089H   SYMBOL    EDATA    WORD      X
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 23
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 23
 
 
       0000008BH   SYMBOL    EDATA    WORD      Y
@@ -1563,7 +1563,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       00FFA446H   LINE      CODE     ---       #737
       00FFA452H   LINE      CODE     ---       #738
       00FFA454H   LINE      CODE     ---       #739
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 24
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 24
 
 
       00FFA454H   LINE      CODE     ---       #741
@@ -1631,7 +1631,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
       000000C0H   SFRSYM    DATA     BYTE      P4
       000000C9H   SFRSYM    DATA     BYTE      P5M1
       000000CCH   SFRSYM    DATA     BYTE      P6M0
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 25
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 25
 
 
       000000B0H   SFRSYM    DATA     BYTE      P3
@@ -1699,7 +1699,7 @@ SYMBOL TABLE OF MODULE:  .\OUT\TestLIL9341 (Main)
 
       ---         MODULE    ---      ---       ?C?FPMUL
       00FF829CH   PUBLIC    CODE     ---       ?C?FPMUL
-L251 LINKER/LOCATER V4.66.93.0                                                        11/10/2025  12:45:54  PAGE 26
+L251 LINKER/LOCATER V4.66.93.0                                                        11/12/2025  16:41:55  PAGE 26
 
 
 

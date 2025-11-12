@@ -42,7 +42,7 @@
 #include "PIC.H"
 
 //全局变量说明  
-char S[80];           //字符串显示缓存
+char S[80];           //字符串显示 缓存
 unsigned int y0,y1;
 unsigned int n;
 unsigned int DelayNms;
