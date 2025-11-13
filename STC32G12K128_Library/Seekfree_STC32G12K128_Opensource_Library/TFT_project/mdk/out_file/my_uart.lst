@@ -1,11 +1,11 @@
-C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  20:39:37  PAGE 1   
+C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  22:24:45  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE my_uart
 OBJECT MODULE PLACED IN .\out_file\my_uart.obj
 COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\my_uart.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BRO
                     -WSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;.
-                    -.\user;..\code) DEBUG PRINT(.\out_file\my_uart.lst) OBJECT(.\out_file\my_uart.obj) 
+                    -.\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\my_uart.lst) OBJECT(.\out_file\my_uart.obj) 
 
 stmt  level    source
 
@@ -66,7 +66,7 @@ stmt  level    source
              -�的数据发送出去
    47   1              //    uart_write_string(UART_INDEX, "\r\n");                               // 输出测试信息
    48   1              // }
-C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  20:39:37  PAGE 2   
+C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  22:24:45  PAGE 2   
 
    49   1              uint32 time=0;
    50   1      

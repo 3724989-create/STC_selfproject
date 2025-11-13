@@ -272,7 +272,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\user;..\code</IncludePath>
+              <IncludePath>..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\user;..\code;..\Hardware</IncludePath>
             </VariousControls>
           </C251>
           <Ax51>
@@ -793,6 +793,13 @@
         </Group>
         <Group>
           <GroupName>Hardware</GroupName>
+          <Files>
+            <File>
+              <FileName>ili9341.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardware\ili9341.c</FilePath>
+            </File>
+          </Files>
         </Group>
       </Groups>
     </Target>

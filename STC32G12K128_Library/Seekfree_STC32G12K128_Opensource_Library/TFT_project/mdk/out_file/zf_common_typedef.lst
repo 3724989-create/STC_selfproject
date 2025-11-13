@@ -1,12 +1,12 @@
-C251 COMPILER V5.60.0,  zf_common_typedef                                                  12/11/25  19:23:44  PAGE 1   
+C251 COMPILER V5.60.0,  zf_common_typedef                                                  12/11/25  22:01:04  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE zf_common_typedef
 OBJECT MODULE PLACED IN .\out_file\zf_common_typedef.obj
 COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\libraries\zf_common\zf_common_typedef.c LARGE NOALIAS FLOAT64 WARNIN
                     -GLEVEL(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device
-                    -;..\..\libraries\zf_driver;..\user;..\code) DEBUG PRINT(.\out_file\zf_common_typedef.lst) OBJECT(.\out_file\zf_common_ty
-                    -pedef.obj) 
+                    -;..\..\libraries\zf_driver;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\zf_common_typedef.lst) OBJECT(.\out_file\
+                    -zf_common_typedef.obj) 
 
 stmt  level    source
 
@@ -66,7 +66,7 @@ stmt  level    source
    52          void (*int0_irq_handler)(void) = NULL;
    53          void (*int1_irq_handler)(void) = NULL;
    54          void (*int2_irq_handler)(void) = NULL;
-C251 COMPILER V5.60.0,  zf_common_typedef                                                  12/11/25  19:23:44  PAGE 2   
+C251 COMPILER V5.60.0,  zf_common_typedef                                                  12/11/25  22:01:04  PAGE 2   
 
    55          void (*int3_irq_handler)(void) = NULL;
    56          void (*int4_irq_handler)(void) = NULL;

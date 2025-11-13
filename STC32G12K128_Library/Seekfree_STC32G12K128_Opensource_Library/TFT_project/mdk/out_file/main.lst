@@ -1,11 +1,11 @@
-C251 COMPILER V5.60.0,  main                                                               12/11/25  20:39:37  PAGE 1   
+C251 COMPILER V5.60.0,  main                                                               12/11/25  22:24:46  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE main
 OBJECT MODULE PLACED IN .\out_file\main.obj
 COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\user\main.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE
                     - INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\u
-                    -ser;..\code) DEBUG PRINT(.\out_file\main.lst) OBJECT(.\out_file\main.obj) 
+                    -ser;..\code;..\Hardware) DEBUG PRINT(.\out_file\main.lst) OBJECT(.\out_file\main.obj) 
 
 stmt  level    source
 
@@ -19,14 +19,28 @@ stmt  level    source
     8   1              
     9   1          while(1)
    10   1          {
-   11   2              scheduler_run();
-   12   2          }
-   13   1      }
+   11   2              // 清屏为红色
+   12   2              LCD_Clear(RED);
+   13   2              system_delay_ms(500);
+   14   2      
+   15   2              // 填充一个蓝色矩形
+   16   2              LCD_Fill(50, 50, 150, 150, BLUE);
+   17   2              system_delay_ms(500);
+   18   2      
+   19   2              // 清屏为绿色
+   20   2              LCD_Clear(GREEN);
+   21   2              system_delay_ms(500);
+   22   2      
+   23   2              // 绘制一个白点
+   24   2              LCD_DrawPoint(120, 160, WHITE);
+   25   2              system_delay_ms(500);
+   26   2          }
+   27   1      }
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =        44     ------
+  code size            =       123     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------

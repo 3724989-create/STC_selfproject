@@ -1,11 +1,11 @@
-C251 COMPILER V5.60.0,  my_pit                                                             12/11/25  20:39:37  PAGE 1   
+C251 COMPILER V5.60.0,  my_pit                                                             12/11/25  22:24:45  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE my_pit
 OBJECT MODULE PLACED IN .\out_file\my_pit.obj
 COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\my_pit.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROW
                     -SE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..
-                    -\user;..\code) DEBUG PRINT(.\out_file\my_pit.lst) OBJECT(.\out_file\my_pit.obj) 
+                    -\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\my_pit.lst) OBJECT(.\out_file\my_pit.obj) 
 
 stmt  level    source
 
@@ -67,7 +67,7 @@ Module Information          Static   Overlayable
   code size            =       127     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
-C251 COMPILER V5.60.0,  my_pit                                                             12/11/25  20:39:37  PAGE 2   
+C251 COMPILER V5.60.0,  my_pit                                                             12/11/25  22:24:45  PAGE 2   
 
   idata size           =    ------     ------
   pdata size           =    ------     ------

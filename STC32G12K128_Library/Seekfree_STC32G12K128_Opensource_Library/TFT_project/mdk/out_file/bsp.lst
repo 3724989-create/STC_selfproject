@@ -1,11 +1,11 @@
-C251 COMPILER V5.60.0,  bsp                                                                12/11/25  20:42:36  PAGE 1   
+C251 COMPILER V5.60.0,  bsp                                                                12/11/25  22:24:45  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE bsp
 OBJECT MODULE PLACED IN .\out_file\bsp.obj
 COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\bsp.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE 
                     -INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\us
-                    -er;..\code) DEBUG PRINT(.\out_file\bsp.lst) OBJECT(.\out_file\bsp.obj) 
+                    -er;..\code;..\Hardware) DEBUG PRINT(.\out_file\bsp.lst) OBJECT(.\out_file\bsp.obj) 
 
 stmt  level    source
 
@@ -67,7 +67,7 @@ stmt  level    source
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-C251 COMPILER V5.60.0,  bsp                                                                12/11/25  20:42:36  PAGE 2   
+C251 COMPILER V5.60.0,  bsp                                                                12/11/25  22:24:45  PAGE 2   
 
   code size            =       158     ------
   ecode size           =    ------     ------

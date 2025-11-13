@@ -13,6 +13,7 @@
 #include "bsp.h"
 #include "my_pit.h"
 #include "my_uart.h"
+#include "ili9341.h"
 
 void all_init(void);
 void scheduler_run(void);

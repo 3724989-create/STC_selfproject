@@ -1,0 +1,313 @@
+C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE ili9341
+OBJECT MODULE PLACED IN .\out_file\ili9341.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\Hardware\ili9341.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE)
+                    - BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driv
+                    -er;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\ili9341.lst) OBJECT(.\out_file\ili9341.obj) 
+
+stmt  level    source
+
+    1          #include "ili9341.h"
+    2          
+    3          #define LCD_CTRL_PINS_MASK (0x01 | 0x02 | 0x08)
+    4          
+    5          // --- 1. STC32G SPI 硬件初始化 ---
+    6          void self_SPI_Init(void)
+    7          {
+    8   1      // 1. 设置 P1M0 的对应位为 1 (完成推挽模式的 '1' 部分)
+    9   1          P1M0 |= LCD_CTRL_PINS_MASK; 
+   10   1      
+   11   1      // 2. 清除 P1M1 的对应位为 0 (完成推挽模式的 '0' 部分)
+   12   1          P1M1 &= ~LCD_CTRL_PINS_MASK;
+   13   1      
+   14   1          // 2. 配置SPI引脚复用 (SCLK, MOSI, MISO)
+   15   1          // P2.0 (SCLK) 和 P2.1 (MOSI) 设为推挽输出
+   16   1          P2M0 |= (1<<0) | (1<<1); 
+   17   1          P2M1 &= ~((1<<0) | (1<<1));
+   18   1      
+   19   1          // P2.2 (MISO) 设为浮空输入 (默认，但显式写出)
+   20   1          P2M0 &= ~(1<<2);
+   21   1          P2M1 &= ~(1<<2);
+   22   1          
+   23   1          // 2.1 配置 SPI 引脚复用 (使用 P_SW1 寄存器)
+   24   1          // 目标: 选择 P2 组引脚 (SCLK:P2.0, MOSI:P2.1, MISO:P2.2, SS:P2.3)
+   25   1          // 对应 P_SW1: SPI_S1=0 (位3), SPI_S0=1 (位2) -> 0x04
+   26   1          
+   27   1          // 步骤一：清除 SPI_S1 位 (P_SW1^3)
+   28   1          P_SW1 &= ~(1<<3); 
+   29   1          
+   30   1          // 步骤二：设置 SPI_S0 位 (P_SW1^2)
+   31   1          P_SW1 |= (1<<2);
+   32   1      
+   33   1          // 3. 配置SPI寄存器 (主模式, 模式0)
+   34   1          // STC32G 硬件SPI寄存器：SPCTL, SPSTAT, SPDR
+   35   1      
+   36   1          // SPCTL 寄存器配置：
+   37   1          // | SPIEN | MSTR | CPOL | CPHA | SPR1 | SPR0 |
+   38   1          // |   1   |   1  |  0   |  0   |  0   |  1   |  (假设分频比为 Fosc/8)
+   39   1      
+   40   1          SPCTL = 0x50; // 1010 0001 (SPI使能，主模式MSTR=1, CPOL=0, CPHA=0, Fosc/4)
+   41   1          // 根据您的需求调整分频位 SPRx
+   42   1      
+   43   1          // 确保SPSTAT中的中断标志位被清除（通常通过读写操作）
+   44   1          (void)SPSTAT;
+*** WARNING C138 IN LINE 44 OF ..\Hardware\ili9341.c: expression with possibly no effect
+   45   1          SPSTAT &= ~(0x40 | 0x80); // 清除 SPIF (传输完成) 和 WCOL (写冲突)
+   46   1      }
+   47          
+   48          // --- 2. ILI9341 底层通信函数 ---
+   49          
+   50          // SPI 发送一个字节数据
+   51          void LCD_Writ_Bus(unsigned char dat) 
+   52          {
+   53   1          SPDAT = dat; // 写入数据
+   54   1          // 等待传输完成(SPIF=1)
+   55   1          while(!(SPSTAT & 0x80)); // 等待 SPIF 标志 (传输完成)
+   56   1          SPSTAT &= ~0x80;          // 清除 SPIF 标志
+C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 2   
+
+   57   1      }
+   58          
+   59          // 写入命令 (DC=0)
+   60          void LCD_WR_REG(unsigned char cmd)
+   61          {
+   62   1          LCD_CS_CLR; // 片选
+   63   1          LCD_DC_CLR; // 命令模式
+   64   1          LCD_Writ_Bus(cmd);
+   65   1          LCD_CS_SET; // 取消片选
+   66   1      }
+   67          
+   68          // 写入数据 (DC=1)
+   69          void LCD_WR_DATA(unsigned char dat)
+   70          {
+   71   1          LCD_CS_CLR; // 片选
+   72   1          LCD_DC_SET; // 数据模式
+   73   1          LCD_Writ_Bus(dat);
+   74   1          LCD_CS_SET; // 取消片选
+   75   1      }
+   76          
+   77          // 写入16位数据 (用于颜色)
+   78          void LCD_WR_DATA_16Bit(unsigned int dat)
+   79          {
+   80   1          LCD_CS_CLR;
+   81   1          LCD_DC_SET;
+   82   1          // 写入高八位
+   83   1          LCD_Writ_Bus(dat >> 8); 
+   84   1          // 写入低八位
+   85   1          LCD_Writ_Bus(dat & 0xFF);
+   86   1          LCD_CS_SET;
+   87   1      }
+   88          
+   89          // --- 3. 屏幕控制函数 ---
+   90          
+   91          // 硬件复位
+   92          void LCD_RST(void)
+   93          {
+   94   1          LCD_RST_CLR; // 拉低复位
+   95   1          system_delay_ms(100);
+   96   1          LCD_RST_SET; // 释放复位
+   97   1          system_delay_ms(100);
+   98   1      }
+   99          
+  100          // 设置光标地址
+  101          void LCD_SetCursor(unsigned int Xstart, unsigned int Ystart)
+  102          {
+  103   1          // 设置列地址 (X)
+  104   1          LCD_WR_REG(0x2A); 
+  105   1          LCD_WR_DATA(Xstart >> 8); // X Start High
+  106   1          LCD_WR_DATA(Xstart & 0xFF); // X Start Low
+  107   1          LCD_WR_DATA(Xstart >> 8); // X End High (单点时Xend=Xstart)
+  108   1          LCD_WR_DATA(Xstart & 0xFF); // X End Low
+  109   1      
+  110   1          // 设置行地址 (Y)
+  111   1          LCD_WR_REG(0x2B);
+  112   1          LCD_WR_DATA(Ystart >> 8); // Y Start High
+  113   1          LCD_WR_DATA(Ystart & 0xFF); // Y Start Low
+  114   1          LCD_WR_DATA(Ystart >> 8); // Y End High
+  115   1          LCD_WR_DATA(Ystart & 0xFF); // Y End Low
+  116   1      
+  117   1          // 准备写入 GRAM (0x2C)
+  118   1          LCD_WR_REG(0x2C);
+  119   1      }
+  120          
+  121          // 设置显示窗口
+  122          void LCD_SetWindows(unsigned int Xstart, unsigned int Ystart, unsigned int Xend, unsigned int Yend)
+C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 3   
+
+  123          {
+  124   1          // 设置列地址 (0x2A)
+  125   1          LCD_WR_REG(0x2A); 
+  126   1          LCD_WR_DATA(Xstart >> 8); 
+  127   1          LCD_WR_DATA(Xstart & 0xFF);
+  128   1          LCD_WR_DATA(Xend >> 8); 
+  129   1          LCD_WR_DATA(Xend & 0xFF);
+  130   1      
+  131   1          // 设置行地址 (0x2B)
+  132   1          LCD_WR_REG(0x2B);
+  133   1          LCD_WR_DATA(Ystart >> 8);
+  134   1          LCD_WR_DATA(Ystart & 0xFF);
+  135   1          LCD_WR_DATA(Yend >> 8);
+  136   1          LCD_WR_DATA(Yend & 0xFF);
+  137   1      
+  138   1          // 准备写入 GRAM
+  139   1          LCD_WR_REG(0x2C);
+  140   1      }
+  141          
+  142          
+  143          // --- 4. ILI9341 初始化序列 ---
+  144          void LCD_Init(void)
+  145          {
+  146   1          LCD_RST(); // 硬件复位
+  147   1      
+  148   1          // --- ILI9341 常用初始化代码序列 ---
+  149   1          LCD_WR_REG(0xCF);  
+  150   1          LCD_WR_DATA(0x00); 
+  151   1          LCD_WR_DATA(0xC1); 
+  152   1          LCD_WR_DATA(0x30); 
+  153   1      
+  154   1          LCD_WR_REG(0xED);  
+  155   1          LCD_WR_DATA(0x64); 
+  156   1          LCD_WR_DATA(0x03); 
+  157   1          LCD_WR_DATA(0x12); 
+  158   1          LCD_WR_DATA(0x81); 
+  159   1      
+  160   1          // ... 省略其他数十条命令 (应参考ILI9341数据手册补全)
+  161   1      
+  162   1          // Power Control 1 (0xC0)
+  163   1          LCD_WR_REG(0xC0);  
+  164   1          LCD_WR_DATA(0x23);
+  165   1      
+  166   1          // Power Control 2 (0xC1)
+  167   1          LCD_WR_REG(0xC1);  
+  168   1          LCD_WR_DATA(0x10);
+  169   1      
+  170   1          // VCOM Control 1 (0xC5)
+  171   1          LCD_WR_REG(0xC5);  
+  172   1          LCD_WR_DATA(0x3E); 
+  173   1          LCD_WR_DATA(0x28); 
+  174   1      
+  175   1          // VCOM Control 2 (0xC7)
+  176   1          LCD_WR_REG(0xC7);  
+  177   1          LCD_WR_DATA(0x86); 
+  178   1      
+  179   1          // Memory Access Control (0x36) - 设置方向
+  180   1          // 0x48: 竖屏(PORTRAIT), 0x28: 横屏(LANDSCAPE)
+  181   1          LCD_WR_REG(0x36);  
+  182   1          LCD_WR_DATA(0x48); // 默认竖屏
+  183   1      
+  184   1          // Pixel Format Set (0x3A) - 16位颜色 (RGB565)
+  185   1          LCD_WR_REG(0x3A);  
+  186   1          LCD_WR_DATA(0x55); // 0x55 for 16bit / 0x66 for 18bit
+  187   1      
+  188   1          // Frame Rate Control (0xB1)
+C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 4   
+
+  189   1          LCD_WR_REG(0xB1);  
+  190   1          LCD_WR_DATA(0x00); 
+  191   1          LCD_WR_DATA(0x18); 
+  192   1      
+  193   1          // Display Function Control (0xB6)
+  194   1          LCD_WR_REG(0xB6);  
+  195   1          LCD_WR_DATA(0x08); 
+  196   1          LCD_WR_DATA(0xA2); 
+  197   1          LCD_WR_DATA(0x27);
+  198   1      
+  199   1          // Sleep Out (0x11)
+  200   1          LCD_WR_REG(0x11);
+  201   1          system_delay_ms(120);
+  202   1      
+  203   1          // Display ON (0x29)
+  204   1          LCD_WR_REG(0x29); 
+  205   1      
+  206   1          // 默认清屏为黑色
+  207   1          LCD_Clear(BLACK);
+  208   1      }
+  209          
+  210          
+  211          // --- 5. 绘图函数实现 ---
+  212          
+  213          // 清屏
+  214          void LCD_Clear(unsigned int Color)
+  215          {
+  216   1          unsigned int i, j;
+  217   1          LCD_SetWindows(0, 0, LCD_W - 1, LCD_H - 1);
+  218   1          
+  219   1          LCD_CS_CLR;
+  220   1          LCD_DC_SET; // 批量写入数据，保持DC高电平
+  221   1          
+  222   1          for(i = 0; i < LCD_H; i++)
+  223   1          {
+  224   2              for(j = 0; j < LCD_W; j++)
+  225   2              {
+  226   3                  // 写入高八位
+  227   3                  LCD_Writ_Bus(Color >> 8); 
+  228   3                  // 写入低八位
+  229   3                  LCD_Writ_Bus(Color & 0xFF);
+  230   3              }
+  231   2          }
+  232   1          LCD_CS_SET;
+  233   1      }
+  234          
+  235          // 画点
+  236          void LCD_DrawPoint(unsigned int x, unsigned int y, unsigned int color)
+  237          {
+  238   1          if(x >= LCD_W || y >= LCD_H) return;
+  239   1          
+  240   1          // 设置单个点的窗口
+  241   1          LCD_SetWindows(x, y, x, y);
+  242   1          // 写入16位颜色
+  243   1          LCD_WR_DATA_16Bit(color);
+  244   1      }
+  245          
+  246          // 填充矩形
+  247          void LCD_Fill(unsigned int xsta, unsigned int ysta, unsigned int xend, unsigned int yend, unsigned int co
+             -lor)
+  248          {
+  249   1          unsigned int i, j;
+  250   1          unsigned int total_points = (xend - xsta + 1) * (yend - ysta + 1);
+  251   1      
+  252   1          if(xend >= LCD_W || yend >= LCD_H) return;
+  253   1          
+C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 5   
+
+  254   1          LCD_SetWindows(xsta, ysta, xend, yend);
+  255   1          
+  256   1          LCD_CS_CLR;
+  257   1          LCD_DC_SET; // 批量写入数据，保持DC高电平
+  258   1      
+  259   1          for(i = 0; i < total_points; i++)
+  260   1          {
+  261   2              // 写入高八位
+  262   2              LCD_Writ_Bus(color >> 8); 
+  263   2              // 写入低八位
+  264   2              LCD_Writ_Bus(color & 0xFF);
+  265   2          }
+  266   1          LCD_CS_SET;
+  267   1      }
+*** WARNING C47 IN LINE 249 OF ..\Hardware\ili9341.c: 'j': unreferenced local variable
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       620     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------          8
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)
