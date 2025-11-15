@@ -3,6 +3,8 @@
 
 #include "bsp.h"
 
+extern uint8 pit_state;
+
 void self_pit_init(void);
 void pit_process(void);
 void led_process(void);

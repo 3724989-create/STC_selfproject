@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  10/11/25  12:50:57  PAGE 1   
+C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  14/11/25  20:40:38  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE zf_device_ble6a20
@@ -66,7 +66,7 @@ stmt  level    source
    50          #include "zf_common_clock.h"
    51          #include "zf_common_debug.h"
    52          #include "zf_common_fifo.h"
-C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  10/11/25  12:50:57  PAGE 2   
+C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  14/11/25  20:40:38  PAGE 2   
 
    53          #include "zf_driver_delay.h"
    54          #include "zf_driver_gpio.h"
@@ -134,7 +134,7 @@ stmt  level    source
   112   3                  buff += send_len;
   113   3                  len -= send_len;
   114   3                  time_cnt = 0;        // 重置超时计数
-C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  10/11/25  12:50:57  PAGE 3   
+C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  14/11/25  20:40:38  PAGE 3   
 
   115   3              }
   116   2                      else    // RTS高电平，模块忙
@@ -202,7 +202,7 @@ stmt  level    source
   172          
   173          //-------------------------------------------------------------------------------------------------------
              -------------
-C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  10/11/25  12:50:57  PAGE 4   
+C251 COMPILER V5.60.0,  zf_device_ble6a20                                                  14/11/25  20:40:38  PAGE 4   
 
   174          // 函数简介     蓝牙转串口模块 初始化
   175          // 参数说明     void
@@ -218,18 +218,19 @@ stmt  level    source
   184   1          // 等待模块初始化
   185   1          system_delay_ms(50);
   186   1          
-  187   1          set_wireless_type(BLE6A20, BLE6A20_INDEX, ble6a20_callback);
-  188   1          
-  189   1          fifo_init(&ble6a20_fifo, FIFO_DATA_8BIT, ble6a20_buffer, BLE6A20_BUFFER_SIZE);
-  190   1          gpio_init(BLE6A20_RTS_PIN, GPIO, GPIO_HIGH, GPIO_NO_PULL);
-  191   1          
-  192   1          // 本函数使用的波特率为115200 为蓝牙转串口模块的默认波特率 如需其他波特率请自行配置模块并修改串口的波
+  187   1          
+  188   1          set_wireless_type(BLE6A20, BLE6A20_INDEX, ble6a20_callback);
+  189   1          
+  190   1          fifo_init(&ble6a20_fifo, FIFO_DATA_8BIT, ble6a20_buffer, BLE6A20_BUFFER_SIZE);
+  191   1          gpio_init(BLE6A20_RTS_PIN, GPIO, GPIO_HIGH, GPIO_NO_PULL);
+  192   1          
+  193   1          // 本函数使用的波特率为115200 为蓝牙转串口模块的默认波特率 如需其他波特率请自行配置模块并修改串口的波
              -特率
-  193   1          uart_init (BLE6A20_INDEX, BLE6A20_BUAD_RATE, BLE6A20_RX_PIN, BLE6A20_TX_PIN);   // 初始化串口
-  194   1          uart_rx_interrupt(BLE6A20_INDEX, 1);
-  195   1          
-  196   1          return return_state;
-  197   1      }
+  194   1          uart_init (BLE6A20_INDEX, BLE6A20_BUAD_RATE, BLE6A20_RX_PIN, BLE6A20_TX_PIN);   // 初始化串口
+  195   1          uart_rx_interrupt(BLE6A20_INDEX, 1);
+  196   1          
+  197   1          return return_state;
+  198   1      }
 
 
 Module Information          Static   Overlayable

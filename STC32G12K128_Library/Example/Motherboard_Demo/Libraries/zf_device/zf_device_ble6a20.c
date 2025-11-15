@@ -184,6 +184,7 @@ uint8 ble6a20_init (void)
     // 等待模块初始化
     system_delay_ms(50);
     
+    
     set_wireless_type(BLE6A20, BLE6A20_INDEX, ble6a20_callback);
     
     fifo_init(&ble6a20_fifo, FIFO_DATA_8BIT, ble6a20_buffer, BLE6A20_BUFFER_SIZE);

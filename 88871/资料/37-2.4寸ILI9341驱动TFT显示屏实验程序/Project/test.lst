@@ -1,0 +1,343 @@
+C251 COMPILER V5.60.0,  test                                                               14/11/25  18:36:10  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE test
+OBJECT MODULE PLACED IN ..\obj\test.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\USER\test.c XSMALL INTR2 BROWSE INCDIR(..\font;..\GUI;..\LCD;..\sys;..\
+                    -USER;..\..\COMM) DEBUG PRINT(.\test.lst) OBJECT(..\obj\test.obj) 
+
+stmt  level    source
+
+    1          /*---------------------------------------------------------------------*/
+    2          /* --- STC MCU Limited ------------------------------------------------*/
+    3          /* --- STC 1T Series MCU Demo Programme -------------------------------*/
+    4          /* --- Mobile: (86)13922805190 ----------------------------------------*/
+    5          /* --- Fax: 86-0513-55012956,55012947,55012969 ------------------------*/
+    6          /* --- Tel: 86-0513-55012928,55012929,55012966 ------------------------*/
+    7          /* --- Web: www.STCAI.com ---------------------------------------------*/
+    8          /* --- BBS: www.STCAIMCU.com  -----------------------------------------*/
+    9          /* --- QQ:  800003751 -------------------------------------------------*/
+   10          /* “∫æß∆¡«˝∂Ø≥Ã–Ú≤Œøºwikiºº ıÕ¯’æÃ·π©µƒø™‘¥‘¥¬Î£¨Ωˆπ©—ßœ∞ π”√          */
+   11          /* »Áπ˚“™‘⁄≥Ã–Ú÷– π”√¥À¥˙¬Î,«Î‘⁄≥Ã–Ú÷–◊¢√˜ π”√¡ÀSTCµƒ◊ ¡œº∞≥Ã–Ú        */
+   12          /*---------------------------------------------------------------------*/
+   13          
+   14          //=========================================µÁ‘¥Ω”œﬂ================================================//
+   15          //VDDΩ”DC 3.3VµÁ‘¥
+   16          //GNDΩ”µÿ
+   17          //=======================================“∫æß∆¡ ˝æ›œﬂΩ”œﬂ==========================================//
+   18          //±æƒ£øÈ ˝æ›◊‹œﬂ¿‡–ÕŒ™8Œª≤¢ø⁄
+   19          //“∫æß∆¡ƒ£øÈ               STC32G
+   20          // LCD_D0~D7     Ω”       P60~P67        //“∫æß∆¡8Œª ˝æ›œﬂ
+   21          //=======================================“∫æß∆¡øÿ÷∆œﬂΩ”œﬂ==========================================//
+   22          //“∫æß∆¡ƒ£øÈ               STC32G
+   23          // LCD_RS        Ω”        P45           // ˝æ›/√¸¡Ó—°‘Òøÿ÷∆–≈∫≈
+   24          // LCD_RD        Ω”        P44           //∂¡øÿ÷∆–≈∫≈
+   25          // LCD_RST       Ω”        P43           //∏¥Œª–≈∫≈
+   26          // LCD_WR        Ω”        P42           //–¥øÿ÷∆–≈∫≈
+   27          // LCD_CS        Ω”        P34           //∆¨—°øÿ÷∆–≈∫≈
+   28          //================================================================================================//
+   29          // ±æ µ—È≤‚ ‘ π”√µƒ2.4¥Á320*240µƒ≤¢ø⁄≤ ∆¡£¨ «‘⁄Ã‘±¶µÍ https://kcer001.taobao.com/ Ã·π©µƒ—˘∆∑≤ ∆¡…œ≤‚ ‘Õ®π
+             -˝µƒ
+   30          //**************************************************************************************************/
+   31          #include <stdio.h>
+   32          #include "lcd.h"
+   33          #include "string.h"
+   34          #include "sys.h"
+   35          #include "gui.h"
+   36          #include "test.h"
+   37          #include "pic.h"
+   38          
+   39          
+   40          //========================variable==========================//
+   41          u16 ColorTab[5]={RED,GREEN,BLUE,YELLOW,BRED};//∂®“Â—’…´ ˝◊È
+   42          u16 ColornTab[8]={RED,MAGENTA,GREEN,DARKBLUE,BLUE,BLACK,LIGHTGREEN};
+   43          //=====================end of variable======================//
+   44          
+   45          /*****************************************************************************
+   46           * @name       :void DrawTestPage(u8 *str)
+   47           * @date       :2018-08-09 
+   48           * @function   :Drawing test interface
+   49           * @parameters :str:the start address of the Chinese and English strings
+   50           * @retvalue   :None
+   51          ******************************************************************************/ 
+   52          void DrawTestPage(u8 *str)
+   53          {
+   54   1              //ªÊ÷∆πÃ∂®¿∏up
+   55   1              LCD_Clear(WHITE);
+   56   1              LCD_Fill(0,0,lcddev.width,20,BLUE);
+   57   1              //ªÊ÷∆πÃ∂®¿∏down
+C251 COMPILER V5.60.0,  test                                                               14/11/25  18:36:10  PAGE 2   
+
+   58   1              LCD_Fill(0,lcddev.height-20,lcddev.width,lcddev.height,BLUE);
+   59   1              POINT_COLOR=WHITE;
+   60   1              Gui_StrCenter(0,2,WHITE,BLUE,str,16,1);//æ”÷–œ‘ æ
+   61   1              Gui_StrCenter(0,lcddev.height-18,WHITE,BLUE,"www.STCMCUDATA.com",16,1);//æ”÷–œ‘ æ
+   62   1              //ªÊ÷∆≤‚ ‘«¯”Ú
+   63   1              //LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+   64   1      }
+   65          
+   66          /*****************************************************************************
+   67           * @name       :void main_test(void)
+   68           * @date       :2018-08-09 
+   69           * @function   :Drawing the main Interface of the Comprehensive Test Program
+   70           * @parameters :None
+   71           * @retvalue   :None
+   72          ******************************************************************************/
+   73          void main_test(void)
+   74          {
+   75   1              DrawTestPage("2.4¥ÁTFT∆¡≤‚ ‘≥Ã–Ú");
+   76   1              
+   77   1              Gui_StrCenter(0,30,RED,BLUE,"∫Íæßø∆ºº",16,1);//æ”÷–œ‘ æ
+   78   1              Gui_StrCenter(0,60,RED,BLUE,"STC MCU Limited",16,1);//æ”÷–œ‘ æ  
+   79   1              Gui_StrCenter(0,90,MAGENTA,BLUE,"Tel: 86-0513-55012928",16,1);//æ”÷–œ‘ æ
+   80   1              Gui_StrCenter(0,120,BLUE,BLUE,"www.STCAI.com",16,1);//æ”÷–œ‘ æ
+   81   1              delay_ms(1500);         
+   82   1              delay_ms(1500);
+   83   1      }
+   84          
+   85          /*****************************************************************************
+   86           * @name       :void Test_Color(void)
+   87           * @date       :2018-08-09 
+   88           * @function   :Color fill test(white,black,red,green,blue)
+   89           * @parameters :None
+   90           * @retvalue   :None
+   91          ******************************************************************************/
+   92          void Test_Color(void)
+   93          {
+   94   1              //DrawTestPage("≤‚ ‘1:¥ø…´ÃÓ≥‰≤‚ ‘");
+   95   1              LCD_Fill(0,0,lcddev.width,lcddev.height,WHITE);
+   96   1              Show_Str(20,30,BLUE,YELLOW,"BL Test",16,1);delay_ms(800);
+   97   1              LCD_Fill(0,0,lcddev.width,lcddev.height,RED);
+   98   1              Show_Str(20,30,BLUE,YELLOW,"RED ",16,1);delay_ms(800);
+   99   1              LCD_Fill(0,0,lcddev.width,lcddev.height,GREEN);
+  100   1              Show_Str(20,30,BLUE,YELLOW,"GREEN ",16,1);delay_ms(800);
+  101   1              LCD_Fill(0,0,lcddev.width,lcddev.height,BLUE);
+  102   1              Show_Str(20,30,RED,YELLOW,"BLUE ",16,1);delay_ms(800);
+  103   1      }
+  104          
+  105          /*****************************************************************************
+  106           * @name       :void Test_FillRec(void)
+  107           * @date       :2018-08-09 
+  108           * @function   :Rectangular display and fill test
+  109                                                                          Display red,green,blue,yellow,pink rectangular boxes in turn,
+  110                                                                          1500 milliseconds later,
+  111                                                                          Fill the rectangle in red,green,blue,yellow and pink in turn
+  112           * @parameters :None
+  113           * @retvalue   :None
+  114          ******************************************************************************/
+  115          void Test_FillRec(void)
+  116          {
+  117   1              u8 i=0;
+  118   1              DrawTestPage("≤‚ ‘3:GUIæÿ–ŒÃÓ≥‰≤‚ ‘");
+  119   1              LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+  120   1              for (i=0; i<5; i++) 
+  121   1              {
+  122   2                      POINT_COLOR=ColorTab[i];
+  123   2                      LCD_DrawRectangle(lcddev.width/2-80+(i*15),lcddev.height/2-80+(i*15),lcddev.width/2-80+(i*15)+60,lcddev
+C251 COMPILER V5.60.0,  test                                                               14/11/25  18:36:10  PAGE 3   
+
+             -.height/2-80+(i*15)+60); 
+  124   2              }
+  125   1              delay_ms(1500); 
+  126   1              LCD_Fill(0,20,lcddev.width-1,lcddev.height-20,WHITE); 
+  127   1              for (i=0; i<5; i++) 
+  128   1              {
+  129   2                      POINT_COLOR=ColorTab[i];
+  130   2                      LCD_DrawFillRectangle(lcddev.width/2-80+(i*15),lcddev.height/2-80+(i*15),lcddev.width/2-80+(i*15)+60,lc
+             -ddev.height/2-80+(i*15)+60);           
+  131   2              }
+  132   1              delay_ms(1500);
+  133   1      }
+  134          
+  135          /*****************************************************************************
+  136           * @name       :void Test_Circle(void)
+  137           * @date       :2018-08-09 
+  138           * @function   :circular display and fill test
+  139                                                                          Display red,green,blue,yellow,pink circular boxes in turn,
+  140                                                                          1500 milliseconds later,
+  141                                                                          Fill the circular in red,green,blue,yellow and pink in turn
+  142           * @parameters :None
+  143           * @retvalue   :None
+  144          ******************************************************************************/
+  145          void Test_Circle(void)
+  146          {
+  147   1              u8 i=0;
+  148   1              DrawTestPage("≤‚ ‘4:GUIª≠‘≤ÃÓ≥‰≤‚ ‘");
+  149   1              LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+  150   1              for (i=0; i<5; i++)  
+  151   1                      gui_circle(lcddev.width/2-80+(i*25),lcddev.height/2-50+(i*25),ColorTab[i],30,0);
+  152   1              delay_ms(1500); 
+  153   1              LCD_Fill(0,20,lcddev.width-1,lcddev.height-20,WHITE); 
+  154   1              for (i=0; i<5; i++) 
+  155   1                      gui_circle(lcddev.width/2-80+(i*25),lcddev.height/2-50+(i*25),ColorTab[i],30,1);
+  156   1              delay_ms(1500);
+  157   1      }
+  158          
+  159          /*****************************************************************************
+  160           * @name       :void Test_Triangle(void)
+  161           * @date       :2018-08-09 
+  162           * @function   :triangle display and fill test
+  163                                                                          Display red,green,blue,yellow,pink triangle boxes in turn,
+  164                                                                          1500 milliseconds later,
+  165                                                                          Fill the triangle in red,green,blue,yellow and pink in turn
+  166           * @parameters :None
+  167           * @retvalue   :None
+  168          ******************************************************************************/
+  169          void Test_Triangle(void)
+  170          {
+  171   1              u8 i=0;
+  172   1              DrawTestPage("≤‚ ‘5:GUI TriangleÃÓ≥‰≤‚ ‘");
+  173   1              LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+  174   1              for(i=0;i<5;i++)
+  175   1              {
+  176   2                      POINT_COLOR=ColorTab[i];
+  177   2                      Draw_Triangel(lcddev.width/2-80+(i*20),lcddev.height/2-20+(i*15),lcddev.width/2-50-1+(i*20),lcddev.heig
+             -ht/2-20-52-1+(i*15),lcddev.width/2-20-1+(i*20),lcddev.height/2-20+(i*15));
+  178   2              }
+  179   1              delay_ms(1500); 
+  180   1              LCD_Fill(0,20,lcddev.width-1,lcddev.height-20,WHITE); 
+  181   1              for(i=0;i<5;i++)
+  182   1              {
+  183   2                      POINT_COLOR=ColorTab[i];
+  184   2                      Fill_Triangel(lcddev.width/2-80+(i*20),lcddev.height/2-20+(i*15),lcddev.width/2-50-1+(i*20),lcddev.heig
+             -ht/2-20-52-1+(i*15),lcddev.width/2-20-1+(i*20),lcddev.height/2-20+(i*15));
+  185   2              }
+C251 COMPILER V5.60.0,  test                                                               14/11/25  18:36:10  PAGE 4   
+
+  186   1              delay_ms(1500);
+  187   1      }
+  188          
+  189          /*****************************************************************************
+  190           * @name       :void English_Font_test(void)
+  191           * @date       :2018-08-09 
+  192           * @function   :English display test
+  193           * @parameters :None
+  194           * @retvalue   :None
+  195          ******************************************************************************/
+  196          void English_Font_test(void)
+  197          {
+  198   1              DrawTestPage("≤‚ ‘6:”¢Œƒœ‘ æ≤‚ ‘");
+  199   1              POINT_COLOR=RED;
+  200   1              BACK_COLOR=BLUE;
+  201   1              LCD_ShowString(10,30,12,"6X12:abcdefghijklmnopqrstuvwxyz",0);
+  202   1              LCD_ShowString(10,45,12,"6X12:ABCDEFGHIJKLMNOP0123456789",1);
+  203   1              LCD_ShowString(10,60,12,"6X12:~!@#$%^&*()_+{}:<>?/|-+.",0);
+  204   1              LCD_ShowString(10,80,16,"8X16:abcdefghijklmnopqrstuvwxyz",0);
+  205   1              LCD_ShowString(10,100,16,"8X16:ABCDEFGHIJKLMNOP0123456789",1);
+  206   1              LCD_ShowString(10,120,16,"8X16:~!@#$%^&*()_+{}:<>?/|-+.",0); 
+  207   1              delay_ms(1500);
+  208   1      }
+  209          
+  210          /*****************************************************************************
+  211           * @name       :void Chinese_Font_test(void)
+  212           * @date       :2018-08-09 
+  213           * @function   :chinese display test
+  214           * @parameters :None
+  215           * @retvalue   :None
+  216          ******************************************************************************/
+  217          void Chinese_Font_test(void)
+  218          {       
+  219   1              DrawTestPage("≤‚ ‘7:÷–Œƒœ‘ æ≤‚ ‘");
+  220   1              Show_Str(10,30,BLUE,YELLOW,"16X16:Ω≠À’π˙–æø∆ºº”–œﬁπ´Àæª∂”≠ƒ˙",16,0);
+  221   1              Show_Str(10,50,BLUE,YELLOW,"16X16:Welcome∫Íæßø∆ºº",16,0);
+  222   1              Show_Str(10,70,BLUE,YELLOW,"24X24:…Ó€⁄ –÷–Œƒ≤‚ ‘",24,1);
+  223   1              Show_Str(10,100,BLUE,YELLOW,"32X32:◊÷ÃÂ≤‚ ‘",32,1);
+  224   1              delay_ms(1500);
+  225   1      }
+  226          
+  227          /*****************************************************************************
+  228           * @name       :void Pic_test(void)
+  229           * @date       :2018-08-09 
+  230           * @function   :picture display test
+  231           * @parameters :None
+  232           * @retvalue   :None
+  233          ******************************************************************************/
+  234          void Pic_test(void)
+  235          {
+  236   1              DrawTestPage("≤‚ ‘8:Õº∆¨œ‘ æ≤‚ ‘");
+  237   1              //LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+  238   1              Gui_Drawbmp16(30,30,gImage_qq);
+  239   1              Show_Str(30+12,75,BLUE,YELLOW,"QQ",16,1);
+  240   1              Gui_Drawbmp16(90,30,gImage_qq);
+  241   1              Show_Str(90+12,75,BLUE,YELLOW,"QQ",16,1);
+  242   1              Gui_Drawbmp16(150,30,gImage_qq);
+  243   1              Show_Str(150+12,75,BLUE,YELLOW,"QQ",16,1);
+  244   1              delay_ms(1500);
+  245   1      }
+  246          
+  247          /*****************************************************************************
+  248           * @name       :void Rotate_Test(void)
+  249           * @date       :2018-08-09 
+  250           * @function   :rotate test
+  251           * @parameters :None
+C251 COMPILER V5.60.0,  test                                                               14/11/25  18:36:10  PAGE 5   
+
+  252           * @retvalue   :None
+  253          ******************************************************************************/
+  254          void Rotate_Test(void)
+  255          {
+  256   1              u8 i=0;
+  257   1              u8 *Direction[4]={"Rotation:0","Rotation:90","Rotation:180","Rotation:270"};
+  258   1              
+  259   1              for(i=0;i<4;i++)
+  260   1              {
+  261   2              LCD_direction(i);
+  262   2              DrawTestPage("≤‚ ‘9:∆¡ƒªΩ«∂»≤‚ ‘");
+  263   2              Show_Str(20,30,BLUE,YELLOW,Direction[i],16,1);
+  264   2              Gui_Drawbmp16(30,50,gImage_qq);
+  265   2              delay_ms(1000);delay_ms(1000);
+  266   2              }
+  267   1              LCD_direction(USE_HORIZONTAL);
+  268   1      }
+  269          
+  270          /*****************************************************************************
+  271           * @name       :void Test_Read(void)
+  272           * @date       :2018-11-13 
+  273           * @function   :read test
+  274           * @parameters :None
+  275           * @retvalue   :None
+  276          ******************************************************************************/
+  277          void Test_Read(void)
+  278          {
+  279   1              u16 lcd_id,color;
+  280   1              u8 buf[10] = {0},i;
+  281   1              u8 cbuf[20] = {0};
+  282   1              DrawTestPage("≤‚ ‘2:∂¡ID∫Õ—’…´÷µ≤‚ ‘");
+  283   1              LCD_Fill(0,20,lcddev.width,lcddev.height-20,WHITE);
+  284   1              lcd_id = LCD_Read_ID();
+  285   1              sprintf((char *)buf,"ID:0x%x",lcd_id);
+  286   1              Show_Str(50,25,BLUE,YELLOW,buf,16,1);
+  287   1              for (i=0; i<7; i++) 
+  288   1              {
+  289   2                      POINT_COLOR=ColornTab[i];
+  290   2                      LCD_DrawFillRectangle(40-10,55+i*25-10,40+10,55+i*25+10);
+  291   2                      color = LCD_ReadPoint(40,55+i*25);
+  292   2                      sprintf((char *)cbuf,"read color:0x%04x",color);
+  293   2                      Show_Str(40+20,55+i*25-8,POINT_COLOR,YELLOW,cbuf,16,1);
+  294   2              }
+  295   1              delay_ms(1500);
+  296   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      5462     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =        26         46
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =       732     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

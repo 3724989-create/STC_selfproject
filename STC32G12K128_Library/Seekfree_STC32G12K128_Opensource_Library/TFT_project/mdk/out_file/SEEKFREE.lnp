@@ -43,7 +43,7 @@
 ".\out_file\my_pit.obj",
 ".\out_file\isr.obj",
 ".\out_file\main.obj",
-".\out_file\ili9341.obj" 
+".\out_file\IIC.obj" 
 TO ".\out_file\SEEKFREE" 
 PRINT(".\out_file\SEEKFREE.map") CASE DISABLEWARNING (57,16) 
 REMOVEUNUSED 

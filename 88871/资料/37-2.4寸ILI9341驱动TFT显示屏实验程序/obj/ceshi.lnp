@@ -1,0 +1,9 @@
+"..\obj\gui.obj",
+"..\obj\main.obj",
+"..\obj\test.obj",
+"..\obj\sys.obj",
+"..\obj\LCD.obj" 
+TO "..\obj\ceshi" 
+PRINT(".\ceshi.map") CASE 
+CLASSES (EDATA (0x0-0xFFF), 
+HDATA (0x0-0xFFF)) 

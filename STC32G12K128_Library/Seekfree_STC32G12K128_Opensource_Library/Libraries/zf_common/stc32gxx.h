@@ -518,6 +518,39 @@ sbit        P54RST      =           RSTCFG^4;
 #define     SEC                     (*(unsigned char volatile far *)0x7efe75)
 #define     SSEC                    (*(unsigned char volatile far *)0x7efe76)
 
+// I2C控制寄存器位定义
+#define ENI2C       0x80
+#define I2CMASTER   0x40
+
+// I2C主机命令
+#define MS_IDLE                     0x00
+#define MS_START                    0x01
+#define MS_SENDDAT                  0x02
+#define MS_RECVACK                  0x03
+#define MS_RECVDAT                  0x04
+#define MS_SENDACK                  0x05
+#define MS_STOP                     0x06
+
+// I2C主机状态
+#define MSBUSY      0x80
+#define MSIF        0x40
+#define MSACKI      0x02
+#define MSACKO      0x01
+
+// I2C从机控制
+#define ESTAI       0x40
+#define ERXI        0x20
+#define ETXI        0x10
+#define ESTOI       0x08
+
+// I2C从机状态
+#define SLBUSY      0x80
+#define STAIF       0x40
+#define RXIF        0x20
+#define TXIF        0x10
+#define STOIF       0x08
+#define SLACKI      0x02
+
 #define     I2CCFG                  (*(unsigned char volatile far *)0x7efe80)
 #define     I2CMSCR                 (*(unsigned char volatile far *)0x7efe81)
 #define     I2CMSST                 (*(unsigned char volatile far *)0x7efe82)

@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 1   
+C251 COMPILER V5.60.0,  ili9341                                                            15/11/25  12:13:33  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE ili9341
@@ -9,294 +9,304 @@ COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\Hardware\ili9341.c LARGE NOALIA
 
 stmt  level    source
 
-    1          #include "ili9341.h"
+    1          // #include "ili9341.h"
     2          
-    3          #define LCD_CTRL_PINS_MASK (0x01 | 0x02 | 0x08)
-    4          
-    5          // --- 1. STC32G SPI Ó²¼þ³õÊ¼»¯ ---
-    6          void self_SPI_Init(void)
-    7          {
-    8   1      // 1. ÉèÖÃ P1M0 µÄ¶ÔÓ¦Î»Îª 1 (Íê³ÉÍÆÍìÄ£Ê½µÄ '1' ²¿·Ö)
-    9   1          P1M0 |= LCD_CTRL_PINS_MASK; 
-   10   1      
-   11   1      // 2. Çå³ý P1M1 µÄ¶ÔÓ¦Î»Îª 0 (Íê³ÉÍÆÍìÄ£Ê½µÄ '0' ²¿·Ö)
-   12   1          P1M1 &= ~LCD_CTRL_PINS_MASK;
-   13   1      
-   14   1          // 2. ÅäÖÃSPIÒý½Å¸´ÓÃ (SCLK, MOSI, MISO)
-   15   1          // P2.0 (SCLK) ºÍ P2.1 (MOSI) ÉèÎªÍÆÍìÊä³ö
-   16   1          P2M0 |= (1<<0) | (1<<1); 
-   17   1          P2M1 &= ~((1<<0) | (1<<1));
-   18   1      
-   19   1          // P2.2 (MISO) ÉèÎª¸¡¿ÕÊäÈë (Ä¬ÈÏ£¬µ«ÏÔÊ½Ð´³ö)
-   20   1          P2M0 &= ~(1<<2);
-   21   1          P2M1 &= ~(1<<2);
-   22   1          
-   23   1          // 2.1 ÅäÖÃ SPI Òý½Å¸´ÓÃ (Ê¹ÓÃ P_SW1 ¼Ä´æÆ÷)
-   24   1          // Ä¿±ê: Ñ¡Ôñ P2 ×éÒý½Å (SCLK:P2.0, MOSI:P2.1, MISO:P2.2, SS:P2.3)
-   25   1          // ¶ÔÓ¦ P_SW1: SPI_S1=0 (Î»3), SPI_S0=1 (Î»2) -> 0x04
-   26   1          
-   27   1          // ²½ÖèÒ»£ºÇå³ý SPI_S1 Î» (P_SW1^3)
-   28   1          P_SW1 &= ~(1<<3); 
-   29   1          
-   30   1          // ²½Öè¶þ£ºÉèÖÃ SPI_S0 Î» (P_SW1^2)
-   31   1          P_SW1 |= (1<<2);
-   32   1      
-   33   1          // 3. ÅäÖÃSPI¼Ä´æÆ÷ (Ö÷Ä£Ê½, Ä£Ê½0)
-   34   1          // STC32G Ó²¼þSPI¼Ä´æÆ÷£ºSPCTL, SPSTAT, SPDR
-   35   1      
-   36   1          // SPCTL ¼Ä´æÆ÷ÅäÖÃ£º
-   37   1          // | SPIEN | MSTR | CPOL | CPHA | SPR1 | SPR0 |
-   38   1          // |   1   |   1  |  0   |  0   |  0   |  1   |  (¼ÙÉè·ÖÆµ±ÈÎª Fosc/8)
-   39   1      
-   40   1          SPCTL = 0x50; // 1010 0001 (SPIÊ¹ÄÜ£¬Ö÷Ä£Ê½MSTR=1, CPOL=0, CPHA=0, Fosc/4)
-   41   1          // ¸ù¾ÝÄúµÄÐèÇóµ÷Õû·ÖÆµÎ» SPRx
-   42   1      
-   43   1          // È·±£SPSTATÖÐµÄÖÐ¶Ï±êÖ¾Î»±»Çå³ý£¨Í¨³£Í¨¹ý¶ÁÐ´²Ù×÷£©
-   44   1          (void)SPSTAT;
-*** WARNING C138 IN LINE 44 OF ..\Hardware\ili9341.c: expression with possibly no effect
-   45   1          SPSTAT &= ~(0x40 | 0x80); // Çå³ý SPIF (´«ÊäÍê³É) ºÍ WCOL (Ð´³åÍ»)
-   46   1      }
-   47          
-   48          // --- 2. ILI9341 µ×²ãÍ¨ÐÅº¯Êý ---
+    3          // // ï¿½ê³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ P1 ï¿½Úµï¿½ CS, DC, RST ï¿½ï¿½ï¿½ï¿½
+    4          // #define LCD_CTRL_PINS_MASK (0x01 | 0x02 | 0x08)
+    5          
+    6          // // --- 1. STC32G SPI Ó²ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ (ï¿½ï¿½ï¿½ Flash ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ P_SW1 ï¿½ï¿½ SPCTL ï¿½
+             -ß¼ï¿½) ---
+    7          // void self_SPI_Init(void)
+    8          // {
+    9          //     // Ê¹ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+   10          //     EAXFR = 1; 
+   11              
+   12          //     // --- 1.1 ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ P1.0, P1.1, P1.3 Ä£Ê½ ---
+   13          //     // ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½Í¨ï¿½Ã·ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿
+             -½ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½Ç¿ï¿½Â©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+   14          //     P1M0 |= LCD_CTRL_PINS_MASK; 
+   15          //     P1M1 &= ~LCD_CTRL_PINS_MASK;
+   16              
+   17          //     // --- 1.2 ï¿½ï¿½ï¿½ï¿½ SPI ï¿½ï¿½ï¿½ï¿½ P2.2, P2.3, P2.4, P2.5 Ä£Ê½ ---
+   18          //     // P2.2 (SCLK), P2.3 (MOSI) ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+   19          //     P2M0 |= (1<<2) | (1<<3); 
+   20          //     P2M1 &= ~((1<<2) | (1<<3));
+   21          //     // P2.4 (MISO) ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (0, 0)
+   22          //     P2M0 &= ~(1<<4);
+   23          //     P2M1 &= ~(1<<4);
+   24          
+   25          //     // --- 1.3 ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ P3.7 Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ---
+   26          //     P3M0 |= (1<<7);
+   27          //     P3M1 &= ~(1<<7);
+   28          
+   29          //     // --- 1.4 ï¿½ï¿½ï¿½ï¿½ SPI ï¿½ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ (P_SW1) ---
+   30          //     // ï¿½ï¿½Ó¦ P_SW1: SPI_S1=0, SPI_S0=1 -> 0x04 (P2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+   31          //     P_SW1 = (P_SW1 & ~(3<<2)) | (1<<2); 
+   32          
+   33          //     // --- 1.5 ï¿½ï¿½ï¿½ï¿½ SPI ï¿½ï¿½ï¿½Æ¼Ä´ï¿½ï¿½ï¿½ (SPCTL) ---
+   34          //     SSIG = 1;     // ï¿½ï¿½ï¿½ï¿½ SS ï¿½ï¿½ï¿½Å¹ï¿½ï¿½ï¿½
+   35          //     SPEN = 1;     // Ê¹ï¿½ï¿½ SPI ï¿½ï¿½ï¿½ï¿½
+   36          //     DORD = 0;     // MSB ï¿½ï¿½Ç°
+   37          //     MSTR = 1;     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ (Master)
+   38          //     CPOL = 0;     // SPI Ä£Ê½ 0: Ê±ï¿½Ó¿ï¿½ï¿½ÐµÍµï¿½Æ½
+   39          //     CPHA = 0;     // SPI Ä£Ê½ 0: ï¿½ï¿½Ò»ï¿½ï¿½Ê±ï¿½Ó±ï¿½ï¿½Ø²ï¿½ï¿½ï¿½
+   40              
+   41          //     // ï¿½ï¿½ï¿½ï¿½ï¿½Ê·ï¿½Æµ (ï¿½ï¿½ï¿½ï¿½ï¿½ Fosc/2T ï¿½ï¿½ Fosc/4)
+   42          //     SPCTL = (SPCTL & ~3) | 3; 
+   43          //     HSCLKDIV = 0x08;          // ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½Ê±ï¿½Ó·ï¿½Æµ
+   44              
+   45          //     // ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ö¾
+   46          //     SPIF = 1; 
+   47          //     WCOL = 1; 
+   48          // }
    49          
-   50          // SPI ·¢ËÍÒ»¸ö×Ö½ÚÊý¾Ý
-   51          void LCD_Writ_Bus(unsigned char dat) 
-   52          {
-   53   1          SPDAT = dat; // Ð´ÈëÊý¾Ý
-   54   1          // µÈ´ý´«ÊäÍê³É(SPIF=1)
-   55   1          while(!(SPSTAT & 0x80)); // µÈ´ý SPIF ±êÖ¾ (´«ÊäÍê³É)
-   56   1          SPSTAT &= ~0x80;          // Çå³ý SPIF ±êÖ¾
-C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 2   
+   50          // // --- 2. SPI ï¿½×²ï¿½Í¨ï¿½Åºï¿½ï¿½ï¿½ ---
+   51          
+   52          // // SPI ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½
+   53          // void LCD_Writ_Bus(unsigned char dat) 
+   54          // {
+   55          //     SPDAT = dat; 
+C251 COMPILER V5.60.0,  ili9341                                                            15/11/25  12:13:33  PAGE 2   
 
-   57   1      }
-   58          
-   59          // Ð´ÈëÃüÁî (DC=0)
-   60          void LCD_WR_REG(unsigned char cmd)
-   61          {
-   62   1          LCD_CS_CLR; // Æ¬Ñ¡
-   63   1          LCD_DC_CLR; // ÃüÁîÄ£Ê½
-   64   1          LCD_Writ_Bus(cmd);
-   65   1          LCD_CS_SET; // È¡ÏûÆ¬Ñ¡
-   66   1      }
-   67          
-   68          // Ð´ÈëÊý¾Ý (DC=1)
-   69          void LCD_WR_DATA(unsigned char dat)
-   70          {
-   71   1          LCD_CS_CLR; // Æ¬Ñ¡
-   72   1          LCD_DC_SET; // Êý¾ÝÄ£Ê½
-   73   1          LCD_Writ_Bus(dat);
-   74   1          LCD_CS_SET; // È¡ÏûÆ¬Ñ¡
-   75   1      }
-   76          
-   77          // Ð´Èë16Î»Êý¾Ý (ÓÃÓÚÑÕÉ«)
-   78          void LCD_WR_DATA_16Bit(unsigned int dat)
-   79          {
-   80   1          LCD_CS_CLR;
-   81   1          LCD_DC_SET;
-   82   1          // Ð´Èë¸ß°ËÎ»
-   83   1          LCD_Writ_Bus(dat >> 8); 
-   84   1          // Ð´ÈëµÍ°ËÎ»
-   85   1          LCD_Writ_Bus(dat & 0xFF);
-   86   1          LCD_CS_SET;
-   87   1      }
-   88          
-   89          // --- 3. ÆÁÄ»¿ØÖÆº¯Êý ---
-   90          
-   91          // Ó²¼þ¸´Î»
-   92          void LCD_RST(void)
-   93          {
-   94   1          LCD_RST_CLR; // À­µÍ¸´Î»
-   95   1          system_delay_ms(100);
-   96   1          LCD_RST_SET; // ÊÍ·Å¸´Î»
-   97   1          system_delay_ms(100);
-   98   1      }
-   99          
-  100          // ÉèÖÃ¹â±êµØÖ·
-  101          void LCD_SetCursor(unsigned int Xstart, unsigned int Ystart)
-  102          {
-  103   1          // ÉèÖÃÁÐµØÖ· (X)
-  104   1          LCD_WR_REG(0x2A); 
-  105   1          LCD_WR_DATA(Xstart >> 8); // X Start High
-  106   1          LCD_WR_DATA(Xstart & 0xFF); // X Start Low
-  107   1          LCD_WR_DATA(Xstart >> 8); // X End High (µ¥µãÊ±Xend=Xstart)
-  108   1          LCD_WR_DATA(Xstart & 0xFF); // X End Low
-  109   1      
-  110   1          // ÉèÖÃÐÐµØÖ· (Y)
-  111   1          LCD_WR_REG(0x2B);
-  112   1          LCD_WR_DATA(Ystart >> 8); // Y Start High
-  113   1          LCD_WR_DATA(Ystart & 0xFF); // Y Start Low
-  114   1          LCD_WR_DATA(Ystart >> 8); // Y End High
-  115   1          LCD_WR_DATA(Ystart & 0xFF); // Y End Low
-  116   1      
-  117   1          // ×¼±¸Ð´Èë GRAM (0x2C)
-  118   1          LCD_WR_REG(0x2C);
-  119   1      }
-  120          
-  121          // ÉèÖÃÏÔÊ¾´°¿Ú
-  122          void LCD_SetWindows(unsigned int Xstart, unsigned int Ystart, unsigned int Xend, unsigned int Yend)
-C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 3   
+   56          //     while(SPIF == 0); // ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+   57          //     SPIF = 1; ? ? ? ? // ï¿½ï¿½ï¿½ SPIF ï¿½ï¿½Ö¾
+   58          // }
+   59          
+   60          // // Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (DC=0)
+   61          // void LCD_WR_REG(unsigned char cmd)
+   62          // {
+   63          //     LCD_CS_CLR; 
+   64          //     LCD_DC_CLR; // ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+   65          //     LCD_Writ_Bus(cmd);
+   66          //     LCD_CS_SET; 
+   67          // }
+   68          
+   69          // // Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (DC=1)
+   70          // void LCD_WR_DATA(unsigned char dat)
+   71          // {
+   72          //     LCD_CS_CLR; 
+   73          //     LCD_DC_SET; // ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+   74          //     LCD_Writ_Bus(dat);
+   75          //     LCD_CS_SET; 
+   76          // }
+   77          
+   78          // // Ð´ï¿½ï¿½16Î»ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«)
+   79          // void LCD_WR_DATA_16Bit(unsigned int dat)
+   80          // {
+   81          //     LCD_CS_CLR;
+   82          //     LCD_DC_SET;
+   83          //     // Ð´ï¿½ï¿½ß°ï¿½Î»
+   84          //     LCD_Writ_Bus(dat >> 8); 
+   85          //     // Ð´ï¿½ï¿½Í°ï¿½Î»
+   86          //     LCD_Writ_Bus(dat & 0xFF);
+   87          //     LCD_CS_SET;
+   88          // }
+   89          
+   90          // // --- 3. ï¿½ï¿½Ä»ï¿½ï¿½ï¿½Æºï¿½ï¿½ï¿½ ---
+   91          
+   92          // // Ó²ï¿½ï¿½ï¿½ï¿½Î»
+   93          // void LCD_RST(void)
+   94          // {
+   95          //     LCD_RST_CLR; // ï¿½ï¿½ï¿½Í¸ï¿½Î»
+   96          //     system_delay_ms(100);
+   97          //     LCD_RST_SET; // ï¿½Í·Å¸ï¿½Î»
+   98          //     system_delay_ms(100);
+   99          // }
+  100          
+  101          // // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
+  102          // void LCD_SetWindows(unsigned int Xstart, unsigned int Ystart, unsigned int Xend, unsigned int Yend)
+  103          // {
+  104          //     // ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½Ö· (0x2A)
+  105          //     LCD_WR_REG(0x2A); 
+  106          //     LCD_WR_DATA(Xstart >> 8); 
+  107          //     LCD_WR_DATA(Xstart & 0xFF);
+  108          //     LCD_WR_DATA(Xend >> 8); 
+  109          //     LCD_WR_DATA(Xend & 0xFF);
+  110          
+  111          //     // ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½Ö· (0x2B)
+  112          //     LCD_WR_REG(0x2B);
+  113          //     LCD_WR_DATA(Ystart >> 8);
+  114          //     LCD_WR_DATA(Ystart & 0xFF);
+  115          //     LCD_WR_DATA(Yend >> 8);
+  116          //     LCD_WR_DATA(Yend & 0xFF);
+  117          
+  118          //     // ×¼ï¿½ï¿½Ð´ï¿½ï¿½ GRAM
+  119          //     LCD_WR_REG(0x2C);
+  120          // }
+  121          
+C251 COMPILER V5.60.0,  ili9341                                                            15/11/25  12:13:33  PAGE 3   
 
-  123          {
-  124   1          // ÉèÖÃÁÐµØÖ· (0x2A)
-  125   1          LCD_WR_REG(0x2A); 
-  126   1          LCD_WR_DATA(Xstart >> 8); 
-  127   1          LCD_WR_DATA(Xstart & 0xFF);
-  128   1          LCD_WR_DATA(Xend >> 8); 
-  129   1          LCD_WR_DATA(Xend & 0xFF);
-  130   1      
-  131   1          // ÉèÖÃÐÐµØÖ· (0x2B)
-  132   1          LCD_WR_REG(0x2B);
-  133   1          LCD_WR_DATA(Ystart >> 8);
-  134   1          LCD_WR_DATA(Ystart & 0xFF);
-  135   1          LCD_WR_DATA(Yend >> 8);
-  136   1          LCD_WR_DATA(Yend & 0xFF);
-  137   1      
-  138   1          // ×¼±¸Ð´Èë GRAM
-  139   1          LCD_WR_REG(0x2C);
-  140   1      }
-  141          
-  142          
-  143          // --- 4. ILI9341 ³õÊ¼»¯ÐòÁÐ ---
-  144          void LCD_Init(void)
-  145          {
-  146   1          LCD_RST(); // Ó²¼þ¸´Î»
-  147   1      
-  148   1          // --- ILI9341 ³£ÓÃ³õÊ¼»¯´úÂëÐòÁÐ ---
-  149   1          LCD_WR_REG(0xCF);  
-  150   1          LCD_WR_DATA(0x00); 
-  151   1          LCD_WR_DATA(0xC1); 
-  152   1          LCD_WR_DATA(0x30); 
-  153   1      
-  154   1          LCD_WR_REG(0xED);  
-  155   1          LCD_WR_DATA(0x64); 
-  156   1          LCD_WR_DATA(0x03); 
-  157   1          LCD_WR_DATA(0x12); 
-  158   1          LCD_WR_DATA(0x81); 
-  159   1      
-  160   1          // ... Ê¡ÂÔÆäËûÊýÊ®ÌõÃüÁî (Ó¦²Î¿¼ILI9341Êý¾ÝÊÖ²á²¹È«)
-  161   1      
-  162   1          // Power Control 1 (0xC0)
-  163   1          LCD_WR_REG(0xC0);  
-  164   1          LCD_WR_DATA(0x23);
-  165   1      
-  166   1          // Power Control 2 (0xC1)
-  167   1          LCD_WR_REG(0xC1);  
-  168   1          LCD_WR_DATA(0x10);
-  169   1      
-  170   1          // VCOM Control 1 (0xC5)
-  171   1          LCD_WR_REG(0xC5);  
-  172   1          LCD_WR_DATA(0x3E); 
-  173   1          LCD_WR_DATA(0x28); 
-  174   1      
-  175   1          // VCOM Control 2 (0xC7)
-  176   1          LCD_WR_REG(0xC7);  
-  177   1          LCD_WR_DATA(0x86); 
-  178   1      
-  179   1          // Memory Access Control (0x36) - ÉèÖÃ·½Ïò
-  180   1          // 0x48: ÊúÆÁ(PORTRAIT), 0x28: ºáÆÁ(LANDSCAPE)
-  181   1          LCD_WR_REG(0x36);  
-  182   1          LCD_WR_DATA(0x48); // Ä¬ÈÏÊúÆÁ
-  183   1      
-  184   1          // Pixel Format Set (0x3A) - 16Î»ÑÕÉ« (RGB565)
-  185   1          LCD_WR_REG(0x3A);  
-  186   1          LCD_WR_DATA(0x55); // 0x55 for 16bit / 0x66 for 18bit
-  187   1      
-  188   1          // Frame Rate Control (0xB1)
-C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 4   
+  122          // // --- 4. ILI9341 ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ---
+  123          // void LCD_Init(void)
+  124          // {
+  125          //     // 1. Ó²ï¿½ï¿½ï¿½ï¿½Î»
+  126          //     LCD_RST(); // ï¿½ï¿½ï¿½Í¸ï¿½Î», ï¿½ï¿½Ê±, ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½
+  127          
+  128          //     // 2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Í¨ï¿½ï¿½Ë³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+  129          
+  130          //     // --- Ð¾Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½Ë½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Command Group A) ---
+  131          //     // Power Control A (CFh)
+  132          //     LCD_WR_REG(0xCF);   
+  133          //     LCD_WR_DATA(0x00); 
+  134          //     LCD_WR_DATA(0xC1); 
+  135          //     LCD_WR_DATA(0x30); 
+  136          
+  137          //     // Power Control B (EDh)
+  138          //     LCD_WR_REG(0xED);   
+  139          //     LCD_WR_DATA(0x64); 
+  140          //     LCD_WR_DATA(0x03); 
+  141          //     LCD_WR_DATA(0x12); 
+  142          //     LCD_WR_DATA(0x81); 
+  143          
+  144          //     // Driver timing control A (E8h)
+  145          //     LCD_WR_REG(0xE8);
+  146          //     LCD_WR_DATA(0x85); 
+  147          //     LCD_WR_DATA(0x01); 
+  148          //     LCD_WR_DATA(0x79); 
+  149          
+  150          //     // Driver timing control B (EAh)
+  151          //     LCD_WR_REG(0xEA);
+  152          //     LCD_WR_DATA(0x00); 
+  153          //     LCD_WR_DATA(0x00); 
+  154          
+  155          //     // Power on Sequence control (CBh)
+  156          //     LCD_WR_REG(0xCB);
+  157          //     LCD_WR_DATA(0x39); 
+  158          //     LCD_WR_DATA(0x2C); 
+  159          //     LCD_WR_DATA(0x00); 
+  160          //     LCD_WR_DATA(0x34); 
+  161          //     LCD_WR_DATA(0x02); 
+  162          
+  163          //     // Pump ratio control (F7h)
+  164          //     LCD_WR_REG(0xF7);
+  165          //     LCD_WR_DATA(0x20); 
+  166          
+  167          //     // --- ï¿½ï¿½ï¿½Äµï¿½Ô´ï¿½ï¿½ VCOM ï¿½ï¿½ï¿½ï¿½ ---
+  168              
+  169          //     // Power Control 1 (C0h) - ï¿½ï¿½ï¿½ï¿½ GVDD (Voltage)
+  170          //     LCD_WR_REG(0xC0);   
+  171          //     LCD_WR_DATA(0x23);  // VRH[5:0] = 3.6V (ï¿½ï¿½ï¿½ï¿½Öµ)
+  172          
+  173          //     // Power Control 2 (C1h) - ï¿½ï¿½ï¿½ï¿½ AVDD/VCL/VGH/VGL
+  174          //     LCD_WR_REG(0xC1);   
+  175          //     LCD_WR_DATA(0x10);  // SAP[2:0];BT[3:0]
+  176          
+  177          //     // VCOM Control 1 (C5h) - ï¿½ï¿½ï¿½ï¿½ VCOM ï¿½ï¿½Ñ¹ (VCM)
+  178          //     LCD_WR_REG(0xC5);   
+  179          //     LCD_WR_DATA(0x3E);  // VCOM = 4.25V (ï¿½ï¿½ï¿½ï¿½Öµ 1)
+  180          //     LCD_WR_DATA(0x28);  // VCOM = 3.7V (ï¿½ï¿½ï¿½ï¿½Öµ 2)
+  181          
+  182          //     // VCOM Control 2 (C7h) - ï¿½ï¿½ï¿½ï¿½ VCOM AC/DC
+  183          //     LCD_WR_REG(0xC7);   
+  184          //     LCD_WR_DATA(0x86);  // VCOMH=VCOM_REG, VCML=VCOM_REG
+  185          
+  186          //     // --- ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ---
+  187          
+C251 COMPILER V5.60.0,  ili9341                                                            15/11/25  12:13:33  PAGE 4   
 
-  189   1          LCD_WR_REG(0xB1);  
-  190   1          LCD_WR_DATA(0x00); 
-  191   1          LCD_WR_DATA(0x18); 
-  192   1      
-  193   1          // Display Function Control (0xB6)
-  194   1          LCD_WR_REG(0xB6);  
-  195   1          LCD_WR_DATA(0x08); 
-  196   1          LCD_WR_DATA(0xA2); 
-  197   1          LCD_WR_DATA(0x27);
-  198   1      
-  199   1          // Sleep Out (0x11)
-  200   1          LCD_WR_REG(0x11);
-  201   1          system_delay_ms(120);
-  202   1      
-  203   1          // Display ON (0x29)
-  204   1          LCD_WR_REG(0x29); 
-  205   1      
-  206   1          // Ä¬ÈÏÇåÆÁÎªºÚÉ«
-  207   1          LCD_Clear(BLACK);
-  208   1      }
-  209          
+  188          //     // Memory Access Control (36h) - ï¿½ï¿½ï¿½ï¿½ GRAM É¨ï¿½è·½ï¿½ï¿½
+  189          //     // 0x48 (ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ 0x28 (ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ï¿½î³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+  190          //     LCD_WR_REG(0x36);   
+  191          //     LCD_WR_DATA(0x48); // B7:MY=0, B6:MX=1, B5:MV=0, B4:ML=0, B3:RGB=1 (RGB ï¿½ï¿½Ê½)
+  192          
+  193          //     // Pixel Format Set (3Ah) - ï¿½ï¿½ï¿½Ã½Ó¿ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½Ê½
+  194          //     // 0x55 = 16 bit/ï¿½ï¿½ï¿½ï¿½ (RGB565)
+  195          //     LCD_WR_REG(0x3A);   
+  196          //     LCD_WR_DATA(0x55); 
+  197          
+  198          //     // Frame Rate Control (B1h) - ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½
+  199          //     LCD_WR_REG(0xB1);   
+  200          //     LCD_WR_DATA(0x00); 
+  201          //     LCD_WR_DATA(0x18);  // 72Hz
+  202          
+  203          //     // Display Function Control (B6h)
+  204          //     LCD_WR_REG(0xB6);   
+  205          //     LCD_WR_DATA(0x08);  // 08h: ï¿½ï¿½Í¨Ä£Ê½
+  206          //     LCD_WR_DATA(0xA2); 
+  207          //     LCD_WR_DATA(0x27);
+  208          
+  209          //     // 3. ï¿½Ë³ï¿½Ë¯ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
   210          
-  211          // --- 5. »æÍ¼º¯ÊýÊµÏÖ ---
-  212          
-  213          // ÇåÆÁ
-  214          void LCD_Clear(unsigned int Color)
-  215          {
-  216   1          unsigned int i, j;
-  217   1          LCD_SetWindows(0, 0, LCD_W - 1, LCD_H - 1);
-  218   1          
-  219   1          LCD_CS_CLR;
-  220   1          LCD_DC_SET; // ÅúÁ¿Ð´ÈëÊý¾Ý£¬±£³ÖDC¸ßµçÆ½
-  221   1          
-  222   1          for(i = 0; i < LCD_H; i++)
-  223   1          {
-  224   2              for(j = 0; j < LCD_W; j++)
-  225   2              {
-  226   3                  // Ð´Èë¸ß°ËÎ»
-  227   3                  LCD_Writ_Bus(Color >> 8); 
-  228   3                  // Ð´ÈëµÍ°ËÎ»
-  229   3                  LCD_Writ_Bus(Color & 0xFF);
-  230   3              }
-  231   2          }
-  232   1          LCD_CS_SET;
-  233   1      }
-  234          
-  235          // »­µã
-  236          void LCD_DrawPoint(unsigned int x, unsigned int y, unsigned int color)
-  237          {
-  238   1          if(x >= LCD_W || y >= LCD_H) return;
-  239   1          
-  240   1          // ÉèÖÃµ¥¸öµãµÄ´°¿Ú
-  241   1          LCD_SetWindows(x, y, x, y);
-  242   1          // Ð´Èë16Î»ÑÕÉ«
-  243   1          LCD_WR_DATA_16Bit(color);
-  244   1      }
-  245          
-  246          // Ìî³ä¾ØÐÎ
-  247          void LCD_Fill(unsigned int xsta, unsigned int ysta, unsigned int xend, unsigned int yend, unsigned int co
-             -lor)
-  248          {
-  249   1          unsigned int i, j;
-  250   1          unsigned int total_points = (xend - xsta + 1) * (yend - ysta + 1);
-  251   1      
-  252   1          if(xend >= LCD_W || yend >= LCD_H) return;
-  253   1          
-C251 COMPILER V5.60.0,  ili9341                                                            12/11/25  22:38:34  PAGE 5   
+  211          //     // Sleep Out (11h) - ï¿½Ë³ï¿½Ë¯ï¿½ï¿½Ä£Ê½
+  212          //     LCD_WR_REG(0x11);
+  213          //     system_delay_ms(120); // ï¿½ï¿½ï¿½ï¿½È´ï¿½ 120ms ï¿½ï¿½ï¿½ï¿½
+  214          
+  215          //     // Display ON (29h) - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
+  216          //     LCD_WR_REG(0x29); 
+  217              
+  218          //     // Ä¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+  219          //     // LCD_Clear(BLACK);
+  220          // }
+  221          
+  222          // // --- 5. ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ ---
+  223          
+  224          // // ï¿½ï¿½ï¿½ï¿½
+  225          // void LCD_Clear(unsigned int Color)
+  226          // {
+  227          //     unsigned int i;
+  228          //     unsigned long total_points = (unsigned long)LCD_W * LCD_H;
+  229          
+  230          //     LCD_SetWindows(0, 0, LCD_W - 1, LCD_H - 1);
+  231              
+  232          //     LCD_CS_CLR;
+  233          //     LCD_DC_SET; // ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½DCï¿½ßµï¿½Æ½
+  234              
+  235          //     for(i = 0; i < total_points; i++)
+  236          //     {
+  237          //         // Ð´ï¿½ï¿½ß°ï¿½Î»ï¿½ÍµÍ°ï¿½Î»
+  238          //         LCD_Writ_Bus(Color >> 8); 
+  239          //         LCD_Writ_Bus(Color & 0xFF);
+  240          //     }
+  241          //     LCD_CS_SET;
+  242          // }
+  243          
+  244          // // ï¿½ï¿½ï¿½ï¿½
+  245          // void LCD_DrawPoint(unsigned int x, unsigned int y, unsigned int color)
+  246          // {
+  247          //     if(x >= LCD_W || y >= LCD_H) return;
+  248              
+  249          //     // ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½
+  250          //     LCD_SetWindows(x, y, x, y);
+  251          //     // Ð´ï¿½ï¿½16Î»ï¿½ï¿½É«
+  252          //     LCD_WR_DATA_16Bit(color);
+  253          // }
+C251 COMPILER V5.60.0,  ili9341                                                            15/11/25  12:13:33  PAGE 5   
 
-  254   1          LCD_SetWindows(xsta, ysta, xend, yend);
-  255   1          
-  256   1          LCD_CS_CLR;
-  257   1          LCD_DC_SET; // ÅúÁ¿Ð´ÈëÊý¾Ý£¬±£³ÖDC¸ßµçÆ½
-  258   1      
-  259   1          for(i = 0; i < total_points; i++)
-  260   1          {
-  261   2              // Ð´Èë¸ß°ËÎ»
-  262   2              LCD_Writ_Bus(color >> 8); 
-  263   2              // Ð´ÈëµÍ°ËÎ»
-  264   2              LCD_Writ_Bus(color & 0xFF);
-  265   2          }
-  266   1          LCD_CS_SET;
-  267   1      }
-*** WARNING C47 IN LINE 249 OF ..\Hardware\ili9341.c: 'j': unreferenced local variable
+  254          
+  255          // // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+  256          // void LCD_Fill(unsigned int xsta, unsigned int ysta, unsigned int xend, unsigned int yend, unsigned int
+             - color)
+  257          // {
+  258          //     unsigned long i;
+  259          //     unsigned long total_points = (unsigned long)(xend - xsta + 1) * (yend - ysta + 1);
+  260          
+  261          //     if(xend >= LCD_W || yend >= LCD_H) return;
+  262              
+  263          //     LCD_SetWindows(xsta, ysta, xend, yend);
+  264              
+  265          //     LCD_CS_CLR;
+  266          //     LCD_DC_SET; // ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½DCï¿½ßµï¿½Æ½
+  267          
+  268          //     for(i = 0; i < total_points; i++)
+  269          //     {
+  270          //         // Ð´ï¿½ï¿½ß°ï¿½Î»
+  271          //         LCD_Writ_Bus(color >> 8); 
+  272          //         // Ð´ï¿½ï¿½Í°ï¿½Î»
+  273          //         LCD_Writ_Bus(color & 0xFF);
+  274          //     }
+  275          //     LCD_CS_SET;
+  276          // }
+*** WARNING C38 IN LINE 276 OF ..\Hardware\ili9341.c: empty translation unit
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       620     ------
+  code size            =    ------     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
   pdata size           =    ------     ------
-  xdata size           =    ------          8
+  xdata size           =    ------     ------
   xdata-const size     =    ------     ------
   edata size           =    ------     ------
   bit size             =    ------     ------
@@ -310,4 +320,4 @@ Module Information          Static   Overlayable
 End of Module Information.
 
 
-C251 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)
+C251 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

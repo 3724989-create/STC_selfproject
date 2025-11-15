@@ -795,9 +795,9 @@
           <GroupName>Hardware</GroupName>
           <Files>
             <File>
-              <FileName>ili9341.c</FileName>
+              <FileName>IIC.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Hardware\ili9341.c</FilePath>
+              <FilePath>..\Hardware\IIC.c</FilePath>
             </File>
           </Files>
         </Group>

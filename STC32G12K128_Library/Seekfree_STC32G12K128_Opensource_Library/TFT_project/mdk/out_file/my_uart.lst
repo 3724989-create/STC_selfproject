@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  22:24:45  PAGE 1   
+C251 COMPILER V5.60.0,  my_uart                                                            15/11/25  23:14:56  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE my_uart
@@ -21,69 +21,69 @@ stmt  level    source
     8          
     9          fifo_struct uart_data_fifo = {0};
    10          
-   11          void uart_rx_interrupt_handler (uint8 dat)
-   12          {
-   13   1      //    get_data = uart_read_byte(UART_INDEX);                                      // 接收数据 while �
-             -��待式 不建议在中断使用
-   14   1          uart_query_byte(UART_INDEX, &dat);                                     // 接收数据 查询式 有�
-             -��据会返回 TRUE 没有数据会返回 FALSE
-   15   1          fifo_write_buffer(&uart_data_fifo, &dat, 1);                           // 将数据写入 fifo 中
-   16   1      }
-   17          
-   18          
-   19          void self_UART_init()
-   20          {
-   21   1          fifo_init(&uart_data_fifo, FIFO_DATA_8BIT, uart_get_data, 64);              // 初始化 fifo 挂载�
+   11          // 重定向 printf 到串口
+   12          
+   13           void uart_rx_interrupt_handler (uint8 dat)
+   14           {
+   15   1       //    get_data = uart_read_byte(UART_INDEX);                                      // 接收数据 while 
+             -等待式 不建议在中断使用
+   16   1           uart_query_byte(UART_INDEX, &dat);                                     // 接收数据 查询式 有
+             -数据会返回 TRUE 没有数据会返回 FALSE
+   17   1           fifo_write_buffer(&uart_data_fifo, &dat, 1);                           // 将数据写入 fifo 中
+   18   1       }
+   19          
+   20          void self_UART_init()
+   21          {
+   22   1          fifo_init(&uart_data_fifo, FIFO_DATA_8BIT, uart_get_data, 64);              // 初始化 fifo 挂载�
              -��冲区
-   22   1      
-   23   1          uart_init(UART_INDEX, UART_BAUDRATE, UART_TX_PIN, UART_RX_PIN);             // 初始化串口
-   24   1          
-   25   1              // UART1的中断优先级不能设置，为最低优先级值0
-   26   1              uart_rx_interrupt(UART_INDEX, ZF_ENABLE);                                   // 开启 UART_INDEX 的接�
+   23   1      
+   24   1          uart_init(UART_INDEX, UART_BAUDRATE, UART_TX_PIN, UART_RX_PIN);             // 初始化串口
+   25   1          
+   26   1              // UART1的中断优先级不能设置，为最低优先级值0
+   27   1              uart_rx_interrupt(UART_INDEX, ZF_ENABLE);                                   // 开启 UART_INDEX 的接�
              -��中断
-   27   1          
-   28   1      
-   29   1              // 设置中断回调函数
-   30   1              uart1_irq_handler = uart_rx_interrupt_handler;
-   31   1              
+   28   1          
+   29   1      
+   30   1              // 设置中断回调函数
+   31   1              uart1_irq_handler = uart_rx_interrupt_handler;
    32   1              
-   33   1              uart_write_string(UART_INDEX, "UART Text.");                                // 输出测试信息
-   34   1          uart_write_byte(UART_INDEX, '\r');                                          // 输出回车
-   35   1          uart_write_byte(UART_INDEX, '\n');                                          // 输出换行
-   36   1      
-   37   1      }
-   38          
-   39          void self_UART_process()
-   40          {
-   41   1              // fifo_data_count = fifo_used(&uart_data_fifo);                           // 查看 fifo 是否�
-             -��数据
-   42   1              // if(fifo_data_count != 0)                                                // 读取到数据了
-   43   1              // {
-   44   1              //    fifo_read_buffer(&uart_data_fifo, fifo_get_data, &fifo_data_count, FIFO_READ_AND_CLEAN);   
-             - // 将 fifo 中数据读出并清空 fifo 挂载的缓冲
-   45   1              //    uart_write_string(UART_INDEX, "UART get data:");                     // 输出测试信息
-   46   1              //    uart_write_buffer(UART_INDEX, fifo_get_data, (uint16)fifo_data_count);       // 将读取�
-             -�的数据发送出去
-   47   1              //    uart_write_string(UART_INDEX, "\r\n");                               // 输出测试信息
-   48   1              // }
-C251 COMPILER V5.60.0,  my_uart                                                            12/11/25  22:24:45  PAGE 2   
+   33   1              
+   34   1              uart_write_string(UART_INDEX, "UART Text.");                                // 输出测试信息
+   35   1          uart_write_byte(UART_INDEX, '\r');                                          // 输出回车
+   36   1          uart_write_byte(UART_INDEX, '\n');                                          // 输出换行
+   37   1      
+   38   1      }
+   39          
+   40          void self_UART_process()
+   41          {
+   42   1               fifo_data_count = fifo_used(&uart_data_fifo);                           // 查看 fifo 是否有
+             -数据
+   43   1               if(fifo_data_count != 0)                                                // 读取到数据了
+   44   1               {
+   45   2                  fifo_read_buffer(&uart_data_fifo, fifo_get_data, &fifo_data_count, FIFO_READ_AND_CLEAN);    /
+             -/ 将 fifo 中数据读出并清空 fifo 挂载的缓冲
+   46   2                  uart_write_string(UART_INDEX, "UART get data:");                     // 输出测试信息
+   47   2                  uart_write_buffer(UART_INDEX, fifo_get_data, (uint16)fifo_data_count);       // 将读取到�
+             -��数据发送出去
+   48   2                  uart_write_string(UART_INDEX, "\r\n");                               // 输出测试信息
+C251 COMPILER V5.60.0,  my_uart                                                            15/11/25  23:14:56  PAGE 2   
 
-   49   1              uint32 time=0;
-   50   1      
-   51   1              time=pit_read();
-   52   1              printf("the time now is:%d",time);
-   53   1              printf("\r\n");
-   54   1      
-   55   1              system_delay_ms(1000);
-   56   1              // 此处编写需要循环执行的
-   57   1      }
-   58          
-*** WARNING C183 IN LINE 49 OF ..\code\my_uart.c: dead assignment eliminated
+   49   2               }
+   50   1              //uint32 time=0;
+   51   1      
+   52   1              //time=pit_read();
+   53   1              // printf("IIC data test");
+   54   1              // printf("\r\n");
+   55   1              
+   56   1              system_delay_ms(1000);
+   57   1              // 此处编写需要循环执行的
+   58   1      }
+   59          
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       208     ------
+  code size            =       301     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
@@ -98,8 +98,8 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =       208     ------
+  hconst size          =       204     ------
 End of Module Information.
 
 
-C251 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

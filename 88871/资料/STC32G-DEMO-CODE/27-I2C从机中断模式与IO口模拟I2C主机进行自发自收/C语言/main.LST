@@ -1,0 +1,444 @@
+C251 COMPILER V5.60.0,  main                                                               15/11/25  12:43:48  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE main.c XSMALL INTR2 BROWSE DEBUG
+
+stmt  level    source
+
+    1          /*---------------------------------------------------------------------*/
+    2          /* --- STC MCU Limited ------------------------------------------------*/
+    3          /* --- STC 1T Series MCU Demo Programme -------------------------------*/
+    4          /* --- Mobile: (86)13922805190 ----------------------------------------*/
+    5          /* --- Fax: 86-0513-55012956,55012947,55012969 ------------------------*/
+    6          /* --- Tel: 86-0513-55012928,55012929,55012966 ------------------------*/
+    7          /* --- Web: www.STCAI.com ---------------------------------------------*/
+    8          /* --- BBS: www.STCAIMCU.com  -----------------------------------------*/
+    9          /* --- QQ:  800003751 -------------------------------------------------*/
+   10          /* Èç¹ûÒªÔÚ³ÌÐòÖÐÊ¹ÓÃ´Ë´úÂë,ÇëÔÚ³ÌÐòÖÐ×¢Ã÷Ê¹ÓÃÁËSTCµÄ×ÊÁÏ¼°³ÌÐò            */
+   11          /*---------------------------------------------------------------------*/
+   12          
+   13          /*************  ¹¦ÄÜËµÃ÷    **************
+   14          
+   15          ±¾Àý³Ì»ùÓÚSTC32GÎªÖ÷¿ØÐ¾Æ¬µÄÊµÑéÏä½øÐÐ±àÐ´²âÊÔ¡£
+   16          
+   17          Ê¹ÓÃKeil C251±àÒëÆ÷£¬Memory ModelÍÆ¼öÉèÖÃXSmallÄ£Ê½£¬Ä¬ÈÏ¶¨Òå±äÁ¿ÔÚedata£¬µ¥Ê±ÖÓ´æÈ¡·ÃÎÊËÙ¶È¿ì¡£
+   18          
+   19          edata½¨Òé±£Áô1K¸ø¶ÑÕ»Ê¹ÓÃ£¬¿Õ¼ä²»¹»Ê±¿É½«´óÊý×é¡¢²»³£ÓÃ±äÁ¿¼Óxdata¹Ø¼ü×Ö¶¨Òåµ½xdata¿Õ¼ä¡£
+   20          
+   21          ÄÚ²¿¼¯³ÉI2C´®ÐÐ×ÜÏß¿ØÖÆÆ÷×ö´Ó»úÄ£Ê½£¬SCL->P3.2, SDA->P3.3;
+   22          IO¿ÚÄ£ÄâI2C×öÖ÷»úÄ£Ê½£¬SCL->P0.0, SDA->P0.1;
+   23          Í¨¹ýÍâ²¿·ÉÏßÁ¬½Ó P0.0->P3.2, P0.1->P3.3£¬ÊµÏÖI2C×Ô·¢×ÔÊÕ¹¦ÄÜ¡£
+   24          
+   25          ÓÃSTCµÄMCUµÄIO·½Ê½Çý¶¯8Î»ÊýÂë¹Ü¡£
+   26          Ê¹ÓÃTimer0µÄ16Î»×Ô¶¯ÖØ×°À´²úÉú1ms½ÚÅÄ,³ÌÐòÔËÐÐÓÚÕâ¸ö½ÚÅÄÏÂ,ÓÃ»§ÐÞ¸ÄMCUÖ÷Ê±ÖÓÆµÂÊÊ±,×Ô¶¯¶¨Ê±ÓÚ1ms.
+   27          ¼ÆÊýÆ÷Ã¿ÃëÖÓ¼Ó1, ¼ÆÊý·¶Î§Îª0~9999.
+   28          
+   29          ÏÔÊ¾Ð§¹ûÎª: ÉÏµçºóÖ÷»úÃ¿ÃëÖÓ·¢ËÍÒ»´Î¼ÆÊýÊý¾Ý£¬²¢ÔÚ×ó±ß4¸öÊýÂë¹ÜÉÏÏÔÊ¾·¢ËÍÄÚÈÝ£»´Ó»ú½ÓÊÕµ½Êý¾ÝºóÔÚÓÒ±ß4¸öÊ
+             -ýÂë¹ÜÏÔÊ¾¡£
+   30          
+   31          ÏÂÔØÊ±, Ñ¡ÔñÊ±ÖÓ 24MHz (ÓÃ»§¿É×ÔÐÐÐÞ¸ÄÆµÂÊ).
+   32          
+   33          ******************************************/
+   34          
+   35          #include "..\..\comm\STC32G.h"
+   36          
+   37          #include "stdio.h"
+   38          #include "intrins.h"
+   39          
+   40          typedef         unsigned char   u8;
+   41          typedef         unsigned int    u16;
+   42          typedef         unsigned long   u32;
+   43          
+   44          #define MAIN_Fosc        24000000UL
+   45          
+   46          /****************************** ÓÃ»§¶¨Òåºê ***********************************/
+   47          
+   48          #define Timer0_Reload   (65536UL -(MAIN_Fosc / 1000))       //Timer 0 ÖÐ¶ÏÆµÂÊ, 1000´Î/Ãë
+   49          
+   50          #define DIS_DOT     0x20
+   51          #define DIS_BLACK   0x10
+   52          #define DIS_        0x11
+   53          
+   54          /*****************************************************************************/
+   55          
+   56          #define SLAW    0x5A
+   57          #define SLAR    0x5B
+   58          
+C251 COMPILER V5.60.0,  main                                                               15/11/25  12:43:48  PAGE 2   
+
+   59          sbit    SDA = P0^1; //¶¨ÒåSDA
+   60          sbit    SCL = P0^0; //¶¨ÒåSCL
+   61          
+   62          
+   63          /*************  ±¾µØ³£Á¿ÉùÃ÷    **************/
+   64          u8 code t_display[]={                       //±ê×¼×Ö¿â
+   65          //   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+   66              0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71,
+   67          //black  -     H    J    K    L    N    o   P    U     t    G    Q    r   M    y
+   68              0x00,0x40,0x76,0x1E,0x70,0x38,0x37,0x5C,0x73,0x3E,0x78,0x3d,0x67,0x50,0x37,0x6e,
+   69              0xBF,0x86,0xDB,0xCF,0xE6,0xED,0xFD,0x87,0xFF,0xEF,0x46};    //0. 1. 2. 3. 4. 5. 6. 7. 8. 9. -1
+   70          
+   71          u8 code T_COM[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};      //Î»Âë
+   72          
+   73          /*************  ±¾µØ±äÁ¿ÉùÃ÷    **************/
+   74          
+   75          u8  LED8[8];        //ÏÔÊ¾»º³å
+   76          u8  display_index;  //ÏÔÊ¾Î»Ë÷Òý
+   77          
+   78          bit isda;                                       //Éè±¸µØÖ·±êÖ¾
+   79          bit isma;                                       //´æ´¢µØÖ·±êÖ¾
+   80          bit B_1ms;          //1ms±êÖ¾
+   81          bit DisplayFlag;
+   82          u8 addr;
+   83          u8 edata buffer[32];
+   84          u16 msecond;
+   85          u16 Test_cnt;   //²âÊÔÓÃµÄÃë¼ÆÊý±äÁ¿
+   86          u8  tmp[4];     //Í¨ÓÃÊý×é
+   87          
+   88          void Timer0_config(void);
+   89          void WriteNbyte(u8 addr, u8 *p, u8 number);
+   90          void ReadNbyte(u8 addr, u8 *p, u8 number);
+   91          
+   92          
+   93          void I2C_Isr() interrupt I2C_VECTOR
+   94          {
+   95   1          if (I2CSLST & STAIF)
+   96   1          {
+   97   2              I2CSLST &= ~STAIF;                      //´¦ÀíSTARTÊÂ¼þ
+   98   2          }
+   99   1          else if (I2CSLST & RXIF)
+  100   1          {
+  101   2              I2CSLST &= ~RXIF;                       //´¦ÀíRECVÊÂ¼þ£¬SLACKOÉèÖÃÎª0
+  102   2              if (isda)
+  103   2              {
+  104   3                  isda = 0;                           //´¦ÀíRECVÊÂ¼þ£¨RECV DEVICE ADDR£©
+  105   3              }
+  106   2              else if (isma)
+  107   2              {
+  108   3                  isma = 0;                           //´¦ÀíRECVÊÂ¼þ£¨RECV MEMORY ADDR£©
+  109   3                  addr = I2CRXD;
+  110   3                  I2CTXD = buffer[addr];
+  111   3              }
+  112   2              else
+  113   2              {
+  114   3                  buffer[addr++] = I2CRXD;            //´¦ÀíRECVÊÂ¼þ£¨RECV DATA£©
+  115   3              }
+  116   2          }
+  117   1          else if (I2CSLST & TXIF)
+  118   1          {
+  119   2              I2CSLST &= ~TXIF;                       //´¦ÀíSENDÊÂ¼þ
+  120   2              if (I2CSLST & SLACKI)
+  121   2              {
+  122   3                  I2CTXD = 0xff;
+  123   3              }
+  124   2              else
+C251 COMPILER V5.60.0,  main                                                               15/11/25  12:43:48  PAGE 3   
+
+  125   2              {
+  126   3                  I2CTXD = buffer[++addr];
+  127   3              }
+  128   2          }
+  129   1          else if (I2CSLST & STOIF)
+  130   1          {
+  131   2              I2CSLST &= ~STOIF;                       //´¦ÀíSTOPÊÂ¼þ
+  132   2              isda = 1;
+  133   2              isma = 1;
+  134   2              DisplayFlag = 1;
+  135   2          }
+  136   1      }
+  137          
+  138          /********************* Ö÷º¯Êý *************************/
+  139          void main(void)
+  140          {
+  141   1          u8  i;
+  142   1      
+  143   1          WTST = 0;  //ÉèÖÃ³ÌÐòÖ¸ÁîÑÓÊ±²ÎÊý£¬¸³ÖµÎª0¿É½«CPUÖ´ÐÐÖ¸ÁîµÄËÙ¶ÈÉèÖÃÎª×î¿ì
+  144   1          EAXFR = 1; //À©Õ¹¼Ä´æÆ÷(XFR)·ÃÎÊÊ¹ÄÜ
+  145   1          CKCON = 0; //Ìá¸ß·ÃÎÊXRAMËÙ¶È
+  146   1      
+  147   1          P0M1 = 0x30;   P0M0 = 0x30;   //ÉèÖÃP0.4¡¢P0.5ÎªÂ©¼«¿ªÂ·(ÊµÑéÏä¼ÓÁËÉÏÀ­µç×èµ½3.3V)
+  148   1          P1M1 = 0x30;   P1M0 = 0x30;   //ÉèÖÃP1.4¡¢P1.5ÎªÂ©¼«¿ªÂ·(ÊµÑéÏä¼ÓÁËÉÏÀ­µç×èµ½3.3V)
+  149   1          P2M1 = 0x3c;   P2M0 = 0x3c;   //ÉèÖÃP2.2~P2.5ÎªÂ©¼«¿ªÂ·(ÊµÑéÏä¼ÓÁËÉÏÀ­µç×èµ½3.3V)
+  150   1          P3M1 = 0x54;   P3M0 = 0x50;   //ÉèÖÃP3.4¡¢P3.6ÎªÂ©¼«¿ªÂ·(ÊµÑéÏä¼ÓÁËÉÏÀ­µç×èµ½3.3V), SCLÉèÖÃÎªÊäÈë¿Ú£¬
+             -SDAÉèÖÃÎª×¼Ë«Ïò¿Ú
+  151   1          P4M1 = 0x3c;   P4M0 = 0x3c;   //ÉèÖÃP4.2~P4.5ÎªÂ©¼«¿ªÂ·(ÊµÑéÏä¼ÓÁËÉÏÀ­µç×èµ½3.3V)
+  152   1          P5M1 = 0x0c;   P5M0 = 0x0c;   //ÉèÖÃP5.2¡¢P5.3ÎªÂ©¼«¿ªÂ·(ÊµÑéÏä¼ÓÁËÉÏÀ­µç×èµ½3.3V)
+  153   1          P6M1 = 0xff;   P6M0 = 0xff;   //ÉèÖÃÎªÂ©¼«¿ªÂ·(ÊµÑéÏä¼ÓÁËÉÏÀ­µç×èµ½3.3V)
+  154   1          P7M1 = 0x00;   P7M0 = 0x00;   //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  155   1      
+  156   1          I2C_S1 =1;   //I2C¹¦ÄÜ½ÅÑ¡Ôñ£¬00:P1.5,P1.4; 01:P2.5,P2.4; 11:P3.2,P3.3
+  157   1          I2C_S0 =1;
+  158   1      
+  159   1          I2CCFG = 0x80;                              //Ê¹ÄÜI2C´Ó»úÄ£Ê½
+  160   1          I2CSLADR = 0x5a;                            //ÉèÖÃ´Ó»úÉè±¸µØÖ·Îª5A
+  161   1          I2CSLST = 0x00;
+  162   1          I2CSLCR = ESTAI | ERXI | ETXI | ESTOI;      //Ê¹ÄÜ´Ó»úÄ£Ê½ÖÐ¶Ï
+  163   1      
+  164   1          Timer0_config();
+  165   1          display_index = 0;
+  166   1          DisplayFlag = 0;
+  167   1      
+  168   1          isda = 1;                                   //ÓÃ»§±äÁ¿³õÊ¼»¯
+  169   1          isma = 1;
+  170   1          addr = 0;
+  171   1          I2CTXD = buffer[addr];
+  172   1          EA = 1;
+  173   1      
+  174   1          for(i=0; i<8; i++)  LED8[i] = DIS_; //ÉÏµçÈ«²¿ÏÔÊ¾-
+  175   1          
+  176   1          while (1)
+  177   1          {
+  178   2              if(DisplayFlag)
+  179   2              {
+  180   3                  DisplayFlag = 0;
+  181   3                  LED8[4] = buffer[0];
+  182   3                  LED8[5] = buffer[1];
+  183   3                  LED8[6] = buffer[2];
+  184   3                  LED8[7] = buffer[3];
+  185   3              }
+  186   2              
+  187   2              if(B_1ms)
+  188   2              {
+  189   3                  B_1ms = 0;
+C251 COMPILER V5.60.0,  main                                                               15/11/25  12:43:48  PAGE 4   
+
+  190   3                  
+  191   3                  if(++msecond >= 1000)   //1Ãëµ½
+  192   3                  {
+  193   4                      msecond = 0;        //Çå1000ms¼ÆÊý
+  194   4                      Test_cnt++;         //Ãë¼ÆÊý+1
+  195   4                      if(Test_cnt >= 10000)    Test_cnt = 0;   //Ãë¼ÆÊý·¶Î§Îª0~9999
+  196   4      
+  197   4                      tmp[0] = Test_cnt / 1000;
+  198   4                      tmp[1] = (Test_cnt % 1000) / 100;
+  199   4                      tmp[2] = (Test_cnt % 100) / 10;
+  200   4                      tmp[3] = Test_cnt % 10;
+  201   4                      LED8[0] = tmp[0];
+  202   4                      LED8[1] = tmp[1];
+  203   4                      LED8[2] = tmp[2];
+  204   4                      LED8[3] = tmp[3];
+  205   4      
+  206   4                      WriteNbyte(0, tmp, 4);
+  207   4                   }
+  208   3              }
+  209   2          }
+  210   1      }
+  211          
+  212          //========================================================================
+  213          // º¯Êý: void Timer0_config(void)
+  214          // ÃèÊö: Timer0³õÊ¼»¯º¯Êý¡£
+  215          // ²ÎÊý: ÎÞ.
+  216          // ·µ»Ø: ÎÞ.
+  217          // °æ±¾: V1.0, 2020-6-10
+  218          //========================================================================
+  219          void Timer0_config(void)
+  220          {
+  221   1          AUXR = 0x80;    //Timer0 set as 1T, 16 bits timer auto-reload, 
+  222   1          TH0 = (u8)(Timer0_Reload / 256);
+  223   1          TL0 = (u8)(Timer0_Reload % 256);
+  224   1          ET0 = 1;    //Timer0 interrupt enable
+  225   1          TR0 = 1;    //Tiner0 run
+  226   1      }
+  227          
+  228          /********************** ÏÔÊ¾É¨Ãèº¯Êý ************************/
+  229          void DisplayScan(void)
+  230          {   
+  231   1          P7 = ~T_COM[7-display_index];
+  232   1          P6 = ~t_display[LED8[display_index]];
+  233   1          if(++display_index >= 8)    display_index = 0;  //8Î»½áÊø»Ø0
+  234   1      }
+  235          
+  236          /********************** Timer0 1msÖÐ¶Ïº¯Êý ************************/
+  237          void timer0 (void) interrupt 1
+  238          {
+  239   1          DisplayScan();  //1msÉ¨ÃèÏÔÊ¾Ò»Î»
+  240   1          B_1ms = 1;      //1ms±êÖ¾
+  241   1      }
+  242          
+  243          /****************************/
+  244          void I2C_Delay(void) //for normal MCS51, delay (2 * dly + 4) T, for STC12Cxxxx delay (4 * dly + 10) T
+  245          {
+  246   1          u16  dly;
+  247   1          dly = MAIN_Fosc / 2000000UL;        //°´2us¼ÆËã
+  248   1          while(--dly);
+  249   1      }
+  250          
+  251          /****************************/
+  252          void I2C_Start(void)               //start the I2C, SDA High-to-low when SCL is high
+  253          {
+  254   1          SDA = 1;
+  255   1          I2C_Delay();
+C251 COMPILER V5.60.0,  main                                                               15/11/25  12:43:48  PAGE 5   
+
+  256   1          SCL = 1;
+  257   1          I2C_Delay();
+  258   1          SDA = 0;
+  259   1          I2C_Delay();
+  260   1          SCL = 0;
+  261   1          I2C_Delay();
+  262   1      }       
+  263          
+  264          void I2C_Stop(void)                 //STOP the I2C, SDA Low-to-high when SCL is high
+  265          {
+  266   1          SDA = 0;
+  267   1          I2C_Delay();
+  268   1          SCL = 1;
+  269   1          I2C_Delay();
+  270   1          SDA = 1;
+  271   1          I2C_Delay();
+  272   1      }
+  273          
+  274          void S_ACK(void)              //Send ACK (LOW)
+  275          {
+  276   1          SDA = 0;
+  277   1          I2C_Delay();
+  278   1          SCL = 1;
+  279   1          I2C_Delay();
+  280   1          SCL = 0;
+  281   1          I2C_Delay();
+  282   1      }
+  283          
+  284          void S_NoACK(void)           //Send No ACK (High)
+  285          {
+  286   1          SDA = 1;
+  287   1          I2C_Delay();
+  288   1          SCL = 1;
+  289   1          I2C_Delay();
+  290   1          SCL = 0;
+  291   1          I2C_Delay();
+  292   1      }
+  293                  
+  294          void I2C_Check_ACK(void)         //Check ACK, If F0=0, then right, if F0=1, then error
+  295          {
+  296   1          SDA = 1;
+  297   1          I2C_Delay();
+  298   1          SCL = 1;
+  299   1          I2C_Delay();
+  300   1          F0  = SDA;
+  301   1          SCL = 0;
+  302   1          I2C_Delay();
+  303   1      }
+  304          
+  305          /****************************/
+  306          void I2C_WriteAbyte(u8 dat)     //write a byte to I2C
+  307          {
+  308   1          u8 i;
+  309   1          i = 8;
+  310   1          do
+  311   1          {
+  312   2              if(dat & 0x80)  SDA = 1;
+  313   2              else            SDA = 0;
+  314   2              dat <<= 1;
+  315   2              I2C_Delay();
+  316   2              SCL = 1;
+  317   2              I2C_Delay();
+  318   2              SCL = 0;
+  319   2              I2C_Delay();
+  320   2          }
+  321   1          while(--i);
+C251 COMPILER V5.60.0,  main                                                               15/11/25  12:43:48  PAGE 6   
+
+  322   1      }
+  323          
+  324          /****************************/
+  325          u8 I2C_ReadAbyte(void)          //read A byte from I2C
+  326          {
+  327   1          u8 i,dat;
+  328   1          i = 8;
+  329   1          SDA = 1;
+  330   1          do
+  331   1          {
+  332   2              SCL = 1;
+  333   2              I2C_Delay();
+  334   2              dat <<= 1;
+  335   2              if(SDA)     dat++;
+  336   2              SCL  = 0;
+  337   2              I2C_Delay();
+  338   2          }
+  339   1          while(--i);
+  340   1          return(dat);
+  341   1      }
+  342          
+  343          /****************************/
+  344          void WriteNbyte(u8 addr, u8 *p, u8 number)          /*  WordAddress,First Data Address,Byte lenth   */
+  345                                                                      //F0=0,right, F0=1,error
+  346          {
+  347   1          I2C_Start();
+  348   1          I2C_WriteAbyte(SLAW);
+  349   1          I2C_Check_ACK();
+  350   1          if(!F0)
+  351   1          {
+  352   2              I2C_WriteAbyte(addr);
+  353   2              I2C_Check_ACK();
+  354   2              if(!F0)
+  355   2              {
+  356   3                  do
+  357   3                  {
+  358   4                      I2C_WriteAbyte(*p);     p++;
+  359   4                      I2C_Check_ACK();
+  360   4                      if(F0)  break;
+  361   4                  }
+  362   3                  while(--number);
+  363   3              }
+  364   2          }
+  365   1          I2C_Stop();
+  366   1      }
+  367          
+  368          /****************************/
+  369          void ReadNbyte(u8 addr, u8 *p, u8 number)       /*  WordAddress,First Data Address,Byte lenth   */
+  370          {
+  371   1          I2C_Start();
+  372   1          I2C_WriteAbyte(SLAW);
+  373   1          I2C_Check_ACK();
+  374   1          if(!F0)
+  375   1          {
+  376   2              I2C_WriteAbyte(addr);
+  377   2              I2C_Check_ACK();
+  378   2              if(!F0)
+  379   2              {
+  380   3                  I2C_Start();
+  381   3                  I2C_WriteAbyte(SLAR);
+  382   3                  I2C_Check_ACK();
+  383   3                  if(!F0)
+  384   3                  {
+  385   4                      do
+  386   4                      {
+  387   5                          *p = I2C_ReadAbyte();   p++;
+C251 COMPILER V5.60.0,  main                                                               15/11/25  12:43:48  PAGE 7   
+
+  388   5                          if(number != 1)     S_ACK();    //send ACK
+  389   5                      }
+  390   4                      while(--number);
+  391   4                      S_NoACK();          //send no ACK
+  392   4                  }
+  393   3              }
+  394   2          }
+  395   1          I2C_Stop();
+  396   1      }
+  397          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      1030     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =        50          4
+  bit size             =         4     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

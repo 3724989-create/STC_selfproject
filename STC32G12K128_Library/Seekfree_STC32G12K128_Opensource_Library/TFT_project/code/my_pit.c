@@ -42,6 +42,6 @@ uint32 pit_read(void)
 
 void pit_handler (void)
 {
-    //pit_state = 1;                                                              // 周期中断触发 标志位置位
+    pit_state = 1;                                                              // 周期中断触发 标志位置位
     systick_count++;
 }

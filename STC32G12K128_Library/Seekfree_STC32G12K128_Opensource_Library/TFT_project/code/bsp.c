@@ -30,6 +30,7 @@ void all_init(void)
     //用户初始化
     self_pit_init();
     self_UART_init();
+    IIC_intit();
 }
 
 

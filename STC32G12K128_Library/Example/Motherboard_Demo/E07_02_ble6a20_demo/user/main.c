@@ -61,7 +61,7 @@
 // 如果发现现象与说明严重不符 请参照本文件最下方 例程常见问题说明 进行排查
 
 // **************************** 代码区域 ****************************
-#define LED1                    (IO_P52 )
+#define LED1                    (IO_P34 )
 
 uint8 data_buffer[32];
 uint8 data_len;
@@ -89,6 +89,7 @@ void main()
     while(1)
     {
         // 此处编写需要循环执行的代码
+        gpio_set_level(LED1,0);
         data_len = ble6a20_read_buffer(data_buffer, 32);                            // 查看是否有消息 默认缓冲区是BLE6A20_BUFFER_SIZE 总共 64 字节
         if(data_len != 0)                                                           // 收到了消息 读取函数会返回实际读取到的数据个数
         {

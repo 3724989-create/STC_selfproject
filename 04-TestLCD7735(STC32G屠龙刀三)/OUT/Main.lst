@@ -1,0 +1,109 @@
+C251 COMPILER V5.60.0,  Main                                                               14/11/25  19:39:05  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE Main
+OBJECT MODULE PLACED IN .\OUT\Main.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE USER\Main.C SMALL INTR2 BROWSE INCDIR(.\USER) DEBUG PRINT(.\OUT\Main.lst) 
+                    -OBJECT(.\OUT\Main.obj) 
+
+stmt  level    source
+
+    1          //===========================================================
+    2          // OLED 1.8" 彩色显示屏 160*128 实验程序
+    3          // 驱动: ST7735 
+    4          // 基于: STC32G12K128芯片实验板编程 屠龙刀三核心实验板 
+    5          // 整理:编程: 浦晓明(浦江一水) For 国芯论坛 2024-06-04 PXM
+    6          //===========================================================
+    7          #include <stdio.h>
+    8          #include <stdlib.h>
+    9          #include <string.h>
+   10          #include "STC32G.h"
+   11          #include "LCD_7735.H"
+   12          #include "PIC.H"
+   13          
+   14          unsigned char k;
+   15          char S[20];
+   16          
+   17          void Delay1ms(void)     //@22.1184MHz
+   18          { unsigned char data i, j;
+   19   1      //_nop_();_nop_();
+   20   1              i = 22; j = 128;
+   21   1              do
+   22   1              {       while (--j);
+   23   2              } while (--i);
+   24   1      }
+   25          void Delayms(unsigned int count)
+   26          { unsigned int i;
+   27   1        for(i=0;i<count;i++)       
+   28   1        Delay1ms();             
+   29   1      }
+   30          //主程序入口
+   31          void main(void)
+   32          { unsigned char i;
+   33   1        unsigned int wait=0;
+   34   1        //IO端口初始化
+   35   1        WTST  = 0; //设置程序指令延时参数，赋值为0可将CPU执行指令的速度设置为最快
+   36   1        EAXFR = 1; //扩展寄存器(XFR)访问使能
+   37   1        CKCON = 0; //提高访问XRAM速度
+   38   1        //IO端口初始化//全部为双向口
+   39   1        P0M1 = 0x00;   P0M0 = 0x04;   //设置为准双向口: P0.2推挽输出控制背光
+   40   1        P1M1 = 0x00;   P1M0 = 0x00;   //设置为准双向口
+   41   1        P2M1 = 0x00;   P2M0 = 0x00;   //设置为准双向口
+   42   1        P3M1 = 0x00;   P3M0 = 0x00;   //设置为准双向口
+   43   1        P4M1 = 0x00;   P4M0 = 0x00;   //设置为准双向口
+   44   1        P5M1 = 0x00;   P5M0 = 0x00;   //设置为准双向口
+   45   1        LCD_Init();
+   46   1        while(1)
+   47   1        {  
+   48   2          LCD_CLS(1);             //蓝色清屏
+   49   2                LCD_Point(5,5,15);      //画点测试 
+   50   2                LCD_LineH(5,8,50,10);   //画水平线
+   51   2                LCD_LineV(5,8,50,10);   //画垂直线
+   52   2                LCD_Line(5,8,55,58,12); //两点一线
+   53   2                LCD_Box(10,95,100,28,15,0,4);         //画矩形方框(可指定边框色和填充色)
+   54   2                LCD_A08(20,15,"A08_012345",15,1,10);  //显示6*8字符串
+   55   2                LCD_A12(20,30,"A12_012345",15,1,10);  //显示8*12字符串
+   56   2                LCD_A16(20,45,"A16_012345",15,1,10);  //显示8*16字符串
+   57   2                LCD_A24(20,64,"A24_0123",15,1,8);     //显示12*24字符串
+   58   2                LCD_H16(24,102,"单片机STC",14,4);     //16点阵中西文混合显示字符串 
+C251 COMPILER V5.60.0,  Main                                                               14/11/25  19:39:05  PAGE 2   
+
+   59   2                LCD_H24( 8,130,"单片机STC",12,1);     //24点阵中西文混合显示字符串
+   60   2          Delayms(2000); 
+   61   2                LCD_Box(0,130,127,28,1,1,1);          //局部清屏
+   62   2          LCD_BMP( 0, 5,64,64,P_SET);           //彩色图标显示
+   63   2          LCD_BMP(64, 5,64,64,P_ZER);
+   64   2          LCD_BMP( 0,69,64,64,P_XSW);
+   65   2          LCD_BMP(64,69,64,64,P_SYS);
+   66   2                LCD_A16(0,140,"LCD_ST7735_DEMO.",10,0,16);
+   67   2          Delayms(2000);
+   68   2          LCD_CLS(0);
+   69   2          for(i=0;i<16;i++)LCD_Box(0, i*10,63,10,7,7,i);          //显示彩色条(色号0..15)
+   70   2          for(i=0;i<16;i++)LCD_Box(64,i*10,63,10,7,7,(unsigned char)(i+16)); //显示彩色条(色号16..31)
+   71   2          Delayms(2000);          //
+   72   2        }
+   73   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =     33350     ------
+  ecode size           =    ------     ------
+  data size            =        21     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        69     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

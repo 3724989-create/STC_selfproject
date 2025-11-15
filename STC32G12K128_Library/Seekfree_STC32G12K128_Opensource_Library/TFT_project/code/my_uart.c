@@ -8,13 +8,14 @@ uint32      fifo_data_count = 0;                                                
 
 fifo_struct uart_data_fifo = {0};
 
-void uart_rx_interrupt_handler (uint8 dat)
-{
-//    get_data = uart_read_byte(UART_INDEX);                                      // 接收数据 while 等待式 不建议在中断使用
-    uart_query_byte(UART_INDEX, &dat);                                     // 接收数据 查询式 有数据会返回 TRUE 没有数据会返回 FALSE
-    fifo_write_buffer(&uart_data_fifo, &dat, 1);                           // 将数据写入 fifo 中
-}
+// 重定向 printf 到串口
 
+ void uart_rx_interrupt_handler (uint8 dat)
+ {
+ //    get_data = uart_read_byte(UART_INDEX);                                      // 接收数据 while 等待式 不建议在中断使用
+     uart_query_byte(UART_INDEX, &dat);                                     // 接收数据 查询式 有数据会返回 TRUE 没有数据会返回 FALSE
+     fifo_write_buffer(&uart_data_fifo, &dat, 1);                           // 将数据写入 fifo 中
+ }
 
 void self_UART_init()
 {
@@ -38,20 +39,20 @@ void self_UART_init()
 
 void self_UART_process()
 {
-        // fifo_data_count = fifo_used(&uart_data_fifo);                           // 查看 fifo 是否有数据
-        // if(fifo_data_count != 0)                                                // 读取到数据了
-        // {
-        //    fifo_read_buffer(&uart_data_fifo, fifo_get_data, &fifo_data_count, FIFO_READ_AND_CLEAN);    // 将 fifo 中数据读出并清空 fifo 挂载的缓冲
-        //    uart_write_string(UART_INDEX, "UART get data:");                     // 输出测试信息
-        //    uart_write_buffer(UART_INDEX, fifo_get_data, (uint16)fifo_data_count);       // 将读取到的数据发送出去
-        //    uart_write_string(UART_INDEX, "\r\n");                               // 输出测试信息
-        // }
-        uint32 time=0;
+         fifo_data_count = fifo_used(&uart_data_fifo);                           // 查看 fifo 是否有数据
+         if(fifo_data_count != 0)                                                // 读取到数据了
+         {
+            fifo_read_buffer(&uart_data_fifo, fifo_get_data, &fifo_data_count, FIFO_READ_AND_CLEAN);    // 将 fifo 中数据读出并清空 fifo 挂载的缓冲
+            uart_write_string(UART_INDEX, "UART get data:");                     // 输出测试信息
+            uart_write_buffer(UART_INDEX, fifo_get_data, (uint16)fifo_data_count);       // 将读取到的数据发送出去
+            uart_write_string(UART_INDEX, "\r\n");                               // 输出测试信息
+         }
+        //uint32 time=0;
 
-        time=pit_read();
-        printf("the time now is:%d",time);
-        printf("\r\n");
-
+        //time=pit_read();
+        // printf("IIC data test");
+        // printf("\r\n");
+        
         system_delay_ms(1000);
         // 此处编写需要循环执行的
 }

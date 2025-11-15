@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  main                                                               12/11/25  22:24:46  PAGE 1   
+C251 COMPILER V5.60.0,  main                                                               15/11/25  23:22:08  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE main
@@ -12,40 +12,106 @@ stmt  level    source
     1          
     2          #include "bsp.h"
     3          
-    4          void main()
-    5          {
-    6   1      
-    7   1              all_init();
-    8   1              
-    9   1          while(1)
-   10   1          {
-   11   2              // ����Ϊ��ɫ
-   12   2              LCD_Clear(RED);
-   13   2              system_delay_ms(500);
-   14   2      
-   15   2              // ���һ����ɫ����
-   16   2              LCD_Fill(50, 50, 150, 150, BLUE);
-   17   2              system_delay_ms(500);
-   18   2      
-   19   2              // ����Ϊ��ɫ
-   20   2              LCD_Clear(GREEN);
-   21   2              system_delay_ms(500);
-   22   2      
-   23   2              // ����һ���׵�
-   24   2              LCD_DrawPoint(120, 160, WHITE);
-   25   2              system_delay_ms(500);
+    4          
+    5          
+    6          void main()
+    7          {
+    8   1          char tmp[4] = {0};
+    9   1          int Test_cnt = 0;
+   10   1          uint32 last_write_time = 0;
+   11   1          uint32 current_time = 0;
+   12   1          uint32 last_complete_test_time = 0;
+   13   1          unsigned char i = 0;
+   14   1          
+   15   1          all_init();
+   16   1          
+   17   1          uart_write_string(UART_INDEX, "========================================\r\n");
+   18   1          uart_write_string(UART_INDEX, "  I2C Full Duplex Communication Ready!\r\n");
+   19   1          uart_write_string(UART_INDEX, "========================================\r\n\r\n");
+   20   1          
+   21   1          Diagnose_SCL_Problem();
+   22   1          
+   23   1              // 准备从机测试数据
+   24   1          for(i = 0; i < 8; i++) {
+   25   2              i2c_slave_receive_buffer[i] = 0xC0 + i;
    26   2          }
-   27   1      }
+   27   1          slave_receive_count = 8;
+   28   1          printf("[Slave] Test data prepared: ");
+   29   1          for(i = 0; i < 8; i++) {
+   30   2              uart_send_hex_8bit(i2c_slave_receive_buffer[i]);
+   31   2              uart_write_byte(UART_INDEX, ' ');
+   32   2          }
+   33   1          printf("\r\n");
+   34   1      
+   35   1          
+   36   1          while(1)
+   37   1          {
+   38   2              current_time = pit_read();
+   39   2              
+   40   2              // 从机处理
+   41   2              I2C_Slave_Process();
+   42   2              // 每5秒执行一次完整测试
+   43   2              if(current_time - last_complete_test_time > 5000) {
+   44   3                  last_complete_test_time = current_time;
+   45   3                  
+   46   3                  gpio_toggle_level(LED1);
+   47   3                  
+   48   3                  printf("=== RUNNING COMPLETE I2C TEST ===\r\n");
+   49   3                  Enhanced_Complete_Test();
+   50   3              }
+   51   2      //        // 处理从机接收到的数据
+   52   2      //        if(slave_data_ready) {
+   53   2      //            printf("=== SLAVE DATA RECEIVED ===\r\n");
+   54   2      //            printf("Bytes: %d, Data: ", slave_receive_count);
+   55   2      //            for(i = 0; i < slave_receive_count; i++) {
+   56   2      //                uart_send_hex_8bit(i2c_slave_receive_buffer[i]);
+   57   2      //                uart_write_byte(UART_INDEX, ' ');
+C251 COMPILER V5.60.0,  main                                                               15/11/25  23:22:08  PAGE 2   
+
+   58   2      //            }
+   59   2      //            printf("\r\n");
+   60   2      //            slave_data_ready = 0;
+   61   2      //        }
+   62   2      //        
+   63   2      //        // 每3秒执行一次主机写入测试
+   64   2      //        if(current_time - last_write_time > 3000) {
+   65   2      //            last_write_time = current_time;
+   66   2      //            
+   67   2      //            Test_cnt++;
+   68   2      //            if(Test_cnt > 10000) Test_cnt = 0;
+   69   2      
+   70   2      //            tmp[0] = Test_cnt / 1000;
+   71   2      //            tmp[1] = (Test_cnt % 1000) / 100;
+   72   2      //            tmp[2] = (Test_cnt % 100) / 10;
+   73   2      //            tmp[3] = Test_cnt % 10;
+   74   2      //            
+   75   2      //            gpio_toggle_level(LED1);
+   76   2      //            
+   77   2      //            printf("=== MASTER WRITING DATA ===\r\n");
+   78   2      //            WriteNbyte(0x00, tmp, 4);
+   79   2      //        }
+   80   2      //        
+   81   2              // 每8秒执行一次完整通信测试
+   82   2      //        if(current_time - last_complete_test_time > 8000) {
+   83   2      //            last_complete_test_time = current_time;
+   84   2      //            Enhanced_Complete_Test();
+   85   2      //        }
+   86   2      //        
+   87   2              system_delay_ms(10);
+   88   2          }
+   89   1      }
+*** WARNING C183 IN LINE 9 OF ..\user\main.c: dead assignment eliminated
+*** WARNING C183 IN LINE 10 OF ..\user\main.c: dead assignment eliminated
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       123     ------
+  code size            =       306     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
   pdata size           =    ------     ------
-  xdata size           =    ------     ------
+  xdata size           =    ------          9
   xdata-const size     =    ------     ------
   edata size           =    ------     ------
   bit size             =    ------     ------
@@ -55,8 +121,8 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =         2     ------
+  hconst size          =       203     ------
 End of Module Information.
 
 
-C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C251 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)
