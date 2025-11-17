@@ -1,0 +1,266 @@
+C251 COMPILER V5.60.0,  main                                                               16/11/25  19:48:11  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE main.c XSMALL INTR2 BROWSE DEBUG
+
+stmt  level    source
+
+    1          /*---------------------------------------------------------------------*/
+    2          /* --- STC MCU Limited ------------------------------------------------*/
+    3          /* --- STC 1T Series MCU Demo Programme -------------------------------*/
+    4          /* --- Mobile: (86)13922805190 ----------------------------------------*/
+    5          /* --- Fax: 86-0513-55012956,55012947,55012969 ------------------------*/
+    6          /* --- Tel: 86-0513-55012928,55012929,55012966 ------------------------*/
+    7          /* --- Web: www.STCAI.com ---------------------------------------------*/
+    8          /* --- BBS: www.STCAIMCU.com  -----------------------------------------*/
+    9          /* --- QQ:  800003751 -------------------------------------------------*/
+   10          /* 如果要在程序中使用此代码,请在程序中注明使用了STC的资料及程序            */
+   11          /*---------------------------------------------------------------------*/
+   12          
+   13          /*************  功能说明    **************
+   14          
+   15          本例程基于STC32G为主控芯片的实验箱进行编写测试。
+   16          
+   17          使用Keil C251编译器，Memory Model推荐设置XSmall模式，默认定义变量在edata，单时钟存取访问速度快。
+   18          
+   19          edata建议保留1K给堆栈使用，空间不够时可将大数组、不常用变量加xdata关键字定义到xdata空间。
+   20          
+   21          高级PWM定时器 PWM5,PWM6,PWM7,PWM8 每个通道都可独立实现PWM输出.
+   22          
+   23          4个通道PWM根据需要设置对应输出口，可通过示波器观察输出的信号.
+   24          
+   25          PWM周期和占空比可以自定义设置，最高可达65535.
+   26          
+   27          下载时, 选择时钟 24MHz (用户可自行修改频率).
+   28          
+   29          ******************************************/
+   30          
+   31          #include "..\..\comm\STC32G.h"
+   32          
+   33          #include "stdio.h"
+   34          #include "intrins.h"
+   35          
+   36          typedef         unsigned char   u8;
+   37          typedef         unsigned int    u16;
+   38          typedef         unsigned long   u32;
+   39          
+   40          #define MAIN_Fosc        24000000UL
+   41          
+   42          /****************************** 用户定义宏 ***********************************/
+   43          
+   44          #define Timer0_Reload   (65536UL -(MAIN_Fosc / 1000))       //Timer 0 中断频率, 1000次/秒
+   45          
+   46          #define PWM5_0      0x00        //P2.0
+   47          #define PWM5_1      0x01        //P1.7
+   48          #define PWM5_2      0x02        //P0.0
+   49          #define PWM5_3      0x03        //P7.4
+   50          
+   51          #define PWM6_0      0x00        //P2.1
+   52          #define PWM6_1      0x04        //P5.4
+   53          #define PWM6_2      0x08        //P0.1
+   54          #define PWM6_3      0x0C        //P7.5
+   55          
+   56          #define PWM7_0      0x00        //P2.2
+   57          #define PWM7_1      0x10        //P3.3
+   58          #define PWM7_2      0x20        //P0.2
+   59          #define PWM7_3      0x30        //P7.6
+C251 COMPILER V5.60.0,  main                                                               16/11/25  19:48:11  PAGE 2   
+
+   60          
+   61          #define PWM8_0      0x00        //P2.3
+   62          #define PWM8_1      0x40        //P3.4
+   63          #define PWM8_2      0x80        //P0.3
+   64          #define PWM8_3      0xC0        //P7.7
+   65          
+   66          #define ENO5P       0x01
+   67          #define ENO6P       0x04
+   68          #define ENO7P       0x10
+   69          #define ENO8P       0x40
+   70          
+   71          /*****************************************************************************/
+   72          
+   73          
+   74          /*************  本地常量声明    **************/
+   75          
+   76          #define PWM_PERIOD  1023    //设置周期值
+   77          
+   78          /*************  本地变量声明    **************/
+   79          
+   80          bit B_1ms;          //1ms标志
+   81          
+   82          u16 PWM5_Duty;
+   83          u16 PWM6_Duty;
+   84          u16 PWM7_Duty;
+   85          u16 PWM8_Duty;
+   86          
+   87          bit PWM5_Flag;
+   88          bit PWM6_Flag;
+   89          bit PWM7_Flag;
+   90          bit PWM8_Flag;
+   91          
+   92          void UpdatePwm(void);
+   93          
+   94          /********************* 主函数 *************************/
+   95          void main(void)
+   96          {
+   97   1          WTST = 0;  //设置程序指令延时参数，赋值为0可将CPU执行指令的速度设置为最快
+   98   1          EAXFR = 1; //扩展寄存器(XFR)访问使能
+   99   1          CKCON = 0; //提高访问XRAM速度
+  100   1      
+  101   1          P0M1 = 0x30;   P0M0 = 0x30;   //设置P0.4、P0.5为漏极开路(实验箱加了上拉电阻到3.3V)
+  102   1          P1M1 = 0x30;   P1M0 = 0x30;   //设置P1.4、P1.5为漏极开路(实验箱加了上拉电阻到3.3V)
+  103   1          P2M1 = 0x3c;   P2M0 = 0x3c;   //设置P2.2~P2.5为漏极开路(实验箱加了上拉电阻到3.3V)
+  104   1          P3M1 = 0x50;   P3M0 = 0x50;   //设置P3.4、P3.6为漏极开路(实验箱加了上拉电阻到3.3V)
+  105   1          P4M1 = 0x3c;   P4M0 = 0x3c;   //设置P4.2~P4.5为漏极开路(实验箱加了上拉电阻到3.3V)
+  106   1          P5M1 = 0x0c;   P5M0 = 0x0c;   //设置P5.2、P5.3为漏极开路(实验箱加了上拉电阻到3.3V)
+  107   1          P6M1 = 0xff;   P6M0 = 0xff;   //设置为漏极开路(实验箱加了上拉电阻到3.3V)
+  108   1          P7M1 = 0x00;   P7M0 = 0x00;   //设置为准双向口
+  109   1      
+  110   1          PWM5_Flag = 0;
+  111   1          PWM6_Flag = 0;
+  112   1          PWM7_Flag = 0;
+  113   1          PWM8_Flag = 0;
+  114   1          
+  115   1          PWM5_Duty = 0;
+  116   1          PWM6_Duty = 256;
+  117   1          PWM7_Duty = 512;
+  118   1          PWM8_Duty = 1024;
+  119   1      
+  120   1          //  Timer0初始化
+  121   1          AUXR = 0x80;    //Timer0 set as 1T, 16 bits timer auto-reload, 
+  122   1          TH0 = (u8)(Timer0_Reload / 256);
+  123   1          TL0 = (u8)(Timer0_Reload % 256);
+  124   1          ET0 = 1;    //Timer0 interrupt enable
+  125   1          TR0 = 1;    //Tiner0 run
+C251 COMPILER V5.60.0,  main                                                               16/11/25  19:48:11  PAGE 3   
+
+  126   1      
+  127   1          PWMB_CCER1 = 0x00; //写 CCMRx 前必须先清零 CCxE 关闭通道
+  128   1          PWMB_CCER2 = 0x00;
+  129   1          PWMB_CCMR1 = 0x68; //通道模式配置
+  130   1          PWMB_CCMR2 = 0x68;
+  131   1          PWMB_CCMR3 = 0x68;
+  132   1          PWMB_CCMR4 = 0x68;
+  133   1          PWMB_CCER1 = 0x33; //配置通道输出使能和极性
+  134   1          PWMB_CCER2 = 0x33;
+  135   1      
+  136   1          PWMB_ARRH = (u8)(PWM_PERIOD >> 8); //设置周期时间
+  137   1          PWMB_ARRL = (u8)PWM_PERIOD;
+  138   1      
+  139   1          PWMB_ENO = 0x00;
+  140   1          PWMB_ENO |= ENO5P; //使能输出
+  141   1          PWMB_ENO |= ENO6P; //使能输出
+  142   1          PWMB_ENO |= ENO7P; //使能输出
+  143   1          PWMB_ENO |= ENO8P; //使能输出
+  144   1      
+  145   1          PWMB_PS = 0x00;    //高级 PWM 通道输出脚选择位
+  146   1          PWMB_PS |= PWM5_0; //选择 PWM5_0 通道
+  147   1          PWMB_PS |= PWM6_0; //选择 PWM6_0 通道
+  148   1          PWMB_PS |= PWM7_0; //选择 PWM7_0 通道
+  149   1          PWMB_PS |= PWM8_0; //选择 PWM8_0 通道
+  150   1      
+  151   1          PWMB_BKR = 0x80;   //使能主输出
+  152   1          PWMB_CR1 |= 0x81;  //使能ARR预装载，开始计时
+  153   1      
+  154   1          EA = 1;     //打开总中断
+  155   1      
+  156   1          while (1);
+  157   1      }
+  158          
+  159          /********************** Timer0 1ms中断函数 ************************/
+  160          void timer0(void) interrupt 1
+  161          {
+  162   1          if(!PWM5_Flag)
+  163   1          {
+  164   2              PWM5_Duty++;
+  165   2              if(PWM5_Duty > PWM_PERIOD) PWM5_Flag = 1;
+  166   2          }
+  167   1          else
+  168   1          {
+  169   2              PWM5_Duty--;
+  170   2              if(PWM5_Duty <= 0) PWM5_Flag = 0;
+  171   2          }
+  172   1      
+  173   1          if(!PWM6_Flag)
+  174   1          {
+  175   2              PWM6_Duty++;
+  176   2              if(PWM6_Duty > PWM_PERIOD) PWM6_Flag = 1;
+  177   2          }
+  178   1          else
+  179   1          {
+  180   2              PWM6_Duty--;
+  181   2              if(PWM6_Duty <= 0) PWM6_Flag = 0;
+  182   2          }
+  183   1      
+  184   1          if(!PWM7_Flag)
+  185   1          {
+  186   2              PWM7_Duty++;
+  187   2              if(PWM7_Duty > PWM_PERIOD) PWM7_Flag = 1;
+  188   2          }
+  189   1          else
+  190   1          {
+  191   2              PWM7_Duty--;
+C251 COMPILER V5.60.0,  main                                                               16/11/25  19:48:11  PAGE 4   
+
+  192   2              if(PWM7_Duty <= 0) PWM7_Flag = 0;
+  193   2          }
+  194   1      
+  195   1          if(!PWM8_Flag)
+  196   1          {
+  197   2              PWM8_Duty++;
+  198   2              if(PWM8_Duty > PWM_PERIOD) PWM8_Flag = 1;
+  199   2          }
+  200   1          else
+  201   1          {
+  202   2              PWM8_Duty--;
+  203   2              if(PWM8_Duty <= 0) PWM8_Flag = 0;
+  204   2          }
+  205   1          
+  206   1          UpdatePwm();
+  207   1      }
+  208          
+  209          //========================================================================
+  210          // 函数: UpdatePwm(void)
+  211          // 描述: 更新PWM占空比. 
+  212          // 参数: none.
+  213          // 返回: none.
+  214          // 版本: V1.0, 2012-11-22
+  215          //========================================================================
+  216          void UpdatePwm(void)
+  217          {
+  218   1          PWMB_CCR5H = (u8)(PWM5_Duty >> 8); //设置占空比时间
+  219   1          PWMB_CCR5L = (u8)(PWM5_Duty);
+  220   1          PWMB_CCR6H = (u8)(PWM6_Duty >> 8); //设置占空比时间
+  221   1          PWMB_CCR6L = (u8)(PWM6_Duty);
+  222   1          PWMB_CCR7H = (u8)(PWM7_Duty >> 8); //设置占空比时间
+  223   1          PWMB_CCR7L = (u8)(PWM7_Duty);
+  224   1          PWMB_CCR8H = (u8)(PWM8_Duty >> 8); //设置占空比时间
+  225   1          PWMB_CCR8L = (u8)(PWM8_Duty);
+  226   1      }
+  227          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       581     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =         8     ------
+  bit size             =         5     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

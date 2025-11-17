@@ -1,0 +1,158 @@
+C251 COMPILER V5.60.0,  main                                                               16/11/25  20:01:34  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN .\out_file\main.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\user\main.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE
+                    - INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\u
+                    -ser;..\code) DEBUG PRINT(.\out_file\main.lst) OBJECT(.\out_file\main.obj) 
+
+stmt  level    source
+
+    1          /********************************************************************************************************
+             -*************
+    2          * STC32G Opensourec Library 即（STC32G 开源库）是一个基于官方 SDK 接口的第三方开源�
+             -�
+    3          * Copyright (c) 2022 SEEKFREE 逐飞科技
+    4          *
+    5          * 本文件是STC 开源库的一部分
+    6          *
+    7          * STC32G 开源库 是免费软件
+    8          * 您可以根据自由软件基金会发布的 GPL（GNU General Public License，即 GNU通用公共许
+             -可证）的条款
+    9          * 即 GPL 的第3版（即 GPL3.0）或（您选择的）任何后来的版本，重新发布和/或修�
+             -�它
+   10          *
+   11          * 本开源库的发布是希望它能发挥作用，但并未对其作任何的保证
+   12          * 甚至没有隐含的适销性或适合特定用途的保证
+   13          * 更多细节请参见 GPL
+   14          *
+   15          * 您应该在收到本开源库的同时收到一份 GPL 的副本
+   16          * 如果没有，请参阅<https://www.gnu.org/licenses/>
+   17          *
+   18          * 额外注明：
+   19          * 本开源库使用 GPL3.0 开源许可证协议 以上许可申明为译文版本
+   20          * 许可申明英文版在 libraries/doc 文件夹下的 GPL3_permission_statement.txt 文件中
+   21          * 许可证副本在 libraries 文件夹下 即该文件夹下的 LICENSE 文件
+   22          * 欢迎各位使用并传播本程序 但修改内容时必须保留逐飞科技的版权声明（即本
+             -声明）
+   23          *
+   24          * 文件名称          
+   25          * 公司名称          成都逐飞科技有限公司
+   26          * 版本信息          查看 libraries/doc 文件夹内 version 文件 版本说明
+   27          * 开发环境          MDK FOR C251
+   28          * 适用平台          STC32G
+   29          * 店铺链接          https://seekfree.taobao.com/
+   30          *
+   31          * 修改记录
+   32          * 日期              作者           备注
+   33          * 2024-08-01        大W            first version
+   34          *********************************************************************************************************
+             -***********/
+   35          
+   36          #include "zf_common_headfile.h"
+   37          
+   38          // *************************** 例程测试说明 ***************************
+   39          // 1.核心板烧录完成本例程，完成上电
+   40          //
+   41          // 2.使用万用表检测 PWM_CHx 对应的通道，会看到电压变化
+   42          //
+   43          // 2.使用示波器检测 PWM_CHx 对应的通道，会看到脉宽变化
+   44          //
+   45          // 如果发现现象与说明严重不符 请参照本文件最下方 例程常见问题说明 进行排
+             -查
+   46          
+   47          
+   48          // **************************** 代码区域 ****************************
+   49          #define CHANNEL_NUMBER          (4)
+   50          
+C251 COMPILER V5.60.0,  main                                                               16/11/25  20:01:34  PAGE 2   
+
+   51          #define PWM_CH1                 (PWMA_CH1P_P10)
+   52          #define PWM_CH2                 (PWMA_CH2P_P22)
+   53          #define PWM_CH3                 (PWMA_CH3P_P64)
+   54          #define PWM_CH4                 (PWMA_CH4P_P34)
+   55          
+   56          int16 duty = 0;
+   57          uint8 channel_index = 0;
+   58          pwm_channel_enum channel_list[CHANNEL_NUMBER] = {PWM_CH1, PWM_CH2, PWM_CH3, PWM_CH4};
+   59          
+   60          
+   61          void main()
+   62          {
+   63   1          clock_init(SYSTEM_CLOCK_30M);
+   64   1              debug_init();
+   65   1      
+   66   1          // 此处编写用户代码 例如外设初始化代码等
+   67   1              // PWMA只能有一个频率！！！
+   68   1              // PWMB只能有一个频率！！！
+   69   1          pwm_init(PWM_CH1, 17000, 0);                                                // 初始化 PWM 通道 �
+             -��率 17KHz 初始占空比 0%
+   70   1          pwm_init(PWM_CH2, 17000, 0);                                                // 初始化 PWM 通道 �
+             -��率 17KHz 初始占空比 0%
+   71   1          pwm_init(PWM_CH3, 17000, 0);                                                // 初始化 PWM 通道 �
+             -��率 17KHz 初始占空比 0%
+   72   1          pwm_init(PWM_CH4, 17000, 0);                                                // 初始化 PWM 通道 �
+             -��率 17KHz 初始占空比 0%
+   73   1          // 此处编写用户代码 例如外设初始化代码等
+   74   1      
+   75   1          while(1)
+   76   1          {
+   77   2              // 此处编写需要循环执行的代码
+   78   2              for(channel_index = 0; channel_index < CHANNEL_NUMBER; channel_index++)
+   79   2              {
+   80   3                  for(duty = 0; duty <= PWM_DUTY_MAX / 2; duty ++)                    // 输出占空比递增�
+             -�� 50%
+   81   3                  {
+   82   4                      pwm_set_duty(channel_list[channel_index], duty);                // 更新对应通道占�
+             -��比额
+   83   4                      system_delay_us(100);
+   84   4                  }
+   85   3                  for(duty = PWM_DUTY_MAX / 2; duty >= 0; duty --)                    // 输出占空比递减�
+             -�� 0%
+   86   3                  {
+   87   4                      pwm_set_duty(channel_list[channel_index], duty);                // 更新对应通道占�
+             -��比
+   88   4                      system_delay_us(100);
+   89   4                  }
+   90   3              }
+   91   2              // 此处编写需要循环执行的代码
+   92   2          }
+   93   1      }
+   94          // **************************** 代码区域 ****************************
+   95          
+   96          // *************************** 例程常见问题说明 ***************************
+   97          // 遇到问题时请按照以下问题检查列表检查
+   98          //
+   99          // 问题1：PWM_CHx 对应的通道长时间无信号、电压变化
+  100          //      查看程序是否正常烧录，是否下载报错，确认正常按下复位按键
+  101          //      四个通道同一时间只有一个通道输出，换个通道看看
+  102          
+  103          
+  104          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       318     ------
+C251 COMPILER V5.60.0,  main                                                               16/11/25  20:01:34  PAGE 3   
+
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =        11     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        28     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

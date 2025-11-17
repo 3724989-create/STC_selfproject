@@ -1,0 +1,183 @@
+C251 COMPILER V5.60.0,  main                                                               16/11/25  19:34:27  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN .\out_file\main.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\user\main.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE
+                    - INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\u
+                    -ser;..\code) DEBUG PRINT(.\out_file\main.lst) OBJECT(.\out_file\main.obj) 
+
+stmt  level    source
+
+    1          /********************************************************************************************************
+             -*************
+    2          * STC32G Opensourec Library 即（STC32G 开源库）是一个基于官方 SDK 接口的第三方开源�
+             -�
+    3          * Copyright (c) 2022 SEEKFREE 逐飞科技
+    4          *
+    5          * 本文件是STC 开源库的一部分
+    6          *
+    7          * STC32G 开源库 是免费软件
+    8          * 您可以根据自由软件基金会发布的 GPL（GNU General Public License，即 GNU通用公共许
+             -可证）的条款
+    9          * 即 GPL 的第3版（即 GPL3.0）或（您选择的）任何后来的版本，重新发布和/或修�
+             -�它
+   10          *
+   11          * 本开源库的发布是希望它能发挥作用，但并未对其作任何的保证
+   12          * 甚至没有隐含的适销性或适合特定用途的保证
+   13          * 更多细节请参见 GPL
+   14          *
+   15          * 您应该在收到本开源库的同时收到一份 GPL 的副本
+   16          * 如果没有，请参阅<https://www.gnu.org/licenses/>
+   17          *
+   18          * 额外注明：
+   19          * 本开源库使用 GPL3.0 开源许可证协议 以上许可申明为译文版本
+   20          * 许可申明英文版在 libraries/doc 文件夹下的 GPL3_permission_statement.txt 文件中
+   21          * 许可证副本在 libraries 文件夹下 即该文件夹下的 LICENSE 文件
+   22          * 欢迎各位使用并传播本程序 但修改内容时必须保留逐飞科技的版权声明（即本
+             -声明）
+   23          *
+   24          * 文件名称          
+   25          * 公司名称          成都逐飞科技有限公司
+   26          * 版本信息          查看 libraries/doc 文件夹内 version 文件 版本说明
+   27          * 开发环境          MDK FOR C251
+   28          * 适用平台          STC32G
+   29          * 店铺链接          https://seekfree.taobao.com/
+   30          *
+   31          * 修改记录
+   32          * 日期              作者           备注
+   33          * 2024-08-01        大W            first version
+   34          *********************************************************************************************************
+             -***********/
+   35          
+   36          #include "zf_common_headfile.h"
+   37          
+   38          // *************************** 例程硬件连接说明 ***************************
+   39          // 接入舵机 主板上对应有舵机的接口 务必注意不要插反 <红色电源> <黑色信号> 
+             -<黄色/橙色/棕色/白色...其它彩色的那根是信号>
+   40          //      模块管脚            单片机管脚
+   41          //      PWM                 P74
+   42          //      GND                 舵机电源 GND 联通 核心板电源地 GND
+   43          //      VCC                 舵机电源输出
+   44          
+   45          
+   46          // *************************** 例程测试说明 ***************************
+   47          // 1.核心板烧录完成本例程
+   48          //
+   49          // 2.在断电情况下 完成核心板插到主板的核心板插座上 确认核心板与主板插座�
+             -�有明显缝隙
+C251 COMPILER V5.60.0,  main                                                               16/11/25  19:34:27  PAGE 2   
+
+   50          //
+   51          // 3.然后将舵机与主板正确连接 请务必注意不要插反 然后使用电池给主板供电�
+             -�开开关
+   52          //
+   53          // 4.正常情况下舵机会来回转动 最好在舵机没有装在车上固定连接转向连杆时测
+             -试 防止安装位置不对造成堵转烧舵机
+   54          //
+   55          // 如果发现现象与说明严重不符 请参照本文件最下方 例程常见问题说明 进行排
+             -查
+   56          
+   57          
+   58          // **************************** 代码区域 ****************************
+   59          #define SERVO_PWM               (PWMB_CH1_P74)                         // 定义主板上舵机对应引�
+             -��
+   60          #define SERVO_FREQ              (50 )                                           // 定义主板上舵机�
+             -��率  请务必注意范围 50-300
+   61          
+   62          #define SERVO_L_MAX             (80 )                                           // 定义主板上舵机�
+             -��动范围 角度
+   63          #define SERVO_R_MAX             (100)                                           // 定义主板上舵机�
+             -��动范围 角度
+   64          
+   65          // ------------------ 舵机占空比计算方式 ------------------
+   66          //
+   67          // 舵机对应的 0-180 活动角度对应 控制脉冲的 0.5ms-2.5ms 高电平
+   68          //
+   69          // 那么不同频率下的占空比计算方式就是
+   70          // PWM_DUTY_MAX/(1000/freq)*(1+Angle/180) 在 50hz 时就是 PWM_DUTY_MAX/(1000/50)*(1+Angle/180)
+   71          //
+   72          // 那么 100hz 下 90度的打角 即高电平时间1.5ms 计算套用为
+   73          // PWM_DUTY_MAX/(1000/100)*(1+90/180) = PWM_DUTY_MAX/10*1.5
+   74          //
+   75          // ------------------ 舵机占空比计算方式 ------------------
+   76          #define SERVO_DUTY(x)         ((float)PWM_DUTY_MAX / (1000.0 / (float)SERVO_FREQ) * (0.5 + (float)(x) / 9
+             -0.0))
+   77          
+   78          #if ((SERVO_FREQ < 50) || (SERVO_FREQ > 300))
+                   #error "SERVO_MOTOR_FREQ ERROE!"
+               #endif
+   81          
+   82          float servo_motor_duty = 90.0;                                                  // 舵机动作角度
+   83          float servo_motor_dir = 1;                                                      // 舵机动作状态
+   84          
+   85          void main()
+   86          {
+   87   1          clock_init(SYSTEM_CLOCK_30M);
+   88   1              debug_init();
+   89   1      
+   90   1              // 此处编写用户代码 例如外设初始化代码等
+   91   1          pwm_init(SERVO_PWM, SERVO_FREQ, 0);
+   92   1          // 此处编写用户代码 例如外设初始化代码等
+   93   1      
+   94   1          while(1)
+   95   1          {
+   96   2              // 此处编写需要循环执行的代码
+   97   2              pwm_set_duty(SERVO_PWM, (uint32)SERVO_DUTY(servo_motor_duty));
+   98   2      
+   99   2              if(servo_motor_dir)
+  100   2              {
+  101   3                  servo_motor_duty ++;
+  102   3                  if(servo_motor_duty >= SERVO_R_MAX)
+  103   3                  {
+  104   4                      servo_motor_dir = 0x00;
+  105   4                  }
+  106   3              }
+  107   2              else
+C251 COMPILER V5.60.0,  main                                                               16/11/25  19:34:27  PAGE 3   
+
+  108   2              {
+  109   3                  servo_motor_duty --;
+  110   3                  if(servo_motor_duty <= SERVO_L_MAX)
+  111   3                  {
+  112   4                      servo_motor_dir = 0x01;
+  113   4                  }
+  114   3              }
+  115   2              system_delay_ms(100);                                                   // 延时
+  116   2              // 此处编写需要循环执行的代码
+  117   2          }
+  118   1      }
+  119          // **************************** 代码区域 ****************************
+  120          
+  121          // *************************** 例程常见问题说明 ***************************
+  122          // 遇到问题时请按照以下问题检查列表检查
+  123          //
+  124          // 问题1：舵机不动
+  125          //      检查舵机供电是否正常 至少5V供电 不可以用杜邦线供电
+  126          //      检查PWM信号是否正常 是否连通
+  127          
+  128          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       283     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =         8     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        20     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
