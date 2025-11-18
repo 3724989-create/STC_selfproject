@@ -59,7 +59,7 @@
 #define TSL1401_CLK(x)          ((x) ? (gpio_high(TSL1401_CLK_PIN)) : (gpio_low(TSL1401_CLK_PIN)))
 #define TSL1401_SI(x)           ((x) ? (gpio_high(TSL1401_SI_PIN)) : (gpio_low(TSL1401_SI_PIN)))
 
-#define TSL1401_AD_RESOLUTION   (ADC_8BIT)                                      // ADC 精度 8bit
+#define TSL1401_AD_RESOLUTION   (ADC_12BIT)                                      // ADC 精度 8bit
 #define TSL1401_DATA_LEN        (128 )                                          // TSL1401 数据长度
 
 extern uint16 tsl1401_data[2][TSL1401_DATA_LEN];                                // TSL1401 数据存放数组
@@ -68,5 +68,7 @@ extern uint8 tsl1401_finish_flag;                                               
 void tsl1401_collect_pit_handler    (void);
 void tsl1401_send_data              (uart_index_enum uart_n, uint8 index);
 void tsl1401_init                   (void);
+void tsl1401_binary_data_process(uint8 *boundry[],uint8 i, uint8 threshold);
+uint16 calculate_dynamic_threshold(uint8 index);
 
 #endif

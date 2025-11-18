@@ -22,28 +22,42 @@ Dialog DLL:      TCORE51.DLL V2.66.4.0
  
 <h2>Project:</h2>
 D:\STC_car\STC32G12K128_Library\Seekfree_STC32G12K128_Opensource_Library\CCD_project\mdk\seekfree.uvproj
-Project File Date:  11/17/2025
+Project File Date:  11/18/2025
 
 <h2>Output:</h2>
 Build target 'STC32G'
-compiling bsp.c...
-compiling my_uart.c...
-compiling my_pit.c...
-compiling my_servo.c...
-compiling main.c...
-compiling IIC.c...
-..\Hardware\IIC.c(375): warning C47: 'i': unreferenced local variable
-..\Hardware\IIC.c(386): warning C183: dead assignment eliminated
-..\Hardware\IIC.c(387): warning C183: dead assignment eliminated
-..\Hardware\IIC.c(386): warning C184: value of 'heartbeat_counter' possibly undefined
-..\Hardware\IIC.c(572): warning C183: dead assignment eliminated
-..\Hardware\IIC.c(572): warning C183: dead assignment eliminated
-..\Hardware\IIC.c(638): warning C183: dead assignment eliminated
-linking...
-Program Size: data=9.1 edata+hdata=2048 xdata=2308 const=7048 code=26142
-creating hex file from ".\out_file\SEEKFREE"...
-".\out_file\SEEKFREE" - 0 Error(s), 7 Warning(s).
-Build Time Elapsed:  00:00:02
+compiling zf_driver_flash.c...
+..\..\Libraries\zf_driver\zf_driver_flash.c(70): error C67: '__IO': undefined identifier
+..\..\Libraries\zf_driver\zf_driver_flash.c(70): error C25: syntax error near 'u32'
+..\..\Libraries\zf_driver\zf_driver_flash.c(70): error C25: syntax error near ')'
+..\..\Libraries\zf_driver\zf_driver_flash.c(73): error C25: syntax error near 'break'
+..\..\Libraries\zf_driver\zf_driver_flash.c(79): error C53: redefinition of 'interrupt_global_enable': different return types
+..\..\Libraries\zf_driver\zf_driver_flash.c(81): error C25: syntax error near 'return'
+..\..\Libraries\zf_driver\zf_driver_flash.c(81): warning C34: 'return_state': missing declaration specifiers
+..\..\Libraries\zf_driver\zf_driver_flash.c(81): error C53: redefinition of 'return_state'
+..\..\Libraries\zf_driver\zf_driver_flash.c(82): error C25: syntax error near '}'
+..\..\Libraries\zf_driver\zf_driver_flash.c(100): error C25: syntax error near 'gFlashStatus'
+..\..\Libraries\zf_driver\zf_driver_flash.c(100): error C67: 'FLASH_COMPLETE': undefined identifier
+..\..\Libraries\zf_driver\zf_driver_flash.c(107): warning C140: 'FLASH_Unlock' undefined; assuming 'extern int FLASH_Unlock()'
+..\..\Libraries\zf_driver\zf_driver_flash.c(108): error C67: 'FLASH_FLAG_EOP': undefined identifier
+..\..\Libraries\zf_driver\zf_driver_flash.c(108): error C67: 'FLASH_FLAG_PGERR': undefined identifier
+..\..\Libraries\zf_driver\zf_driver_flash.c(108): error C67: 'FLASH_FLAG_WRPRTERR': undefined identifier
+..\..\Libraries\zf_driver\zf_driver_flash.c(108): warning C140: 'FLASH_ClearFlag' undefined; assuming 'extern int FLASH_ClearFlag()'
+..\..\Libraries\zf_driver\zf_driver_flash.c(109): warning C140: 'FLASH_ErasePage' undefined; assuming 'extern int FLASH_ErasePage()'
+..\..\Libraries\zf_driver\zf_driver_flash.c(109): warning C95: 'FLASH_ErasePage': too many actual parameters
+..\..\Libraries\zf_driver\zf_driver_flash.c(110): error C67: 'FLASH_FLAG_EOP': undefined identifier
+..\..\Libraries\zf_driver\zf_driver_flash.c(111): warning C140: 'FLASH_Lock' undefined; assuming 'extern int FLASH_Lock()'
+..\..\Libraries\zf_driver\zf_driver_flash.c(112): error C67: 'FLASH_COMPLETE': undefined identifier
+..\..\Libraries\zf_driver\zf_driver_flash.c(119): error C94: 'interrupt_global_enable': declared with 'void' parameter list
+..\..\Libraries\zf_driver\zf_driver_flash.c(143): error C25: syntax error near 'uint32'
+..\..\Libraries\zf_driver\zf_driver_flash.c(148): error C25: syntax error near 'for'
+..\..\Libraries\zf_driver\zf_driver_flash.c(148): error C25: syntax error near '='
+..\..\Libraries\zf_driver\zf_driver_flash.c(148): error C25: syntax error near '<'
+..\..\Libraries\zf_driver\zf_driver_flash.c(148): warning C34: 'len': missing declaration specifiers
+..\..\Libraries\zf_driver\zf_driver_flash.c(148): error C25: syntax error near '++'
+..\..\Libraries\zf_driver\zf_driver_flash.c(148): error C7: compilation aborted
+Target not created.
+Build Time Elapsed:  00:00:00
 </pre>
 </body>
 </html>

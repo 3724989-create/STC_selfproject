@@ -1,0 +1,148 @@
+C251 COMPILER V5.60.0,  LQ_I2C_VL53                                                        18/11/25  13:39:10  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_I2C_VL53
+OBJECT MODULE PLACED IN .\OBJ_Out\LQ_I2C_VL53.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\libraries\LQ_LIB\Src\LQ_I2C_VL53.c XSMALL OPTIMIZE(6,SPEED) REGFILE(
+                    -.\OBJ_Out\LQ_STCAI32_LIB.ORC) BROWSE INCDIR(..\..\libraries\Driver;..\..\libraries\Driver\Inc;..\..\libraries\Include;..
+                    -\..\libraries\LQ_LIB\Inc;..\User;..\code;..\Hardware;..\..\libraries\zf_common;..\..\Libraries\zf_components;..\..\Libra
+                    -ries\zf_device;..\..\Libraries\zf_driver) DEFINE(STC32G) DEBUG PRINT(.\OBJ_Out\LQ_I2C_VL53.lst) OBJECT(.\OBJ_Out\LQ_I2C_
+                    -VL53.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           【平    台】北京龙邱智能科技STC32位核心板
+    3           【编    写】龙邱科技
+    4           【E-mail  】chiusir@163.com
+    5           【软件版本】V1.0 版权所有，单位使用请先联系授权
+    6           【相关信息参考下列地址】
+    7           【网    站】http://www.lqist.cn
+    8           【淘宝店铺】http://longqiu.taobao.com
+    9           --------------------------------------------------------------------------------
+   10           【  IDE  】 keil C251 V5.60
+   11           【Target 】 STC32G/STC8051U/AI8051U 32位模式
+   12           【SYS CLK】 42 MHz使用内部晶振
+   13          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   14          
+   15          //#include "LQ_I2C_VL53.h"
+   16          #include "include.h"
+   17          
+   18          unsigned char VL53_STAR = 0x02;    //0x02 连续测量模式    0x01 单次测量模式
+   19          
+   20          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   21          @函数名称：void Test_Vl53(void)
+   22          @功能说明：VL53 写1个寄存器 reg：  寄存器 data：  写入数据
+   23          @参数说明：dev：    地址
+   24          @函数返回：无
+   25          @修改时间：2022/03/15
+   26          @调用方法：无
+   27          @备    注：无
+   28          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   29          void VL53_Write_Byte(unsigned char dev, unsigned char reg, unsigned char val)
+   30          {
+   31   1        IIC_WriteByteToSlave(dev<<1, reg, val);
+   32   1      }
+   33          
+   34          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   35          @函数名称：void VL53_Read_nByte(unsigned char dev, unsigned char reg, unsigned char length, unsigned char
+             -* data)
+   36          @功能说明：VL53 写1个寄存器 reg：  寄存器 data：  写入数据
+   37          @参数说明：dev：    地址
+   38          @函数返回：无
+   39          @修改时间：2022/03/15
+   40          @调用方法：无
+   41          @备    注：无
+   42          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   43          void VL53_Read_nByte(unsigned char dev, unsigned char reg, unsigned char length, unsigned char* val)
+   44          {
+   45   1        IIC_ReadMultByteFromSlave(dev<<1, reg, length, val);
+   46   1      }
+   47          
+   48          
+   49          void Test_IIC_VL53(void)
+   50          {
+   51   1          char txt[36] = {0};
+   52   1          unsigned char dis_buff[2];
+   53   1          uint16 dis, last_dis = 0;
+   54   1          Soft_I2C_Init();
+C251 COMPILER V5.60.0,  LQ_I2C_VL53                                                        18/11/25  13:39:10  PAGE 2   
+
+   55   1          OLED_CLS();
+   56   1          OLED_P8x16Str(10, 0, "Test VL53!");         //字符串显示
+   57   1          delay_ms(50);
+   58   1          VL53_Write_Byte(VL53ADDR, VL53L0X_REG_SYSRANGE_START, VL53_STAR);//   delayms(50);
+   59   1          while(1)
+   60   1          {
+   61   2      
+   62   2              /* 获取测量数据 */
+   63   2              VL53_Read_nByte(VL53ADDR, VL53_REG_DIS, 2, dis_buff);
+   64   2              /* 转换数据 */
+   65   2              dis = (dis_buff[0]<<8) | (dis_buff[1]);
+   66   2      
+   67   2              /* 超过2M没有障碍 */
+   68   2              if(dis > 8000)
+   69   2              {
+   70   3                  dis = 0;
+   71   3              }
+   72   2      
+   73   2              if(dis == 20)
+   74   2              {
+   75   3                  dis = last_dis;
+   76   3              }
+   77   2              last_dis = dis;
+   78   2      
+   79   2              sprintf((char*)txt,"dis:%04d mm",dis);
+   80   2              OLED_P8x16Str(10,3,txt);
+   81   2              delay_ms(50);
+   82   2          }
+   83   1      }
+   84          
+   85          
+   86          
+   87          
+   88          
+   89          
+   90          
+   91          
+   92          
+   93          
+   94          
+   95          
+   96          
+   97          
+   98          
+   99          
+  100          
+  101          
+  102          
+  103          
+  104          
+  105          
+  106          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       165     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =         1         38
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+C251 COMPILER V5.60.0,  LQ_I2C_VL53                                                        18/11/25  13:39:10  PAGE 3   
+
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        64     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

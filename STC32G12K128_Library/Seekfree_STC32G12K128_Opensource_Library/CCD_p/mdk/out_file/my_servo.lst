@@ -1,0 +1,53 @@
+C251 COMPILER V5.60.0,  my_servo                                                           18/11/25  17:09:54  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE my_servo
+OBJECT MODULE PLACED IN .\out_file\my_servo.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\my_servo.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BR
+                    -OWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;
+                    -..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\my_servo.lst) OBJECT(.\out_file\my_servo.obj) 
+
+stmt  level    source
+
+    1          #include "my_servo.h"
+    2          
+    3          void Servo_init()
+    4          {
+    5   1          pwm_init(PWM_SERVO, 50, 0); 
+    6   1      }
+    7          
+    8          void Servo_test_Process()
+    9          {
+   10   1              pwm_set_duty(PWM_SERVO, 300);
+   11   1              system_delay_ms(500);
+   12   1              pwm_set_duty(PWM_SERVO, 515);
+   13   1              system_delay_ms(500);
+   14   1              pwm_set_duty(PWM_SERVO, 730);
+   15   1              system_delay_ms(500);
+   16   1              pwm_set_duty(PWM_SERVO, 515);
+   17   1              system_delay_ms(500);
+   18   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =        95     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

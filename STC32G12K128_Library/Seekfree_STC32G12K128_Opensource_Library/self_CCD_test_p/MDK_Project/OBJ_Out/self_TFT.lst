@@ -1,0 +1,37 @@
+C251 COMPILER V5.60.0,  self_TFT                                                           18/11/25  13:39:17  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE self_TFT
+OBJECT MODULE PLACED IN .\OBJ_Out\self_TFT.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\self_TFT.c XSMALL OPTIMIZE(6,SPEED) REGFILE(.\OBJ_Out\LQ_STCAI32_L
+                    -IB.ORC) BROWSE INCDIR(..\..\libraries\Driver;..\..\libraries\Driver\Inc;..\..\libraries\Include;..\..\libraries\LQ_LIB\I
+                    -nc;..\User;..\code;..\Hardware;..\..\libraries\zf_common;..\..\Libraries\zf_components;..\..\Libraries\zf_device;..\..\L
+                    -ibraries\zf_driver) DEFINE(STC32G) DEBUG PRINT(.\OBJ_Out\self_TFT.lst) OBJECT(.\OBJ_Out\self_TFT.obj) 
+
+stmt  level    source
+
+*** WARNING C38 IN LINE 1 OF ..\code\self_TFT.c: empty translation unit
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

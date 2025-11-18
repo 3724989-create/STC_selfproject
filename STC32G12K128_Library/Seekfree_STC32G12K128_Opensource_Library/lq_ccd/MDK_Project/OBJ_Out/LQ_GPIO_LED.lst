@@ -1,0 +1,161 @@
+C251 COMPILER V5.60.0,  LQ_GPIO_LED                                                        18/11/25  13:45:53  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_GPIO_LED
+OBJECT MODULE PLACED IN .\OBJ_Out\LQ_GPIO_LED.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\libraries\LQ_LIB\Src\LQ_GPIO_LED.c XSMALL UNSIGNED_CHAR FLOAT64 BROW
+                    -SE INCDIR(..\..\libraries\Driver;..\..\libraries\Include;..\..\libraries\Driver\Inc;..\..\libraries\LQ_LIB\Inc;..\User) 
+                    -DEFINE(AI8051U_32Bit) DEBUG PRINT(.\OBJ_Out\LQ_GPIO_LED.lst) OBJECT(.\OBJ_Out\LQ_GPIO_LED.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           【平    台】北京龙邱智能科技STC32位核心板
+    3           【编    写】龙邱科技
+    4           【E-mail  】chiusir@163.com
+    5           【软件版本】V1.0 版权所有，单位使用请先联系授权
+    6           【相关信息参考下列地址】
+    7           【网    站】http://www.lqist.cn
+    8           【淘宝店铺】http://longqiu.taobao.com
+    9           --------------------------------------------------------------------------------
+   10           【  IDE  】 keil C251 V5.60
+   11           【Target 】 STC32G/STC8051U/AI8051U 32位模式
+   12           【SYS CLK】 42 MHz使用内部晶振
+   13          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   14          
+   15          #include "include.h"
+   16          
+   17          
+   18          /**************************************************************************************
+   19           * 函数: GPIO_LED_Init(void)
+   20           * 描述: 初始化LED程序. LED0 -->在LQ_LED.h中宏定义
+   21           * 参数: None.
+   22           * 返回: None.
+   23           * 版本: V1.0, 2024-07-25
+   24           * eg:   P4_MODE_OUT_PP(GPIO_Pin_2|GPIO_Pin_3); 将P42和P43设置为推挽输出
+   25           *       对于LED，设置为准双向、推挽输出模式等都是可以的
+   26           **************************************************************************************/
+   27          void GPIO_LED_Init(void)
+   28          {
+   29   1      //-------------------------初始化方式1--------------------------------
+   30   1      //    GPIO_InitTypeDef GPIO_LED_Initstu;                  //每个端口重新初始胡一个结构体
+   31   1      //
+   32   1      //    GPIO_LED_Initstu.Pin  = GPIO_Pin_1;                 //要初始化的I/O  eg: GPIO_Pin_0|GPIO_Pin_2;
+   33   1      //    GPIO_LED_Initstu.Mode = GPIO_OUT_PP;                //要初始化的I/O 模式 推挽输出
+   34   1      //    GPIO_Inilize(GPIO_P0,&GPIO_LED_Initstu);            //将P10,初始化为推挽输出模式
+   35   1      
+   36   1      
+   37   1      //-------------------------初始化方式2--------------------------------
+   38   1      //    P0_MODE_OUT_PP(GPIO_Pin_1);      // 初始化P01,P35 推挽输出模式   ，每个端口一个函数
+   39   1          P3_MODE_OUT_PP(GPIO_Pin_5);
+   40   1      //-------------------------初始化方式3--------------------------------
+   41   1          GPIO_InitConfig(P0_1,OUT_PP);       // 初始化P01,推挽输出模式   一个函数初始化管脚和模式
+   42   1          
+   43   1          GPIO_Write_Pin(LED0p,SET);
+   44   1          GPIO_Write_Pin(Beep,RESET);           //初始状态设为高,LED低电平点亮
+   45   1      }
+   46          
+   47          
+   48          /**************************************************************************************
+   49           * 函数：LED_Ctrl
+   50           * 描述：控制LED状态
+   51           * 参数：ledp:定义的LED管脚sta:状态 ON打开 OFF关闭 RVS反转
+   52           * 返回：无
+   53           * 时间：2024-11-01
+   54           * 方法：LED_Ctrl(LED0,ON);
+   55           * 备注：LED管脚在 头文件中宏定义
+   56           **************************************************************************************/
+   57          void LED_Ctrl(LED_n ledp, LED_s sta)
+C251 COMPILER V5.60.0,  LQ_GPIO_LED                                                        18/11/25  13:45:53  PAGE 2   
+
+   58          {
+   59   1              switch (ledp)
+   60   1              {
+   61   2              case LED0:
+   62   2                      if (sta == ON)                    LED0p = RESET;
+   63   2                      else if (sta == OFF)      LED0p = SET;
+   64   2                      else if (sta == RVS)     LED0p =!LED0p;//(LED0p)?(LED0p=RESET):(LED0p=SET);
+   65   2                      break;
+   66   2              case LED1:
+   67   2                      if (sta == ON)                  LED1p = RESET;
+   68   2                      else if (sta == OFF)    LED1p = SET;
+   69   2                      else if (sta == RVS)    LED1p =!LED1p;//(LED1p)?(LED1p=RESET):(LED1p=SET);
+   70   2                      break;
+   71   2              case Beep0:
+   72   2                      if (sta == ON)                  Beep = RESET;
+   73   2                      else if (sta == OFF)    Beep = SET;
+   74   2                      else if (sta == RVS)    Beep =!Beep;    //(LED1p)?(LED1p=RESET):(LED1p=SET);
+   75   2                      break;
+   76   2              case LED_ALL:
+   77   2                      if (sta == ON)
+   78   2                      {
+   79   3                              LED0p = RESET;
+   80   3                              LED1p = RESET;
+   81   3                      }
+   82   2                      else if (sta == OFF)
+   83   2                      {
+   84   3                              LED0p = SET;
+   85   3                              LED1p = SET;
+   86   3                      }
+   87   2                      else if (sta == RVS)
+   88   2                      {
+   89   3                              LED0p =!LED0p;//(LED0p)?(LED0p=RESET):(LED0p=SET);
+   90   3                              LED1p =!LED1p;
+   91   3                  Beep =!Beep;  //(LED1p)?(LED1p=RESET):(LED1p=SET);
+   92   3                      }
+   93   2                      break;
+   94   2              default:;
+   95   2              break;
+   96   2              }
+   97   1      }
+   98          
+   99          /**************************************************************************************
+  100           * 函数: Test_LED(void)
+  101           * 描述: LED测试函数，闪灯
+  102           * 参数: None.
+  103           * 返回: None.
+  104           * 版本: V1.0, 2024-11-01
+  105           **************************************************************************************/
+  106          void Test_GPIO_LED()
+  107          {
+  108   1              GPIO_LED_Init();                // LED初始化，修改管脚 在LQ_LED.h 宏定义
+  109   1      //    GPIO_Write_Pin(Beep,RESET);   //或LED_Ctrl(Beep,OFF);
+  110   1              while(1)
+  111   1              {
+  112   2              LED_Ctrl(LED0,RVS);
+  113   2              LED_Ctrl(Beep0,RVS);
+  114   2              delay_ms(250);
+  115   2              //或者以下方式直接操作GPIO_Pin --> PnX
+  116   2      //        GPIO_Write_Pin(LED0p,RESET);      //由 #define LED0p  P01而来
+  117   2      //        delay_ms(200);
+  118   2      //        GPIO_Write_Pin(LED0p,SET);        //
+  119   2      //        delay_ms(200);
+  120   2      
+  121   2              }
+  122   1      }
+
+C251 COMPILER V5.60.0,  LQ_GPIO_LED                                                        18/11/25  13:45:53  PAGE 3   
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       220     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

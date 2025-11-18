@@ -1,0 +1,335 @@
+C251 COMPILER V5.60.0,  LQ_CCD                                                             18/11/25  13:07:46  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_CCD
+OBJECT MODULE PLACED IN .\out_file\LQ_CCD.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\lq_libraries\LQ_LIB\Src\LQ_CCD.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) 
+                    -OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\lib
+                    -raries\zf_driver;..\user;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_libraries\Driver\I
+                    -nc) DEBUG PRINT(.\out_file\LQ_CCD.lst) OBJECT(.\out_file\LQ_CCD.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           ¡¾Æ½    Ì¨¡¿±±¾©ÁúÇñÖÇÄÜ¿Æ¼¼STC32Î»ºËÐÄ°å
+    3           ¡¾±à    Ð´¡¿ÁúÇñ¿Æ¼¼
+    4           ¡¾E-mail  ¡¿chiusir@163.com
+    5           ¡¾Èí¼þ°æ±¾¡¿V1.1 °æÈ¨ËùÓÐ£¬µ¥Î»Ê¹ÓÃÇëÏÈÁªÏµÊÚÈ¨
+    6           ¡¾Ïà¹ØÐÅÏ¢²Î¿¼ÏÂÁÐµØÖ·¡¿
+    7           ¡¾Íø    Õ¾¡¿http://www.lqist.cn
+    8           ¡¾ÌÔ±¦µêÆÌ¡¿http://longqiu.taobao.com
+    9           --------------------------------------------------------------------------------
+   10           ¡¾  IDE  ¡¿ keil C251 V5.60
+   11           ¡¾Target ¡¿ STC32G/STC8051U/AI8051U 32Î»Ä£Ê½
+   12           ¡¾SYS CLK¡¿ 42 MHzÊ¹ÓÃÄÚ²¿¾§Õñ
+   13          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   14          
+   15          #include "include.h"
+   16          //#include "LQ_CCD.h"
+   17          
+   18          
+   19          u8 xdata CCD1_Bin[128];   //¶þÖµ»¯ÂË²¨ºóµÄ£¨ÂË²¨¸²¸Ç¶þÖµ»¯µÄÊý×é£©
+   20          /**
+   21            * @brief    CCD¹Ü½Å³õÊ¼»¯
+   22            * @return   ÎÞ
+   23            * @note     
+   24            * @example  
+   25            * @date     2023/11/24
+   26          */
+   27          void CCD1_Init() 
+   28          {
+   29   1              ADC_InitTypeDef         ADC_InitStructure;              //½á¹¹¶¨Òå
+   30   1      
+   31   1          P1_MODE_IN_HIZ(GPIO_Pin_7);     //ADC¹Ü½Å£¬¸ß×èÌ¬ÊäÈë
+   32   1      
+   33   1          //ADCÅäÖÃ
+   34   1              ADC_InitStructure.ADC_SMPduty   = 12;           //ADC Ä£ÄâÐÅºÅ²ÉÑùÊ±¼ä¿ØÖÆ, 0~31£¨×¢Òâ£º SMPDUTY Ò»¶¨²»ÄÜÉèÖÃÐ¡ÓÚ
+             - 10£©
+   35   1              ADC_InitStructure.ADC_CsSetup   = 0;            //ADC Í¨µÀÑ¡ÔñÊ±¼ä¿ØÖÆ 0(Ä¬ÈÏ),1
+   36   1              ADC_InitStructure.ADC_CsHold    = 1;            //ADC Í¨µÀÑ¡Ôñ±£³ÖÊ±¼ä¿ØÖÆ 0,1(Ä¬ÈÏ),2,3
+   37   1              ADC_InitStructure.ADC_Speed     = ADC_SPEED_2X12T;              //ÉèÖÃ ADC ¹¤×÷Ê±ÖÓÆµÂÊ ADC_SPEED_2X1T~ADC_SPEED_2X1
+             -6T
+   38   1              ADC_InitStructure.ADC_AdjResult = ADC_RIGHT_JUSTIFIED;  //ADC½á¹ûµ÷Õû,  ADC_LEFT_JUSTIFIED,ADC_RIGHT_JUSTI
+             -FIED
+   39   1              ADC_Inilize(&ADC_InitStructure);                //³õÊ¼»¯
+   40   1              ADC_PowerControl(ENABLE);                               //ADCµçÔ´¿ª¹Ø, ENABLE»òDISABLE
+   41   1              NVIC_ADC_Init(DISABLE,Priority_0);              //ÖÐ¶ÏÊ¹ÄÜ, ENABLE/DISABLE; ÓÅÏÈ¼¶(µÍµ½¸ß) Priority_0,Priority_1,Pri
+             -ority_2,Priority_3
+   42   1      
+   43   1          
+   44   1          P1_MODE_OUT_PP(GPIO_Pin_5);     //ÍÆÍìÊä³ö
+   45   1          P1_MODE_OUT_PP(GPIO_Pin_3);     //ÍÆÍìÊä³ö
+   46   1      }
+   47          
+   48          void CCD_Delayus(uint16_t us)
+   49          {
+   50   1          delay_us(us);
+   51   1      }
+   52          
+C251 COMPILER V5.60.0,  LQ_CCD                                                             18/11/25  13:07:46  PAGE 2   
+
+   53          /**
+   54            * @brief    CCD²É¼¯º¯Êý
+   55            *
+   56            * @param    p  £º  ´æ·Å²É¼¯Êý¾ÝµÄÊ×µØÖ·
+   57            *
+   58            * @return   ÎÞ
+   59            *
+   60            * @note     
+   61            *
+   62            * @example  uint16_t ccd_buf[128];
+   63            *           CCD_Collect(ccd_buf); 
+   64            *
+   65          */
+   66          void CCD_Collect(uint16_t *p)
+   67          {
+   68   1              unsigned char i;
+   69   1              unsigned int  temp = 0;
+   70   1          {
+   71   2              CCD1_SI_H;              // SI  = 1 
+   72   2              CCD_Delayus(1);
+   73   2              CCD1_CLK_H;             // CLK = 1 
+   74   2              CCD_Delayus(1);
+   75   2              CCD1_SI_L;              // SI  = 0 
+   76   2              CCD_Delayus(1);
+   77   2      
+   78   2              for(i=0; i<128; i++) 
+   79   2              {
+   80   3                  CCD_Delayus(1);
+   81   3                  CCD1_CLK_H;         // CLK = 1 
+   82   3                  CCD_Delayus(1);
+   83   3                  temp = CCD1_AO_GET();       
+   84   3                  *p++ = temp;     
+   85   3                  CCD1_CLK_L;        // CLK = 0 
+   86   3              }
+   87   2              CCD_Delayus(1);
+   88   2              CCD1_CLK_H;            // CLK = 1 
+   89   2              CCD_Delayus(1);
+   90   2              CCD1_CLK_L;            // CLK = 0 
+   91   2          }
+   92   1      
+   93   1      }
+   94          
+   95          
+   96          /*******************************************************************
+   97           * º¯ÊýÃû£ºvoid ccd_binaryzation(uint16_t threshold, uint16_t *ccd_data, uint8_t *bin_ccd)
+   98           * ¹¦  ÄÜ£ºCCD¶þÖµ»¯´¦Àí,²¢ÂË²¨
+   99           * ²Î  Êý£ºÎÞ
+  100           * ·µ»ØÖµ: ÎÞ
+  101           ******************************************************************/
+  102          void ccd_binaryzation(uint16_t threshold, uint16_t *ccd_data, uint8_t *bin_ccd)
+  103          {
+  104   1          u8 i = 0;
+  105   1          for (i = 0; i < 128; i++)  //¶þÖµ»¯
+  106   1          {
+  107   2              if (*ccd_data++ >= threshold)
+  108   2              {
+  109   3                  *bin_ccd++ = 1;
+  110   3              }
+  111   2              else
+  112   2              {
+  113   3                  *bin_ccd++ = 0;
+  114   3              }
+  115   2          }
+  116   1      
+  117   1          Bin_CCD_Filter();//½«¶þÖµ»¯ºóµÄÊý¾Ý½øÐÐÂË²¨£¬²¢±£´æµ½È«¾ÖÊý¾ÝÖÐ
+  118   1      }
+C251 COMPILER V5.60.0,  LQ_CCD                                                             18/11/25  13:07:46  PAGE 3   
+
+  119          
+  120          /*******************************************************************
+  121           * º¯ÊýÃû£ºuint16_t ccd_get_threshold(uint16_t ccd_data[CCD_W])
+  122           * ¹¦  ÄÜ£ºCCD¼ÆËã¶¯Ì¬ãÐÖµ
+  123           * ²Î  Êý£ºccd_data[CCD_W]
+  124           * ·µ»ØÖµ: ãÐÖµ((value1_max + value1_min) / 2)
+  125           ******************************************************************/
+  126          uint16_t ccd_get_threshold(uint16_t ccd_data[128])
+  127          {
+  128   1          uint8_t i = 0;
+  129   1          uint16_t value1_max, value1_min;
+  130   1          value1_max = ccd_data[0];
+  131   1          value1_min = ccd_data[0];
+  132   1          ccd_data += 5;
+  133   1          for (i = 5; i < 123; i++)
+  134   1          {
+  135   2              if (value1_max <= ccd_data[i])
+  136   2                  value1_max = ccd_data[i];
+  137   2              else if (value1_min >= ccd_data[i])
+  138   2                  value1_min = ccd_data[i];
+  139   2          }
+  140   1      
+  141   1          return ((value1_max + value1_min) / 2);
+  142   1      }
+  143          
+  144          
+  145          /*******************************************************************
+  146           * º¯ÊýÃû£ºuint16_t ccd_get_error(uint8_t bin_ccd[CCD_W], uint8_t ccd_x)
+  147           * ¹¦  ÄÜ£º»ñÈ¡CCD±ßÏß£¬¼ÆËãÈüµÀÆ«²îÖµ
+  148           * ²Î  Êý£º¶þÖµ»¯µÄCCDÊý¾ÝÊý×é ccd_data[CCD_W],CCDÇø·Ö£¬Ò»¸öº¯ÊýÊµÏÖ»ñÈ¡±ßÏßºÍÖÐÏßÆ«²î»ñÈ¡
+  149           * ·µ»ØÖµ: ¸ù¾Ý×óÓÒ±ßÏß¼ÆËãÖÐÏßÆ«²î
+  150           ******************************************************************/
+  151          uint16_t ccd_get_error(uint8_t bin_ccd[128])
+  152          {
+  153   1          uint8_t i = 0, j = 0;
+  154   1          char Left, Right;
+  155   1          j = 64; // ´ÓÖÐ¼äÏòÁ½±ßÕÒ±ßÏß
+  156   1          if (bin_ccd[64] == 0)
+  157   1          {
+  158   2              for (i = 0; i < (64 - 3); i++)
+  159   2              {
+  160   3                  if ((bin_ccd[j - i] + bin_ccd[j - i - 1] + bin_ccd[j - i - 2]) == 3) // ×ó¶ªÏß
+  161   3                  {
+  162   4                      return -64;
+  163   4                  }
+  164   3                  if ((bin_ccd[j + i] + bin_ccd[j + i + 1] + bin_ccd[j + i + 2]) == 3) // ÓÒ¶ªÏß
+  165   3                  {
+  166   4                      return 64;
+  167   4                  }
+  168   3              }
+  169   2              return 200; // ¡¡Á½±ß¶¼¶ªÏß
+  170   2          }
+  171   1          else
+  172   1          {
+  173   2      //        LED_Ctrl(LED0, RVS);
+  174   2              i = j = 64;
+  175   2              for (i = 64; i >= 3; i--) // ´ÓÖÐ¼äÏò×óÕÒ±ßÏß Ñ°ÕÒÌø±äµãÌáÈ¡±ßÏß
+  176   2              {
+  177   3                  if ((bin_ccd[i - 1] + bin_ccd[i - 2] + bin_ccd[i - 3]) == 0) // i×ó±ßÈ«Îª0
+  178   3                  {
+  179   4                      if ((bin_ccd[i + 1] + bin_ccd[i + 2] + bin_ccd[i + 3]) == 3) // iÓÒ±ßÈ«Îª1 ÔòiÎª×ó±ßÏß
+  180   4                      {
+  181   5                          Left = i;
+  182   5                          break;
+  183   5                      }
+  184   4                  }
+C251 COMPILER V5.60.0,  LQ_CCD                                                             18/11/25  13:07:46  PAGE 4   
+
+  185   3                  if (i <= 3) // ×îÐ¡±ßÏßÎª3
+  186   3                      Left = 3;
+  187   3              }
+  188   2      
+  189   2              for (j = 64; j <= 125; j++) // ´ÓÖÐ¼äÏòÓÒÕÒ±ßÏß Ñ°ÕÒÌø±äµãÌáÈ¡±ßÏß
+  190   2              {
+  191   3                  if ((bin_ccd[j + 1] + bin_ccd[j + 2] + bin_ccd[j + 3]) == 0) // ÓÒ±ßÈ«Îª0
+  192   3                  {
+  193   4                      if ((bin_ccd[j - 1] + bin_ccd[j - 2] + bin_ccd[j - 3]) == 3) // j×ó±ßÈ«Îª1£¬iÎªÓÒ±ßÏß
+  194   4                      {
+  195   5                          Right = j;
+  196   5                          break;
+  197   5                      }
+  198   4                  }
+  199   3                  if (j >= 125) // ×î´ó±ßÏßÎª125
+  200   3                      Right = 125;
+  201   3              }
+  202   2              return (Left + Right - 128); // ¸ù¾Ý×óÓÒ±ßÏß¼ÆËãÈüµÀÖÐÏß
+  203   2          }
+  204   1      }
+  205          
+  206          /*******************************************************************
+  207           * º¯ÊýÃû£ºvoid Bin_CCD_Filter(char ccd_n)
+  208           * ¹¦  ÄÜ£º¶Ô¶þÖµ»¯ºóµÄCCDÊý¾Ý½øÐÐ¼òµ¥ÂË²¨´¦Àí
+  209           * ·µ»ØÖµ: ÎÞ
+  210           ******************************************************************/
+  211          void Bin_CCD_Filter()
+  212          {
+  213   1          u8 i = 0;
+  214   1          for (i = 1; i < 128; i++)
+  215   1          {
+  216   2              if (CCD1_Bin[i] == 1 && CCD1_Bin[i - 1] == 0 && CCD1_Bin[i + 1] == 0) // Èç¹ûÇ°Ò»¸öÏñËØµãºÍºóÒ»¸ö
+             -ÏñËØµã¶¼Îª0 Ôò´ËÏñËØµãÎª0
+  217   2              {
+  218   3                  CCD1_Bin[i] = 0;
+  219   3              }
+  220   2              else if (CCD1_Bin[i] == 0 && CCD1_Bin[i - 1] == 1 && CCD1_Bin[i + 1] == 1) // Èç¹ûÇ°Ò»¸öÏñËØµãºÍº
+             -óÒ»¸öÏñËØµã¶¼Îª1 Ôò´ËÏñËØµãÎª1
+  221   2              {
+  222   3                  CCD1_Bin[i] = 1;
+  223   3              }
+  224   2          }
+  225   1      }
+  226          
+  227          /**
+  228            * @brief    ²âÊÔCCD  OLED»­Í¼
+  229            *
+  230            * @param    ÎÞ
+  231            *
+  232            * @return   ÎÞ
+  233            *
+  234            * @note     
+  235            *
+  236            * @example  
+  237            *
+  238          */
+  239          void Test_CCD()
+  240          {
+  241   1              uint32_t xdata now_time = 0;
+  242   1              uint16_t xdata ccd_buf[128];
+  243   1              static uint8_t xdata count = 0;
+  244   1              uint8_t xdata i = 0;
+  245   1              
+  246   1              GPIO_LED_Init();                //LED³õÊ¼»¯
+  247   1              OLED_Init();
+  248   1          OLED_CLS();
+C251 COMPILER V5.60.0,  LQ_CCD                                                             18/11/25  13:07:46  PAGE 5   
+
+  249   1          
+  250   1              CCD1_Init();            //  CCD³õÊ¼»¯
+  251   1          
+  252   1              OLED_P8x16Str(15,0,"LQ CCD Test");      
+  253   1              
+  254   1              while(1)
+  255   1              {
+  256   2              /* ²É¼¯ccdÍ¼Ïñ */
+  257   2              CCD_Collect(ccd_buf);
+  258   2              ccd_binaryzation(THRESHOLD, ccd_buf, CCD1_Bin); // ¡¡¶þÖµ»¯²¢ÂË²¨,ºÄÊ±Ô¼0.1ms
+  259   2              /* OLED ÏÔÊ¾ */
+  260   2       
+  261   2              for(i=0; i<128; i++)
+  262   2              {
+  263   3                  OLED_Set_Pos(i , 7); 
+  264   3      
+  265   3                  if(CCD1_Bin[i] > 0)    //ÏÔÊ¾¶þÖµ»¯ºóµÄ     
+  266   3                      OLED_WrDat(0xFF);       //»­µã
+  267   3                  else
+  268   3                      OLED_WrDat(0x00);                   
+  269   3      //            if(ccd_buf[i] > THRESHOLD)//ÏÔÊ¾Ô­Ê¼                      
+  270   3      //                OLED_WrDat(0xFF);
+  271   3      //            else
+  272   3      //                OLED_WrDat(0x00);     
+  273   3              }
+  274   2              LED_Ctrl(LED0,RVS);
+  275   2      
+  276   2              delay_ms(100);
+  277   2          }
+  278   1      }
+  279          
+  280          
+  281          
+*** WARNING C183 IN LINE 69 OF ..\lq_libraries\LQ_LIB\Src\LQ_CCD.c: dead assignment eliminated
+*** WARNING C184 IN LINE 202 OF ..\lq_libraries\LQ_LIB\Src\LQ_CCD.c: value of 'Left' possibly undefined
+*** WARNING C184 IN LINE 202 OF ..\lq_libraries\LQ_LIB\Src\LQ_CCD.c: value of 'Right' possibly undefined
+*** WARNING C183 IN LINE 241 OF ..\lq_libraries\LQ_LIB\Src\LQ_CCD.c: dead assignment eliminated
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       837     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =       129        268
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        18     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  4 WARNING(S),  0 ERROR(S)

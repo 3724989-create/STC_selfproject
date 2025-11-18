@@ -1,0 +1,394 @@
+C251 COMPILER V5.60.0,  LQ_HI2C_Gyro                                                       18/11/25  13:12:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_HI2C_Gyro
+OBJECT MODULE PLACED IN .\out_file\LQ_HI2C_Gyro.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c LARGE NOALIAS FLOAT64 WARNINGLEV
+                    -EL(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\
+                    -..\libraries\zf_driver;..\user;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_libraries\Dr
+                    -iver\Inc) DEBUG PRINT(.\out_file\LQ_HI2C_Gyro.lst) OBJECT(.\out_file\LQ_HI2C_Gyro.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           ¡¾Æ½    Ì¨¡¿±±¾©ÁúÇñÖÇÄÜ¿Æ¼¼STC32Î»ºËÐÄ°å
+    3           ¡¾±à    Ð´¡¿ÁúÇñ¿Æ¼¼
+    4           ¡¾E-mail  ¡¿chiusir@163.com
+    5           ¡¾Èí¼þ°æ±¾¡¿V1.0 °æÈ¨ËùÓÐ£¬µ¥Î»Ê¹ÓÃÇëÏÈÁªÏµÊÚÈ¨
+    6           ¡¾Ïà¹ØÐÅÏ¢²Î¿¼ÏÂÁÐµØÖ·¡¿
+    7           ¡¾Íø    Õ¾¡¿http://www.lqist.cn
+    8           ¡¾ÌÔ±¦µêÆÌ¡¿http://longqiu.taobao.com
+    9           --------------------------------------------------------------------------------
+   10           ¡¾  IDE  ¡¿ keil C251 V5.60
+   11           ¡¾Target ¡¿ STC32G/STC8051U/AI8051U 32Î»Ä£Ê½
+   12           ¡¾SYS CLK¡¿ 42 MHzÊ¹ÓÃÄÚ²¿¾§Õñ
+   13          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   14          
+   15          #include "LQ_HI2C_Gyro.h"
+   16          
+   17          
+   18          //extern signed short  aacx,aacy,aacz;            //¼ÓËÙ¶È´«¸ÐÆ÷Ô­Ê¼Êý¾Ý
+   19          //extern signed short  gyrox,gyroy,gyroz;         //ÍÓÂÝÒÇÔ­Ê¼Êý¾Ý
+   20          //extern short magx, magy, magz;
+   21          
+   22          
+   23          #define Dev_add 0xD0
+   24          Dev dev_Name;
+   25          
+   26          /**************************************************************************
+   27            * @brief   ÍÓÂÝÒÇ²âÊÔº¯Êý
+   28            * @param   void
+   29            * @retur   void
+   30            * @see      Test_HardIIC_Gyro();
+   31            * @date     2024/05/21 ÐÇÆÚ¶þ
+   32                  * ±¸×¢  ²âÊÔÍÓÂÝÒÇ¼ÓËÙ¶È¼Æ£¬²ÉÓÃÓ²¼þIIC·½Ê½£¬¿ÉÒÔÐÞ¸ÄIIC³õÊ¼»¯º¯ÊýµÄÈë¿Ú²ÎÊý Ñ¡Ôñ²»Í¬µÄÒý½Å
+   33          **************************************************************************/
+   34          void Test_HardIIC_Gyro(void)
+   35          {
+   36   1          signed short  aacx,aacy,aacz;            //¼ÓËÙ¶È´«¸ÐÆ÷Ô­Ê¼Êý¾Ý
+   37   1          signed short  gyrox,gyroy,gyroz;         //ÍÓÂÝÒÇÔ­Ê¼Êý¾Ý
+   38   1          short magx, magy, magz;
+   39   1              unsigned char DATH[6], DATL[6];
+   40   1              unsigned char ID;
+   41   1              char txt[64];
+   42   1      
+   43   1              //Ó²¼þIIC³õÊ¼»¯£¬0:Ê¹ÓÃP2.4ÓëP2.3Òý½Å   1£ºÊ¹ÓÃP1.5 P1.4Òý½Å  2£ºÊ¹ÓÃP3.2ÓëP3.3Òý½Å
+   44   1              Hard_IIC_Init(1);
+   45   1      
+   46   1              OLED_CLS();                 //LCDÇåÆÁ
+   47   1      
+   48   1              ID = Get_Slave_ID();                            //¼ì²âÐÍºÅ
+   49   1              sprintf(txt,"ID:0X%2x",ID);
+   50   1              OLED_P6x8Str(70,2,txt);     // ×Ö·û´®ÏÔÊ¾ID
+   51   1      
+   52   1              switch(dev_Name)
+   53   1              {
+   54   2                      case ICM20602:OLED_P8x16Str(0,0,"LQ ICM20602 Test"); break;// ×Ö·û´®ÏÔÊ¾
+   55   2                      case MPU9250:OLED_P8x16Str(0,0,"LQ MPU9250 Test"); break;// ×Ö·û´®ÏÔÊ¾
+   56   2                      case ICM20689:OLED_P8x16Str(0,0,"LQ ICM20689 Test"); break;// ×Ö·û´®ÏÔÊ¾
+C251 COMPILER V5.60.0,  LQ_HI2C_Gyro                                                       18/11/25  13:12:28  PAGE 2   
+
+   57   2                      case ICM42605:OLED_P8x16Str(0,0,"LQ ICM42605 Test"); break;// ×Ö·û´®ÏÔÊ¾
+   58   2                      case MPU6050:OLED_P8x16Str(0,0,"LQ MPU6050 Test"); break;// ×Ö·û´®ÏÔÊ¾
+   59   2                      case errorid:OLED_P8x16Str(0,0,"LQ Test fail"); while(1);// ×Ö·û´®ÏÔÊ¾
+   60   2              }
+   61   1      
+   62   1              Gyro_Init();
+   63   1      
+   64   1              while(1)
+   65   1              {
+   66   2                      //µÃµ½¼ÓËÙ¶È´«¸ÐÆ÷Êý¾Ý
+   67   2                      DATH[0] = Hard_IIC_Read_MPU_Byte(Dev_add,0x3B);DATL[0] = Hard_IIC_Read_MPU_Byte(Dev_add,0x3C);
+   68   2                      DATH[1] = Hard_IIC_Read_MPU_Byte(Dev_add,0x3D);DATL[1] = Hard_IIC_Read_MPU_Byte(Dev_add,0x3E);
+   69   2                      DATH[2] = Hard_IIC_Read_MPU_Byte(Dev_add,0x3F);DATL[2] = Hard_IIC_Read_MPU_Byte(Dev_add,0x40);
+   70   2                      DATH[3] = Hard_IIC_Read_MPU_Byte(Dev_add,0x43);DATL[3] = Hard_IIC_Read_MPU_Byte(Dev_add,0x44);
+   71   2                      DATH[4] = Hard_IIC_Read_MPU_Byte(Dev_add,0x45);DATL[4] = Hard_IIC_Read_MPU_Byte(Dev_add,0x46);
+   72   2                      DATH[5] = Hard_IIC_Read_MPU_Byte(Dev_add,0x47);DATL[5] = Hard_IIC_Read_MPU_Byte(Dev_add,0x48);
+   73   2                      //Êý¾Ý×ª»»
+   74   2                      aacx = DATH[0]; aacx = (aacx<<8)|DATL[0];
+   75   2                      aacy = DATH[1]; aacy = (aacy<<8)|DATL[1];
+   76   2                      aacz = DATH[2]; aacz = (aacz<<8)|DATL[2];
+   77   2                      gyrox = DATH[3]; gyrox = (gyrox<<8)|DATL[3];
+   78   2                      gyroy = DATH[4]; gyroy = (gyroy<<8)|DATL[4];
+   79   2                      gyroz = DATH[5]; gyroz = (gyroz<<8)|DATL[5];
+   80   2      
+   81   2                      if(dev_Name == MPU9250)
+   82   2                      {
+   83   3                              DATH[0] = Hard_IIC_Read_MPU_Byte(Dev_add,0X03);DATL[0] = Hard_IIC_Read_MPU_Byte(Dev_add,0X04);
+   84   3                              DATH[1] = Hard_IIC_Read_MPU_Byte(Dev_add,0X05);DATL[1] = Hard_IIC_Read_MPU_Byte(Dev_add,0X06);
+   85   3                              DATH[2] = Hard_IIC_Read_MPU_Byte(Dev_add,0X07);DATL[2] = Hard_IIC_Read_MPU_Byte(Dev_add,0X08);
+   86   3                              magx = DATH[0]; magx = (magx<<8)|DATL[0];
+   87   3                              magy = DATH[1]; magy = (magy<<8)|DATL[1];
+   88   3                              magz = DATH[2]; magz = (magz<<8)|DATL[2];
+   89   3                              sprintf((char*)txt,"gx:%06d",gyrox);
+   90   3                              OLED_P6x8Str(70,5,txt);
+   91   3                              sprintf((char*)txt,"gy:%06d",gyroy);
+   92   3                              OLED_P6x8Str(70,6,txt);
+   93   3                              sprintf((char*)txt,"gz:%06d",gyroz);
+   94   3                              OLED_P6x8Str(70,7,txt);
+   95   3                      }
+   96   2                      sprintf((char*)txt,"ax:%06d",aacx);
+   97   2                      OLED_P6x8Str(0,2,txt);
+   98   2                      sprintf((char*)txt,"ay:%06d",aacy);
+   99   2                      OLED_P6x8Str(0,3,txt);
+  100   2                      sprintf((char*)txt,"az:%06d",aacz);
+  101   2                      OLED_P6x8Str(0,4,txt);
+  102   2                      sprintf((char*)txt,"gx:%06d",gyrox);
+  103   2                      OLED_P6x8Str(0,5,txt);
+  104   2                      sprintf((char*)txt,"gy:%06d",gyroy);
+  105   2                      OLED_P6x8Str(0,6,txt);
+  106   2                      sprintf((char*)txt,"gz:%06d",gyroz);
+  107   2                      OLED_P6x8Str(0,7,txt);
+  108   2      
+  109   2                      LED_Ctrl(LED0,RVS);        //LEDÉÁË¸
+  110   2                      delay_ms(100);
+  111   2              }
+  112   1      }
+  113          
+  114          /**************************************************************************
+  115            * @brief   ¶ÁÈ¡ÍÓÂÝÒÇµÄÉè±¸ID
+  116            * @param   void
+  117            * @retur   ID
+  118            * @see      Get_Slave_ID();
+  119            * @date     2024/05/21 ÐÇÆÚ¶þ
+  120          **************************************************************************/
+  121          unsigned char Get_Slave_ID(void)
+  122          {
+C251 COMPILER V5.60.0,  LQ_HI2C_Gyro                                                       18/11/25  13:12:28  PAGE 3   
+
+  123   1              unsigned char ID;
+  124   1      
+  125   1              //¶ÁÈ¡Éè±¸ID£¬ËùÓÐÍÓÂÝÒÇµÄID¶¼ÊÇ0xD0,²¢ÇÒ´æ·ÅIDµÄ¼Ä´æÆ÷¶¼ÊÇ0X7F
+  126   1              ID = Hard_IIC_Read_MPU_Byte(Dev_add,WHO_AM_I);
+*** ERROR C67 IN LINE 126 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'WHO_AM_I': undefined identifier
+*** WARNING C96 IN LINE 126 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Read_MPU_Byte': too few actual param
+             -eters
+  127   1              switch(ID)
+  128   1              {
+  129   2                      case 0x09:dev_Name = ICM20602;break;
+  130   2                      case 0x38:dev_Name = MPU9250 ;break;
+  131   2                      case 0x4C:dev_Name = ICM20689;break;
+  132   2                      case 0x21:dev_Name = ICM42605;break;
+  133   2                      case 0x34:dev_Name = MPU6050 ;break;
+  134   2                      default :dev_Name = errorid ;return 0;
+  135   2              }
+  136   1              return ID;
+  137   1      }
+  138          
+  139          
+  140          /**************************************************************************
+  141            * @brief    ³õÊ¼»¯ÍÓÂÝÒÇ
+  142            * @param    ÎÞ
+  143            * @return   0£º³õÊ¼»¯³É¹¦   1£ºÊ§°Ü
+  144            * @note     Ê¹ÓÃÇ°ÏÈ³õÊ¼»¯IIC½Ó¿Ú
+  145            * @see      MPU6050_Init();
+  146            * @date     2019/6/12 ÐÇÆÚÈý
+  147            *************************************************************************/
+  148          unsigned char Gyro_Init(void)
+  149          {
+  150   1              unsigned char res;
+  151   1              unsigned char  dat, Accel_Fsr = 1, Gyro_Fsr = 3;
+  152   1              int rate = 1000;
+  153   1              switch(dev_Name)
+  154   1              {
+  155   2                      case ICM42605:
+  156   2              {
+  157   3                  OLED_P8x16Str(0,3,"ICM42605 NO CARE");
+  158   3      //            while(1);
+  159   3              }break;
+  160   2                      case MPU9250:
+  161   2              {
+  162   3                  Hard_IIC_Write_MPU_Byte(Dev_add,MPU_FIFO_EN_REG,0X00);  //¹Ø±ÕFIFO
+*** ERROR C67 IN LINE 162 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_FIFO_EN_REG': undefined identifier
+*** WARNING C96 IN LINE 162 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  163   3                  Hard_IIC_Write_MPU_Byte(Dev_add,MPU_INTBP_CFG_REG,0X82);//INTÒý½ÅµÍµçÆ½ÓÐÐ§£¬¿ªÆôbypassÄ£Ê½
+*** ERROR C67 IN LINE 163 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_INTBP_CFG_REG': undefined identifier
+*** WARNING C96 IN LINE 163 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  164   3                  res = Hard_IIC_Read_MPU_Byte(AK8963_ADDR,MPU_MAG_WIA);   //¶ÁÈ¡MPU9250µÄID
+*** ERROR C67 IN LINE 164 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'AK8963_ADDR': undefined identifier
+*** ERROR C67 IN LINE 164 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_MAG_WIA': undefined identifier
+*** WARNING C96 IN LINE 164 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Read_MPU_Byte': too few actual param
+             -eters
+  165   3                  if(res == AK8963_ID)                                //Æ÷¼þIDÕýÈ·
+*** ERROR C67 IN LINE 165 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'AK8963_ID': undefined identifier
+  166   3                  {
+  167   4                      Hard_IIC_Write_MPU_Byte(AK8963_ADDR,MPU_MAG_CNTL2_REG,0X01);//Èí¼þÖØÖÃ
+*** ERROR C67 IN LINE 167 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'AK8963_ADDR': undefined identifier
+*** ERROR C67 IN LINE 167 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_MAG_CNTL2_REG': undefined identifier
+*** WARNING C96 IN LINE 167 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  168   4                      delay_ms(100);
+  169   4                      Hard_IIC_Write_MPU_Byte(AK8963_ADDR,MPU_MAG_CNTL1_REG,0X16);//ÉèÖÃÎªµ¥´ÎÄ£Ê½£¬Êä³ö16bit
+*** ERROR C67 IN LINE 169 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'AK8963_ADDR': undefined identifier
+C251 COMPILER V5.60.0,  LQ_HI2C_Gyro                                                       18/11/25  13:12:28  PAGE 4   
+
+*** ERROR C67 IN LINE 169 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_MAG_CNTL1_REG': undefined identifier
+*** WARNING C96 IN LINE 169 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  170   4                  }
+  171   3              }break;
+  172   2                      case ICM20602:
+  173   2              {}break;
+  174   2                      case ICM20689:
+  175   2              {}break;
+  176   2                      case MPU6050:
+  177   2              {
+  178   3                  res = 0;
+  179   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_PWR_MGMT1_REG,0X80);//¸´Î»MPU6050
+*** ERROR C67 IN LINE 179 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_PWR_MGMT1_REG': undefined identifier
+*** WARNING C96 IN LINE 179 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  180   3                  delay_ms(100);  //ÑÓÊ±100ms
+  181   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_PWR_MGMT1_REG,0X00);//»½ÐÑMPU6050
+*** ERROR C67 IN LINE 181 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_PWR_MGMT1_REG': undefined identifier
+*** WARNING C96 IN LINE 181 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  182   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_GYRO_CFG_REG,Gyro_Fsr<<3);                                                          //ÍÓÂÝÒ
+             -Ç´«¸ÐÆ÷,¡À2000dps
+*** ERROR C67 IN LINE 182 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_GYRO_CFG_REG': undefined identifier
+*** WARNING C96 IN LINE 182 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  183   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_ACCEL_CFG_REG,Accel_Fsr<<3);                                                //¼ÓËÙ
+             -¶È´«¸ÐÆ÷,¡À4g
+*** ERROR C67 IN LINE 183 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_ACCEL_CFG_REG': undefined identifier
+*** WARNING C96 IN LINE 183 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  184   3                  if(rate>1000) rate = 1000;
+  185   3                  if(rate<4) rate=4;
+  186   3                  dat = 1000/rate-1;
+  187   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_SAMPLE_RATE_REG,dat);        //ÉèÖÃÊý×ÖµÍÍ¨ÂË²¨Æ÷  Éè
+             -ÖÃ²ÉÑùÂÊ1000Hz
+*** ERROR C67 IN LINE 187 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_SAMPLE_RATE_REG': undefined identifier
+*** WARNING C96 IN LINE 187 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  188   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_CFG_REG,0x02);      //ÉèÖÃÊý×ÖµÍÍ¨ÂË²¨Æ÷   98hz
+*** ERROR C67 IN LINE 188 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_CFG_REG': undefined identifier
+*** WARNING C96 IN LINE 188 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  189   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_INT_EN_REG,0X00);   //¹Ø±ÕËùÓÐÖÐ¶Ï
+*** ERROR C67 IN LINE 189 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_INT_EN_REG': undefined identifier
+*** WARNING C96 IN LINE 189 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  190   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_USER_CTRL_REG,0X00);//I2CÖ÷Ä£Ê½¹Ø±Õ
+*** ERROR C67 IN LINE 190 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_USER_CTRL_REG': undefined identifier
+*** WARNING C96 IN LINE 190 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  191   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_PWR_MGMT1_REG,0X01);//ÉèÖÃCLKSEL,PLL XÖáÎª²Î¿¼
+*** ERROR C67 IN LINE 191 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_PWR_MGMT1_REG': undefined identifier
+*** WARNING C96 IN LINE 191 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  192   3                  res += Hard_IIC_Write_MPU_Byte(Dev_add,MPU_PWR_MGMT2_REG,0X00);//¼ÓËÙ¶ÈÓëÍÓÂÝÒÇ¶¼¹¤×÷
+*** ERROR C67 IN LINE 192 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'MPU_PWR_MGMT2_REG': undefined identifier
+*** WARNING C96 IN LINE 192 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Write_MPU_Byte': too few actual para
+             -meters
+  193   3      
+  194   3              }break;
+  195   2              case errorid: break;
+  196   2      
+  197   2              }
+  198   1              return 0;
+  199   1      }
+C251 COMPILER V5.60.0,  LQ_HI2C_Gyro                                                       18/11/25  13:12:28  PAGE 5   
+
+  200          
+  201          
+  202          ////////////////////////////////////Çý¶¯³ÌÐò////////////////////////////////////////////////
+  203          
+  204          
+  205          /**************************************************************************
+  206            * @brief    ÍÓÂÝÒÇ ¶ÁÒ»¸ö¼Ä´æÆ÷
+  207            *
+  208            * @param    addr  :Æ÷¼þµØÖ·
+  209            * @param    reg   :¼Ä´æÆ÷µØÖ·
+  210            *
+  211            * @return   ¶ÁÈ¡µÄÖµ
+  212            *
+  213            * @note     µ×²ãÇý¶¯ ÒÆÖ²Ê±ÐèÒªÐÞ¸Ä
+  214            *
+  215            * @see      Hard_IIC_Read_MPU_Byte(Dev_add,WHO_AM_I);
+  216            *
+  217            * @date     2019/6/12 ÐÇÆÚÈý
+  218          **************************************************************************/
+  219          unsigned char Hard_IIC_Read_MPU_Byte(unsigned char addr,unsigned char reg)
+  220          {
+  221   1              unsigned char res, Read_addr;
+  222   1              Read_addr = addr+1;
+  223   1              Hard_IIC_Start();                                                       //ÆðÊ¼ÐÅºÅ
+*** WARNING C140 IN LINE 223 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Start' undefined; assuming 'extern 
+             -int Hard_IIC_Start()'
+  224   1              Hard_IIC_SendData(addr);                        //·¢ËÍÉè±¸µØÖ·
+*** WARNING C140 IN LINE 224 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData' undefined; assuming 'exte
+             -rn int Hard_IIC_SendData()'
+*** WARNING C95 IN LINE 224 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData': too many actual parameter
+             -s
+*** WARNING C191 IN LINE 224 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData()': potential runtime prob
+             -lem with K&R parameters
+  225   1              Hard_IIC_RecvACK();                                             //µÈ´ý»Ø¸´
+*** WARNING C140 IN LINE 225 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_RecvACK' undefined; assuming 'exter
+             -n int Hard_IIC_RecvACK()'
+  226   1              Hard_IIC_SendData(reg);                         //·¢ËÍ¼Ä´æÆ÷µØÖ·
+*** WARNING C95 IN LINE 226 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData': too many actual parameter
+             -s
+*** WARNING C191 IN LINE 226 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData()': potential runtime prob
+             -lem with K&R parameters
+  227   1              Hard_IIC_RecvACK();                                             //µÈ´ý»Ø¸´
+  228   1      
+  229   1              Hard_IIC_Start();                                                       //·¢ËÍÆðÊ¼ÐÅºÅ
+  230   1              Hard_IIC_SendData(Read_addr);   //·¢ËÍÉè±¸µØÖ·+1 £¨Îª¶ÁÈ¡¸ÃµØÖ·µÄÐÅºÅ£©
+*** WARNING C95 IN LINE 230 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData': too many actual parameter
+             -s
+*** WARNING C191 IN LINE 230 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData()': potential runtime prob
+             -lem with K&R parameters
+  231   1              res = Hard_IIC_RecvData();              //¶ÁÈ¡Êý¾Ý
+*** WARNING C140 IN LINE 231 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_RecvData' undefined; assuming 'exte
+             -rn int Hard_IIC_RecvData()'
+  232   1              Hard_IIC_SendNAK();                                             //·´À¡ÐÅºÅ
+*** WARNING C140 IN LINE 232 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendNAK' undefined; assuming 'exter
+             -n int Hard_IIC_SendNAK()'
+  233   1              Hard_IIC_Stop();                                                        //Í£Ö¹ÐÅºÅ
+*** WARNING C140 IN LINE 233 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_Stop' undefined; assuming 'extern i
+             -nt Hard_IIC_Stop()'
+  234   1      
+  235   1              return res;
+  236   1      }
+  237          
+  238          
+  239          
+  240          /**************************************************************************
+  241            * @brief    ÍÓÂÝÒÇ Ð´Ò»¸ö¼Ä´æÆ÷
+C251 COMPILER V5.60.0,  LQ_HI2C_Gyro                                                       18/11/25  13:12:28  PAGE 6   
+
+  242            *
+  243            * @param    addr  :Æ÷¼þµØÖ·
+  244            * @param    reg   :¼Ä´æÆ÷µØÖ·
+  245            * @param    value :ÒªÐ´ÈëµÄÖµ
+  246            *
+  247            * @return   0£ºÐ´³É¹¦
+  248            *
+  249            * @note     µ×²ãÇý¶¯ ÒÆÖ²Ê±ÐèÒªÐÞ¸Ä
+  250            *
+  251            * @see      Hard_IIC_Write_MPU_Byte(Dev_add,MPU_PWR_MGMT2_REG,0X00);
+  252            *
+  253            * @date     2019/6/12 ÐÇÆÚÈý
+  254          **************************************************************************/
+  255          unsigned char Hard_IIC_Write_MPU_Byte(unsigned char addr,unsigned char reg, unsigned char value)
+  256          {
+  257   1              Hard_IIC_Start();                                                       //ÆðÊ¼ÐÅºÅ
+  258   1              Hard_IIC_SendData(addr);                        //·¢ËÍÉè±¸µØÖ·
+*** WARNING C95 IN LINE 258 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData': too many actual parameter
+             -s
+*** WARNING C191 IN LINE 258 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData()': potential runtime prob
+             -lem with K&R parameters
+  259   1              Hard_IIC_RecvACK();                                             //µÈ´ý»Ø¸´
+  260   1              Hard_IIC_SendData(reg);                         //·¢ËÍ¼Ä´æÆ÷µØÖ·
+*** WARNING C95 IN LINE 260 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData': too many actual parameter
+             -s
+*** WARNING C191 IN LINE 260 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData()': potential runtime prob
+             -lem with K&R parameters
+  261   1              Hard_IIC_RecvACK();                                             //µÈ´ý»Ø¸´
+  262   1              Hard_IIC_SendData(value);                               //·¢ËÍ¼Ä´æÆ÷µØÖ·
+*** WARNING C95 IN LINE 262 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData': too many actual parameter
+             -s
+*** WARNING C191 IN LINE 262 OF ..\lq_libraries\LQ_LIB\Src\LQ_HI2C_Gyro.c: 'Hard_IIC_SendData()': potential runtime prob
+             -lem with K&R parameters
+  263   1              Hard_IIC_RecvACK();                                             //µÈ´ý»Ø¸´
+  264   1              Hard_IIC_Stop();                                                        //Í£Ö¹ÐÅºÅ
+  265   1      
+  266   1              return 0;
+  267   1      }
+  268          
+  269          
+  270          
+  271          
+  272          
+  273          
+  274          
+  275          
+  276          
+  277          
+  278          
+  279          
+
+C251 COMPILATION COMPLETE.  34 WARNING(S),  20 ERROR(S)

@@ -1,0 +1,1 @@
+"..\..\Libraries\zf_components\seekfree_assistant_inface.c" LARGE NOALIAS FLOAT64 WARNINGLEVEL (3) OPTIMIZE (SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\seekfree_assistant_inface.lst) OBJECT(.\out_file\seekfree_assistant_inface.obj)

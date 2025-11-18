@@ -57,7 +57,7 @@ uint16 tsl1401_data[2][TSL1401_DATA_LEN];                                       
 
 static uint8 tsl1401_init_state = 0;
 uint8 tsl1401_finish_flag;                                                      // TSL1401 数据准备就绪标志位
-
+uint16 calculate_dynamic_threshold(uint8 index);
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介     TSL1401 线阵 TSL1401 数据采集
 // 参数说明     void
@@ -68,6 +68,7 @@ uint8 tsl1401_finish_flag;                                                      
 void tsl1401_collect_pit_handler (void)
 {
 	uint8 i = 0;
+    uint16 threshold;
 	
     if(!tsl1401_init_state)
     {
@@ -86,6 +87,8 @@ void tsl1401_collect_pit_handler (void)
         TSL1401_CLK(0);
         tsl1401_data[0][i] = adc_convert(TSL1401_AO_PIN);
         tsl1401_data[1][i] = adc_convert(TSL1401_AO_PIN2);
+        //threshold=calculate_dynamic_threshold(0);
+        //tsl1401_binary_data_process(0,i,threshold);
         TSL1401_CLK(1);
     }
     //采集完成标志位置1
@@ -100,6 +103,41 @@ void tsl1401_collect_pit_handler (void)
 // 使用示例     tsl1401_send_data(DEBUG_UART_INDEX, 1);
 // 备注信息     调用该函数前请先初始化串口
 //-------------------------------------------------------------------------------------------------------------------
+
+uint16 calculate_dynamic_threshold(uint8 index)
+{
+    uint8 i;
+    uint16 max_l=0;
+    uint16 min_l=0xFFFF;
+    uint16 threshold;
+
+    for(i=0;i<TSL1401_DATA_LEN;i++)
+    {
+        uint16 current_l=tsl1401_data[index][i];
+        if(current_l>max_l)
+        {
+            max_l=current_l;
+        }
+        if(current_l<min_l)
+        {
+            min_l=current_l;
+        }
+    }
+    //边缘检查
+    if(max_l>min_l+100)
+    {
+        threshold = (max_l + min_l) / 2;
+    }
+    else
+    {
+        // 如果亮度差异太小（可能视野是均匀的灰色），使用一个预设的经验值
+        // 这里的 2048 仅为示例，需要根据 ADC 分辨率调整
+        threshold = 2048; 
+    }
+
+    return threshold;
+}
+
 void tsl1401_send_data (uart_index_enum uart_n, uint8 index)
 {
     uint8 i;
@@ -115,6 +153,19 @@ void tsl1401_send_data (uart_index_enum uart_n, uint8 index)
         uart_write_byte(uart_n, (uint8)(tsl1401_data[index][i] & 0xFF));                 // 发送高低8位
     }
 }
+
+void tsl1401_binary_data_process(uint8 *boundry[],uint8 i, uint8 threshold)
+{
+        if(boundry[i]>threshold)
+        {
+            boundry[i]=(uint8)128;  // 白色或反光
+        }
+        else
+        {
+              boundry[i]=(uint8)0;  // 黑色或无反射
+        }
+}
+
 
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介     TSL1401 线阵 TSL1401 初始化

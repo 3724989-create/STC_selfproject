@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 1   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE IIC
@@ -66,7 +66,7 @@ stmt  level    source
    55   1          EAXFR = 1;
    56   1          CKCON = 0;
    57   1      
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 2   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 2   
 
    58   1          // 只配置可用的P0.4-P0.7引脚为开漏模式
    59   1          // P0.4(SCL主机), P0.5(SDA主机), P0.6(SCL从机), P0.7(SDA从机)
@@ -134,7 +134,7 @@ stmt  level    source
   121   1          I2C_SDA = 0;
   122   1          I2C_Delay();
   123   1          I2C_SCL = 1;
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 3   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 3   
 
   124   1          I2C_Delay();
   125   1          I2C_SCL = 0;
@@ -202,7 +202,7 @@ stmt  level    source
   187   2                  dat |= 0x01;
   188   2              I2C_SCL = 0;
   189   2              I2C_Delay();
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 4   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 4   
 
   190   2          }
   191   1          
@@ -270,7 +270,7 @@ stmt  level    source
   253   2              return;
   254   2          }
   255   1          
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 5   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 5   
 
   256   1          if(!I2C_SendByte(addr)) {
   257   2              I2C_Stop();
@@ -338,7 +338,7 @@ stmt  level    source
   319   2              return 1;
   320   2          }
   321   1          
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 6   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 6   
 
   322   1          last_sda = current_sda;
   323   1          last_scl = current_scl;
@@ -406,7 +406,7 @@ stmt  level    source
   385   1          // 大幅减少调试输出
   386   1          if(heartbeat_counter++ > 100) {
   387   2              heartbeat_counter = 0;
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 7   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 7   
 
   388   2              gpio_toggle_level(LED1);
   389   2          }
@@ -474,7 +474,7 @@ stmt  level    source
   450   6                          }
   451   5                      uart_write_string(UART_INDEX, "[Slave] Entering transmit mode\r\n");
   452   5                      printf("[Slave] Will send: 0x%02X\r\n", send_byte);
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 8   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 8   
 
   453   5                      } else {
   454   5                      // 写操作 - 进入接收模式 (state = 2)
@@ -542,7 +542,7 @@ stmt  level    source
   516   3                      // 等待主机提供第9个时钟（ACK位）
   517   3                      if(I2C_SLAVE_SCL) {
   518   4                          // 释放SDA，让主机发送ACK/NACK
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 9   
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 9   
 
   519   4                          I2C_SLAVE_SDA = 1;
   520   4                          
@@ -610,7 +610,7 @@ stmt  level    source
   581   1      }
   582          void I2C_AutoTestProcess(void)
   583          {
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 10  
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 10  
 
   584   1          u32 msecound=pit_read();
   585   1          static u8 test_phase=0;
@@ -678,7 +678,7 @@ stmt  level    source
   647   1      //    
   648   1      //    // 处理I2C从设备通信
   649   1            I2C_Slave_Process();
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 11  
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 11  
 
   650   1      
   651   1      //     // 如果从设备接收到数据，通过串口发送
@@ -746,7 +746,7 @@ stmt  level    source
   713          {
   714   1          uart_write_string(UART_INDEX, "=== Pin Configuration Check ===\r\n");
   715   1          
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 12  
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 12  
 
   716   1          // 检查主机引脚
   717   1          printf("MASTER - SDA(P0.1): %d, SCL(P0.0): %d\r\n", I2C_SDA, I2C_SCL);
@@ -814,7 +814,7 @@ stmt  level    source
   779   1          
   780   1          // 测试总线电平
   781   1          printf("Bus levels - SDA: %d, SCL: %d\r\n", I2C_SDA, I2C_SCL);
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 13  
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 13  
 
   782   1          
   783   1          // 简单通信测试
@@ -882,7 +882,7 @@ stmt  level    source
   845          
   846          void Enhanced_Complete_Test(void)
   847          {
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 14  
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 14  
 
   848   1          u8 test_data[] = {0xAA, 0x55, 0x01, 0x02, 0x03};
   849   1          u8 read_buffer[8] = {0};
@@ -950,7 +950,7 @@ stmt  level    source
   911          void Diagnose_SCL_Problem(void)
   912          {
   913   1          printf("=== TESTING NEW I2C PINS (P0.4-P0.7) ===\r\n" );
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 15  
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 15  
 
   914   1          
   915   1          // 检查SCL引脚状态
@@ -1018,7 +1018,7 @@ stmt  level    source
 *** WARNING C183 IN LINE 572 OF ..\Hardware\IIC.c: dead assignment eliminated
 *** WARNING C183 IN LINE 572 OF ..\Hardware\IIC.c: dead assignment eliminated
 *** WARNING C183 IN LINE 638 OF ..\Hardware\IIC.c: dead assignment eliminated
-C251 COMPILER V5.60.0,  IIC                                                                15/11/25  23:21:12  PAGE 16  
+C251 COMPILER V5.60.0,  IIC                                                                18/11/25  17:07:27  PAGE 16  
 
 
 

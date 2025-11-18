@@ -1,0 +1,237 @@
+C251 COMPILER V5.60.0,  LQ_KEY                                                             18/11/25  13:39:10  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_KEY
+OBJECT MODULE PLACED IN .\OBJ_Out\LQ_KEY.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\libraries\LQ_LIB\Src\LQ_KEY.c XSMALL OPTIMIZE(6,SPEED) REGFILE(.\OBJ
+                    -_Out\LQ_STCAI32_LIB.ORC) BROWSE INCDIR(..\..\libraries\Driver;..\..\libraries\Driver\Inc;..\..\libraries\Include;..\..\l
+                    -ibraries\LQ_LIB\Inc;..\User;..\code;..\Hardware;..\..\libraries\zf_common;..\..\Libraries\zf_components;..\..\Libraries\
+                    -zf_device;..\..\Libraries\zf_driver) DEFINE(STC32G) DEBUG PRINT(.\OBJ_Out\LQ_KEY.lst) OBJECT(.\OBJ_Out\LQ_KEY.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           【平    台】北京龙邱智能科技STC32位核心板
+    3           【编    写】龙邱科技
+    4           【E-mail  】chiusir@163.com
+    5           【软件版本】V1.0 版权所有，单位使用请先联系授权
+    6           【相关信息参考下列地址】
+    7           【网    站】http://www.lqist.cn
+    8           【淘宝店铺】http://longqiu.taobao.com
+    9           --------------------------------------------------------------------------------
+   10           【  IDE  】 keil C251 V5.60
+   11           【Target 】 STC32G/STC8051U/AI8051U 32位模式
+   12           【SYS CLK】 42 MHz使用内部晶振
+   13          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   14          
+   15          
+   16          #include "include.h"
+   17          //#include "LQ_KEY.h"
+   18          /*************************************************************************
+   19          *  函数名称：void GPIO_KEY_Init(void)
+   20          *  功能说明：GPIO初始化函数
+   21          *  参数说明：无
+   22          *  函数返回：无
+   23          *  修改时间：2020年3月10日
+   24          *  备    注：
+   25          *************************************************************************/
+   26          void GPIO_KEY_Init(void)
+   27          {
+   28   1      //    GPIO_InitTypeDef GPIO_KEY_Initstu;
+   29   1      //
+   30   1      //    //P27 初始化为上拉准双向口模式
+   31   1      //    GPIO_KEY_Initstu.Pin  = GPIO_Pin_7;                 //要初始化的端口I/O  eg: GPIO_Pin_0|GPIO_Pin_2;
+   32   1      //    GPIO_KEY_Initstu.Mode = GPIO_PullUp;                //要初始化的I/O  上拉 准双向口模式
+   33   1      //    GPIO_Inilize(GPIO_P2,&GPIO_KEY_Initstu);            //将上述配置初始化到端口P2
+   34   1      //
+   35   1      //    //P45，P46 初始化为上拉准双向口模式
+   36   1      //    GPIO_KEY_Initstu.Pin  = GPIO_Pin_5|GPIO_Pin_6;
+   37   1      //    GPIO_KEY_Initstu.Mode = GPIO_PullUp;
+   38   1      //    GPIO_Inilize(GPIO_P4,&GPIO_KEY_Initstu);
+   39   1      //
+   40   1      //    //P56，P57 初始化为上拉准双向口模式
+   41   1      //    GPIO_KEY_Initstu.Pin  = GPIO_Pin_6|GPIO_Pin_7;
+   42   1      //    GPIO_KEY_Initstu.Mode = GPIO_PullUp;
+   43   1      //    GPIO_Inilize(GPIO_P5,&GPIO_KEY_Initstu);
+   44   1          
+   45   1          P2_MODE_IO_PU(GPIO_Pin_7);
+   46   1          P4_MODE_IO_PU(GPIO_Pin_5|GPIO_Pin_6);
+   47   1          P5_MODE_IO_PU(GPIO_Pin_6|GPIO_Pin_7);
+   48   1      }
+   49          
+   50          /*************************************************************************
+   51          *  函数名称：unsigned char KEY_Read(KEYn_e KEYno)
+   52          *  功能说明：读取按键状态
+   53          *  参数说明：KEYn_e KEYno按键编号
+   54          *  函数返回：按键状态，0/1
+   55          *  修改时间：2022年3月10日
+   56          *  备    注：
+C251 COMPILER V5.60.0,  LQ_KEY                                                             18/11/25  13:39:10  PAGE 2   
+
+   57          *************************************************************************/
+   58          unsigned char KEY_Read(KEYn_e KEYno)
+   59          {
+   60   1              switch(KEYno)                           //按键
+   61   1              {
+   62   2                      case KEY0:  return KEY0p;                               //母板上按键0
+   63   2                  break;
+   64   2                      case KEY1:  return KEY1p;                               //母板上按键1
+   65   2                              break;
+   66   2                      case KEY2:  return KEY2p;                       //母板上按键2
+   67   2                              break;
+   68   2      
+   69   2                      case DSW0:  return DSW0p;                               //母板上拨码开关0
+   70   2                              break;
+   71   2                      case DSW1:  return DSW1p;                               //母板上拨码开关1
+   72   2                              break;
+   73   2      
+   74   2                      case Reed_Tube:  return Reed_Tubep;     //母板上干簧管
+   75   2                              break;
+   76   2                      default:
+   77   2                  return 0xFF;
+   78   2          }
+   79   1          return 0;
+   80   1      }
+   81          
+   82          /*************************************************************************
+   83          *  函数名称：unsigned char KEY_Read_All(void)
+   84          *  功能说明：读取全部按键状态
+   85          *  参数说明：无
+   86          *  函数返回：按键组合状态，0--7八种状态
+   87          *  修改时间：2022年3月8日
+   88          *  备    注：读取三个按键状态，方便组合键使用
+   89          *************************************************************************/
+   90          unsigned char KEY_Read_All(void)
+   91          {
+   92   1              unsigned char tm=0;
+   93   1              unsigned char k0, k1, k2;
+   94   1              k0 = KEY0p;             //获取引脚状态
+   95   1              k1 = KEY1p;
+   96   1              k2 = KEY2p;
+   97   1              tm = k0 | (k1<<1) | (k2 << 2);//读取各个按键状态并编码
+   98   1              if(tm==0x07)            //没有按键按下0111
+   99   1              {
+  100   2                      return 0;
+  101   2              }
+  102   1              return  (~tm)&0X07;
+  103   1      }
+  104          
+  105          /*************************************************************************
+  106          *  函数名称：void Test_GPIO_KEY(void)
+  107          *  功能说明：测试程序
+  108          *  参数说明：无
+  109          *  函数返回：无
+  110          *  修改时间：2022年3月10日
+  111          *  备    注：按下KEY0/1/2任意键 LED全亮
+  112          *************************************************************************/
+  113          void Test_GPIO_KEY(void)
+  114          {
+  115   1              unsigned char k=0xFF, j=0xff;
+  116   1      
+  117   1              GPIO_LED_Init();
+  118   1              GPIO_KEY_Init();
+  119   1          
+  120   1              while(1)
+  121   1              {
+  122   2                      k= KEY_Read(KEY0)& KEY_Read(KEY1)& KEY_Read(KEY2);      //判断按键是否按下
+C251 COMPILER V5.60.0,  LQ_KEY                                                             18/11/25  13:39:10  PAGE 3   
+
+  123   2      //              j = KEY_Read(DSW0)& KEY_Read(DSW1);                                     //判断拨码开关是否打开
+  124   2      
+  125   2                      if(k==0) LED_Ctrl(LED0, ON);            //按下KEY0/1/2任意键 LE0亮
+  126   2                      else     LED_Ctrl(LED0, OFF);           //松开KEY0/1/2任意键 LE0灭
+  127   2      
+  128   2      //              if(j==0) LED_Ctrl(LED1, ON);            //拨码开关1/2打开 LE0亮
+  129   2      //              else     LED_Ctrl(LED1, OFF);           //拨码开关1/2打开 LE0灭
+  130   2      
+  131   2                      delay_ms(100);                          //延时等待
+  132   2              }
+  133   1       }
+  134          
+  135          
+  136          ///*************************************************************************
+  137          //*  函数名称：void Test_ComKEY_Tft(void)
+  138          //*  功能说明：测试组合按键并在彩屏显示
+  139          //*  参数说明：无
+  140          //*  函数返回：无
+  141          //*  修改时间：2024年11月11日
+  142          //*  备    注：按键状态彩屏显示
+  143          //*************************************************************************/
+  144          //void Test_ComKEY_DisPlay(void)
+  145          //{
+  146          //      u8 k=0xFF;
+  147          //
+  148          //    OLED_Init();                                              //OLED初始化
+  149          //      OLED_CLS();                                               //清屏
+  150          //      OLED_P14x16Str(0,0,(u8*)"北京龙邱智能科技");            //字符串显示
+  151          //      OLED_P6x8Str(0,2,"Long Qiu i.s.t.");                            //字符串显示
+  152          //      delay_ms(1000);                                            //延时等待
+  153          //      OLED_CLS();                                               //清屏
+  154          //      OLED_P6x8Str(0,1,"KEY Pressed:  ");                             //字符串显示
+  155          //      GPIO_KEY_Init();
+  156          //      while(1)
+  157          //      {
+  158          //              k= KEY_Read_All();
+  159          //              switch(k)
+  160          //              {
+  161          //                case NOKEYDOWN:
+  162          //                       OLED_P6x8Str(35,3,"NO key!  ");                //字符串显示
+  163          //                break;
+  164          //                case KEY0DOWN:
+  165          //                       OLED_P6x8Str(35,3,"KEY0!    ");                  //字符串显示
+  166          //                break;
+  167          //                case KEY1DOWN:
+  168          //                       OLED_P6x8Str(35,3,"KEY1!    ");                  //字符串显示
+  169          //                break;
+  170          //                case KEY2DOWN:
+  171          //                       OLED_P6x8Str(35,3,"KEY2!    ");                  //字符串显示
+  172          //                break;
+  173          //                case KEY01DOWN:
+  174          //                       OLED_P6x8Str(35,3,"KEY0&1!  ");                  //字符串显示
+  175          //                break;
+  176          //                case KEY02DOWN:
+  177          //                       OLED_P6x8Str(35,3,"KEY0&2!  ");                  //字符串显示
+  178          //                break;
+  179          //                case KEY12DOWN:
+  180          //                       OLED_P6x8Str(35,3,"KEY1&2!  ");                  //字符串显示
+  181          //                break;
+  182          //                case KEY012DOWN:
+  183          //                       OLED_P6x8Str(35,3,"KEY0&1&2!");                //字符串显示
+  184          //                break;
+  185          //                default:
+  186          //                break;
+  187          //               }
+  188          //              LED_Ctrl(LED0,RVS);                     //四个LED同时闪烁
+C251 COMPILER V5.60.0,  LQ_KEY                                                             18/11/25  13:39:10  PAGE 4   
+
+  189          //              delay_ms(50);                           //延时等待
+  190          //      }
+  191          
+  192          // }
+  193          
+  194          
+  195          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       181     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

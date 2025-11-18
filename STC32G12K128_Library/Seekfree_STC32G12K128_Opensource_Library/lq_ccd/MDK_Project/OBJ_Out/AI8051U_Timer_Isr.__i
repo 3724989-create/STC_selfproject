@@ -1,0 +1,1 @@
+"..\..\libraries\Driver\isr\AI8051U_Timer_Isr.c" XSMALL UNSIGNED_CHAR FLOAT64 BROWSE INCDIR(..\..\libraries\Driver;..\..\libraries\Include;..\..\libraries\Driver\Inc;..\..\libraries\LQ_LIB\Inc;..\User) DEFINE (AI8051U_32Bit) DEBUG PRINT(.\OBJ_Out\AI8051U_Timer_Isr.lst) OBJECT(.\OBJ_Out\AI8051U_Timer_Isr.obj)

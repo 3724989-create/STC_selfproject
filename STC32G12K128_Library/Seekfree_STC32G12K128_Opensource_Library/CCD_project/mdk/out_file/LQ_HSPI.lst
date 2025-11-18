@@ -1,0 +1,113 @@
+C251 COMPILER V5.60.0,  LQ_HSPI                                                            18/11/25  13:12:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_HSPI
+OBJECT MODULE PLACED IN .\out_file\LQ_HSPI.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\lq_libraries\LQ_LIB\Src\LQ_HSPI.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3)
+                    - OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\li
+                    -braries\zf_driver;..\user;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_libraries\Driver\
+                    -Inc) DEBUG PRINT(.\out_file\LQ_HSPI.lst) OBJECT(.\out_file\LQ_HSPI.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           【平    台】北京龙邱智能科技STC32位核心板
+    3           【编    写】龙邱科技
+    4           【E-mail  】chiusir@163.com
+    5           【软件版本】V1.1 版权所有，单位使用请先联系授权
+    6           【相关信息参考下列地址】
+    7           【网    站】http://www.lqist.cn
+    8           【淘宝店铺】http://longqiu.taobao.com
+    9           --------------------------------------------------------------------------------
+   10           【  IDE  】 keil C251 V5.60
+   11           【Target 】 STC32G/STC8051U/AI8051U 32位模式
+   12           【SYS CLK】 42 MHz使用内部晶振
+   13          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   14          
+   15          #include "LQ_HSPI.h"
+   16          #include "include.h"
+   17          
+   18          /***************************************************************
+   19           *  函数名：void HSPI_Init()
+   20           *  功  能：硬件SPI应用初始化
+   21           *  参  数：无
+   22           *  返回值：无
+   23           *  说  明：这里初始化的模式是对应SPI接口 陀螺仪的 ，其他SPI使用注意重新初始化
+   24           *          同时注意，修改对应使用的SPI管脚 和初始化参数
+   25           **************************************************************/
+   26          void HSPI_Init()
+   27          {
+   28   1          GPIO_InitTypeDef    SPI_GPIO_InitStr;
+   29   1          SPI_InitTypeDef             SPI_InitStructure;
+   30   1      #ifdef STC32G
+                   SPI_SW(SPI_P54_P40_P41_P43);                // SPI管脚选择，按组
+               #else
+   33   1          SPI_SW(SPI_P40_P41_P42_P43);                // SPI管脚选择，按组
+*** ERROR C67 IN LINE 33 OF ..\lq_libraries\LQ_LIB\Src\LQ_HSPI.c: 'SPI_P40_P41_P42_P43': undefined identifier
+   34   1      #endif
+   35   1              SPI_SS_3 = 1;                           //对应上面选择的管脚，同步修改
+   36   1          SPI_IOSW_Enable();                      //交换MMSI和MISO脚位
+   37   1          
+   38   1           //初始化串口使用收发管脚，需要与实际选择的串口保持一致
+   39   1          SPI_GPIO_InitStr.Pin  = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;      //指定要初始化的SPI管脚
+   40   1          SPI_GPIO_InitStr.Mode = GPIO_PullUp;                        //指定IO的输入或输出方式,GPIO_PullUp 准双向口
+   41   1          GPIO_Inilize(GPIO_P4,&SPI_GPIO_InitStr);                //初始化，结构体配置
+   42   1      
+   43   1              SPI_InitStructure.SPI_Mode      = SPI_Mode_Master;              //主从选择   SPI_Mode_Master, SPI_Mode_Slave
+   44   1              SPI_InitStructure.SPI_CPOL      = SPI_CPOL_Low;                 //时钟相位   SPI_CPOL_High,   SPI_CPOL_Low
+   45   1              SPI_InitStructure.SPI_CPHA      = SPI_CPHA_1Edge;               //数据边沿   SPI_CPHA_1Edge,  SPI_CPHA_2Edge
+   46   1              SPI_InitStructure.SPI_FirstBit  = SPI_MSB;                              //移位方向   SPI_MSB, SPI_LSB
+   47   1              SPI_InitStructure.SPI_Speed     = SPI_Speed_4;                  //SPI速度    SPI_Speed_4, SPI_Speed_8, SPI_Speed_16, SP
+             -I_Speed_2
+   48   1              SPI_InitStructure.SPI_SSIG      = DISABLE;                              //片选位     ENABLE, DISABLE
+   49   1          SPI_InitStructure.SPI_Enable    = ENABLE;                           //SPI启动    ENABLE, DISABLE
+   50   1              SPI_Init(&SPI_InitStructure);
+   51   1              NVIC_SPI_Init(ENABLE,Priority_3);               //中断使能, ENABLE/DISABLE; 优先级(低到高) Priority_0,Priority_1,Prio
+             -rity_2,Priority_3
+   52   1              
+   53   1      }
+C251 COMPILER V5.60.0,  LQ_HSPI                                                            18/11/25  13:12:28  PAGE 2   
+
+   54          
+   55          
+   56          /**************************************************************
+   57           *  函数名：void SPI_Write_Nbytes(u32 addr, u8 *buffer, u8 size)
+   58           *  功  能：向设备某地址写数据
+   59           *  入参数:
+   60           *  addr   : 地址参数
+   61           *  buffer : 缓冲需要写入设备的数据
+   62           *  size   : 数据块大小
+   63           *出参数: 无
+   64           *************************************************************/
+   65          void SPI_Write_NByte(unsigned char addr, unsigned char* buffer, unsigned char sizel)
+   66          {
+   67   1          SPI_SS_3  = 0;                       // enable device
+   68   1          SPI_WriteByte(addr);                //发送写命令设置起始地址
+   69   1          do{
+   70   2              SPI_WriteByte(*buffer++);       //
+   71   2              buffer++;
+   72   2          }while(--sizel);
+   73   1          SPI_SS_3  = 1;                        // disable device
+   74   1      }
+   75          
+   76          /**************************************************************
+   77           *  函数名：void SPI_Write_Nbytes(u32 addr, u8 *buffer, u8 size)写数据到设备中
+   78           *  功  能：从设备某地址读取数据
+   79           *  入参数:
+   80           *  addr   : 地址参数
+   81           *  buffer : 缓冲需要读取设备的数据
+   82           *  size   : 数据块大小
+   83           *出参数: 无
+   84           *************************************************************/
+   85          void SPI_Read_NByte(unsigned char addr, unsigned char* buffer, unsigned int sizel)
+   86          {
+   87   1          SPI_SS_3  = 0;                        //enable device
+   88   1          SPI_WriteByte(addr);                 //发送读命令
+   89   1          do{
+   90   2              *buffer = SPI_ReadByte();       //receive byte and store at buffer
+   91   2              buffer++;
+   92   2          }while(--sizel);                     //read until no_bytes is reached
+   93   1          SPI_SS_3  = 1;                        //disable device
+   94   1      }
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)

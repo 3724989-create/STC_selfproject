@@ -1,0 +1,94 @@
+C251 COMPILER V5.60.0,  AI8051U_Exti                                                       18/11/25  13:45:58  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE AI8051U_Exti
+OBJECT MODULE PLACED IN .\OBJ_Out\AI8051U_Exti.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\libraries\Driver\Src\AI8051U_Exti.c XSMALL UNSIGNED_CHAR FLOAT64 BRO
+                    -WSE INCDIR(..\..\libraries\Driver;..\..\libraries\Include;..\..\libraries\Driver\Inc;..\..\libraries\LQ_LIB\Inc;..\User)
+                    - DEFINE(AI8051U_32Bit) DEBUG PRINT(.\OBJ_Out\AI8051U_Exti.lst) OBJECT(.\OBJ_Out\AI8051U_Exti.obj) 
+
+stmt  level    source
+
+    1          /*---------------------------------------------------------------------*/
+    2          /* ------------------- Web: www.STCAI.com -----------------------------*/
+    3          /*---------------------------------------------------------------------*/
+    4          
+    5          #include "AI8051U_Exti.h"
+    6          
+    7          //========================================================================
+    8          // 函数: u8     Ext_Inilize(u8 EXT, EXTI_InitTypeDef *INTx)
+    9          // 描述: 外部中断初始化程序.
+   10          // 参数: EXT: 外部中断号, INTx: 结构参数,请参考Exti.h里的定义.
+   11          // 返回: 成功返回 SUCCESS, 错误返回 FAIL.
+   12          // 版本: V1.0, 2012-10-22
+   13          //========================================================================
+   14          u8 Ext_Inilize(u8 EXT, EXTI_InitTypeDef *INTx)
+   15          {
+   16   1              if (EXT > EXT_INT4)
+   17   1                      return FAIL; // 空操作
+   18   1      
+   19   1              if (EXT == EXT_INT0) // 外中断0
+   20   1              {
+   21   2                      IE0 = 0; // 外中断0标志位
+   22   2                      INT0_Mode(INTx->EXTI_Mode);
+   23   2                      return SUCCESS; // 成功
+   24   2              }
+   25   1      
+   26   1              if (EXT == EXT_INT1) // 外中断1
+   27   1              {
+   28   2                      IE1 = 0; // 外中断1标志位
+   29   2                      INT1_Mode(INTx->EXTI_Mode);
+   30   2                      return SUCCESS; // 成功
+   31   2              }
+   32   1      //      return FAIL; // 失败
+   33   1              //---------------------------- 以下中断没有模式可配置 默认即下降沿触发 ------------------------------
+   34   1              if (EXT == EXT_INT2) // 外中断2
+   35   1              {
+   36   2                      INT2IF = 0;             // 外中断2标志位
+   37   2                      EX2 = 1;                // 使能 INT2 下降沿中断
+   38   2                      return SUCCESS; // 成功
+   39   2              }
+   40   1      //      return FAIL; // 失败
+   41   1      
+   42   1              if (EXT == EXT_INT3) // 外中断3
+   43   1              {
+   44   2                      INT3IF = 0;             // 外中断3标志位
+   45   2                      EX3 = 1;                // 使能 INT3 下降沿中断
+   46   2                      return SUCCESS; // 成功
+   47   2              }
+   48   1      //      return FAIL; // 失败
+   49   1      
+   50   1              if (EXT == EXT_INT4) // 外中断3
+   51   1              {
+   52   2                      INT4IF = 0;             // 外中断4标志位
+   53   2                      EX4 = 1;                // 使能 INT4 下降沿中断
+   54   2                      return SUCCESS; // 成功
+   55   2              }
+   56   1              return FAIL; // 失败
+   57   1      }
+C251 COMPILER V5.60.0,  AI8051U_Exti                                                       18/11/25  13:45:58  PAGE 2   
+
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =        87     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

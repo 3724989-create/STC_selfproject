@@ -1,0 +1,165 @@
+C251 COMPILER V5.60.0,  LQ_PID                                                             18/11/25  13:12:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_PID
+OBJECT MODULE PLACED IN .\out_file\LQ_PID.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\lq_libraries\LQ_LIB\Src\LQ_PID.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) 
+                    -OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\lib
+                    -raries\zf_driver;..\user;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_libraries\Driver\I
+                    -nc) DEBUG PRINT(.\out_file\LQ_PID.lst) OBJECT(.\out_file\LQ_PID.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           【平    台】北京龙邱智能科技STC32位核心板
+    3           【编    写】龙邱科技
+    4           【E-mail  】chiusir@163.com
+    5           【软件版本】V1.0 版权所有，单位使用请先联系授权
+    6           【相关信息参考下列地址】
+    7           【网    站】http://www.lqist.cn
+    8           【淘宝店铺】http://longqiu.taobao.com
+    9          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   10          
+   11          #include <LQ_PID.h>
+*** ERROR C318 IN LINE 13 OF ..\lq_libraries\LQ_LIB\Inc\LQ_PID.h: can't open file 'stdint.h'
+   12          extern int16_t gyro_z1;
+*** WARNING C34 IN LINE 12 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'gyro_z1': missing declaration specifiers
+*** ERROR C42 IN LINE 12 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'gyro_z1': not in formal parameter list
+   13          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   14          @函数名称：float constrain_float(float amt, float low, float high)
+   15          @功能说明：限幅函数
+   16          @参数说明：amt：参数 low：最低值 high：最高值
+   17          @函数返回：无
+   18          @修改时间：2022/02/24
+   19          @调用方法：constrain_float(pid->integrator, -pid->imax, pid->imax);
+   20          @备    注：
+   21          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   22          float constrain_float(float amt, float low, float high)
+   23          {
+*** ERROR C42 IN LINE 23 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'constrain_float': not in formal parameter list
+*** ERROR C25 IN LINE 23 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near '{'
+   24              return ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)));
+   25          }
+   26          
+   27          // pid参数初始化函数
+   28          void PidInit(pid_param_t *pid)
+*** ERROR C42 IN LINE 28 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': not in formal parameter list
+   29          {
+   30              pid->kp              = 0;
+   31              pid->ki              = 0;
+   32              pid->kd              = 0;
+   33              pid->imax            = 0;
+   34              pid->out_p           = 0;
+   35              pid->out_i           = 0;
+   36              pid->out_d           = 0;
+   37              pid->out             = 0;
+   38              pid->integrator      = 0;
+   39              pid->last_error      = 0;
+   40              pid->last_derivative = 0;
+   41              pid->last_t          = 0;
+   42          }
+   43          
+   44          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   45          @函数名称：float constrain_float(float amt, float low, float high)
+   46          @功能说明：pid位置式控制器输出
+   47          @参数说明：
+   48          @函数返回：
+   49          @修改时间：2022/02/24
+   50          @调用方法：
+C251 COMPILER V5.60.0,  LQ_PID                                                             18/11/25  13:12:28  PAGE 2   
+
+   51          @备    注：
+   52          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   53          float PidLocCtrl(pid_param_t *pid, float error)
+*** ERROR C42 IN LINE 53 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': not in formal parameter list
+*** ERROR C25 IN LINE 53 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near 'float'
+   54          {
+   55              /* 累积误差 */
+   56              pid->integrator += error;
+   57          
+   58              /* 误差限幅 */
+   59              constrain_float(pid->integrator, -pid->imax, pid->imax);
+   60          
+   61              pid->out_p = pid->kp * error;
+*** ERROR C42 IN LINE 61 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'error': not in formal parameter list
+   62              pid->out_i = pid->ki * pid->integrator;
+*** WARNING C34 IN LINE 62 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': missing declaration specifiers
+*** ERROR C42 IN LINE 62 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': not in formal parameter list
+*** ERROR C25 IN LINE 62 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near '->'
+*** WARNING C34 IN LINE 62 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': missing declaration specifiers
+*** ERROR C42 IN LINE 62 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': not in formal parameter list
+   63              pid->out_d = pid->kd * (error - pid->last_error);
+*** ERROR C25 IN LINE 63 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near '-'
+   64          
+   65              pid->last_error = error;
+   66          
+   67              pid->out = pid->out_p + pid->out_i + pid->out_d;
+   68          
+   69              return pid->out;
+   70          }
+   71          
+   72          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   73          @函数名称：PidIncCtrl(pid_param_t * pid, float error)
+   74          @功能说明：增量式pid控制
+   75          @参数说明：
+   76          @函数返回：
+   77          @修改时间：2022/02/24
+   78          @调用方法：
+   79          @备    注：
+   80          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   81          float PidIncCtrl(pid_param_t *pid, float error)
+*** WARNING C34 IN LINE 81 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': missing declaration specifiers
+*** ERROR C42 IN LINE 81 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': not in formal parameter list
+*** ERROR C25 IN LINE 81 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near 'float'
+   82          {
+   83          
+   84              pid->out_p = pid->kp * (error - pid->last_error);
+*** ERROR C25 IN LINE 84 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near '-'
+   85              pid->out_i = pid->ki * error;
+*** WARNING C34 IN LINE 85 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'error': missing declaration specifiers
+*** ERROR C42 IN LINE 85 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'error': not in formal parameter list
+   86              pid->out_d = pid->kd * ((error - pid->last_error) - pid->last_derivative);
+*** WARNING C34 IN LINE 86 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': missing declaration specifiers
+*** ERROR C42 IN LINE 86 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'pid': not in formal parameter list
+*** ERROR C25 IN LINE 86 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near '->'
+*** ERROR C25 IN LINE 86 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near '-'
+   87          
+   88              pid->last_derivative = error - pid->last_error;
+   89              pid->last_error = error;
+   90          
+   91              pid->out += pid->out_p + pid->out_i + pid->out_d;
+   92          
+   93              return pid->out;
+   94          }
+   95          
+   96          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   97          @函数名称：PidCasCtrl(pid_param_t * pid, float error)
+C251 COMPILER V5.60.0,  LQ_PID                                                             18/11/25  13:12:28  PAGE 3   
+
+   98          @功能说明：串级式pid控制（转向环）
+   99          @参数说明：
+  100          @函数返回：
+  101          @修改时间：2024/01/09
+  102          @调用方法：
+  103          @备    注：
+  104          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+  105          float PidCasCtrl(pid_param_t *external_pid, pid_param_t *interior_pid, float error)
+*** WARNING C34 IN LINE 105 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'external_pid': missing declaration specifiers
+*** ERROR C42 IN LINE 105 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'external_pid': not in formal parameter list
+*** ERROR C25 IN LINE 105 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near 'pid_param_t'
+*** WARNING C34 IN LINE 105 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'interior_pid': missing declaration specifiers
+*** ERROR C42 IN LINE 105 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'interior_pid': not in formal parameter list
+*** ERROR C25 IN LINE 105 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near 'float'
+  106          {
+  107          
+  108              external_pid->out_p = external_pid->kp * error;
+*** WARNING C34 IN LINE 108 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'error': missing declaration specifiers
+*** ERROR C42 IN LINE 108 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'error': not in formal parameter list
+  109          
+  110              external_pid->out_d = external_pid->kd * gyro_z1;
+*** WARNING C34 IN LINE 110 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'external_pid': missing declaration specifiers
+*** ERROR C42 IN LINE 110 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: 'external_pid': not in formal parameter list
+*** ERROR C25 IN LINE 110 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: syntax error near '->'
+*** ERROR C7 IN LINE 110 OF ..\lq_libraries\LQ_LIB\Src\LQ_PID.c: compilation aborted
+
+C251 COMPILATION COMPLETE.  10 WARNING(S),  27 ERROR(S)

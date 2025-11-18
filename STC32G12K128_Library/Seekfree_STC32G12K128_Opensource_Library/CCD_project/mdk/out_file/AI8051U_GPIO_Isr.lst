@@ -1,0 +1,255 @@
+C251 COMPILER V5.60.0,  AI8051U_GPIO_Isr                                                   18/11/25  13:12:27  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE AI8051U_GPIO_Isr
+OBJECT MODULE PLACED IN .\out_file\AI8051U_GPIO_Isr.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\lq_libraries\Driver\isr\AI8051U_GPIO_Isr.c LARGE NOALIAS FLOAT64 WARNIN
+                    -GLEVEL(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device
+                    -;..\..\libraries\zf_driver;..\user;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_librarie
+                    -s\Driver\Inc) DEBUG PRINT(.\out_file\AI8051U_GPIO_Isr.lst) OBJECT(.\out_file\AI8051U_GPIO_Isr.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           【平    台】北京龙邱智能科技STC32位核心板
+    3           【编    写】龙邱科技
+    4           【E-mail  】chiusir@163.com
+    5           【软件版本】V1.1 版权所有，单位使用请先联系授权
+    6           【最后更新】2024年11月8日
+    7           【相关信息参考下列地址】
+    8           【网    站】http://www.lqist.cn
+    9           【淘宝店铺】http://longqiu.taobao.com
+   10           --------------------------------------------------------------------------------
+   11           【  IDE  】 keil C251 5.60.0
+   12           【Target 】 STC32G/STC8051U/AI8051U 32位模式
+   13           【SYS CLK】 42 MHz使用内部晶振
+   14          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   15          
+   16          #include "include.h"
+   17          
+   18          //========================================================================
+   19          // 函数: void P0xINT_ISR_Handler
+   20          // 描述: GPIO P0端口中断函数.
+   21          // 参数: none.
+   22          // 返回: none.
+   23          // 版本: V1.0, 2024-11-18
+   24          //      如果if判断，将中断服务函数写在其中，不美观，可单独设立一个函数，来写中断服务内容，在进中断后调用
+   25          //========================================================================
+   26          //void P0INT_ISR_Handler (void) interrupt P0INT_VECTOR          //进中断后手动经清除标志位
+   27          //{
+   28          //    u8 P0x_IRQ;
+   29          //    P0x_IRQ = P0INTF;       //P0端口中断标志寄存器
+   30          //    if(P0x_IRQ)
+   31          //    {
+   32          //        P0INTF = 0x00;      //清除P0端口中断标志位
+   33          //        if(P0x_IRQ&GPIO_Pin_0)    /* P0.0中断服务*/
+   34          //        {
+   35          //            // TODO: 在此处添加用户代码
+   36          //            LED_Ctrl(LED0,RVS);
+   37          //        }
+   38          
+   39          //        if(P0x_IRQ&GPIO_Pin_3)    /* P0.3中断服务*/
+   40          //        {
+   41          //            // TODO: 在此处添加用户代码
+   42          ////            LED_Ctrl(LED0,RVS);
+   43          //        }
+   44          ///*  还可以继续添加其他管脚的中断服务程序  */
+   45          //    }
+   46          //}
+   47          
+   48          
+   49          //========================================================================
+   50          // 函数: void P1INT_ISR_Handler
+   51          // 描述: GPIO P1端口中断函数.
+   52          // 参数: none.
+   53          // 返回: none.
+   54          // 版本: V1.0, 2024-11-18
+   55          //========================================================================
+   56          //void P1INT_ISR_Handler (void) interrupt P1INT_VECTOR          //进中断后手动经清除标志位
+C251 COMPILER V5.60.0,  AI8051U_GPIO_Isr                                                   18/11/25  13:12:27  PAGE 2   
+
+   57          //{
+   58          //    u8 P1x_IRQ;
+   59          //    P1x_IRQ = P2INTF;
+   60          //    if(P1x_IRQ)
+   61          //    {
+   62          //        P1INTF = 0x00;      //清除P1端口中断标志位
+   63          //        if(P1x_IRQ&GPIO_Pin_0)    /* P1.0中断服务*/
+   64          //        {
+   65          //            // TODO: 在此处添加用户代码
+   66          ////            LED_Ctrl(LED0,RVS);
+   67          //        }
+   68          ///*  还可以继续添加其他管脚的中断服务程序  */
+   69          //    }
+   70          //}
+   71          
+   72          
+   73          //========================================================================
+   74          // 函数: void P2INT_ISR_Handler
+   75          // 描述: GPIO P2端口中断函数.
+   76          // 参数: none.
+   77          // 返回: none.
+   78          // 版本: V1.0, 2024-11-18
+   79          //========================================================================
+   80          //void P2INT_ISR_Handler (void) interrupt P2INT_VECTOR          //进中断后手动经清除标志位
+   81          //{
+   82          //    u8 P2x_IRQ;
+   83          //    P2x_IRQ = P2INTF;
+   84          //    if(P2x_IRQ)
+   85          //    {
+   86          //        P2INTF = 0x00;      //清除P2端口中断标志位
+   87          //        if(P2x_IRQ&GPIO_Pin_0)    /* P2.0中断服务*/
+   88          //        {
+   89          //            // TODO: 在此处添加用户代码
+   90          ////            LED_Ctrl(LED0,RVS);
+   91          //        }
+   92          ///*  还可以继续添加其他管脚的中断服务程序  */
+   93          
+   94          //    }
+   95          //}
+   96          
+   97          //========================================================================
+   98          // 函数: void P3INT_ISR_Handler
+   99          // 描述: GPIO P3端口中断函数.
+  100          // 参数: none.
+  101          // 返回: none.
+  102          // 版本: V1.0, 2024-11-18
+  103          //========================================================================
+  104          //void P3INT_ISR_Handler (void) interrupt P3INT_VECTOR          //进中断后手动经清除标志位
+  105          //{
+  106          //    u8 P3x_IRQ;
+  107          //    P3x_IRQ = P3INTF;
+  108          //    if(P3x_IRQ)
+  109          //    {
+  110          //        P3INTF = 0x00;      //清除P3端口中断标志位
+  111          //        if(P3x_IRQ&GPIO_Pin_0)    /* P3.0中断服务*/
+  112          //        {
+  113          //            // TODO: 在此处添加用户代码
+  114          ////            LED_Ctrl(LED0,RVS);
+  115          //        }
+  116          /*  还可以继续添加其他管脚的中断服务程序  */
+  117          //    }
+  118          //}
+  119          
+  120          //========================================================================
+  121          // 函数: void P4INT_ISR_Handler
+  122          // 描述: GPIO P4端口中断函数.
+C251 COMPILER V5.60.0,  AI8051U_GPIO_Isr                                                   18/11/25  13:12:27  PAGE 3   
+
+  123          // 参数: none.
+  124          // 返回: none.
+  125          // 版本: V1.0, 2024-11-18
+  126          //========================================================================
+  127          //void P4INT_ISR_Handler (void) interrupt P4INT_VECTOR          //进中断后手动经清除标志位
+  128          //{
+  129          //    u8 P4x_IRQ;
+  130          //    P4x_IRQ = P4INTF;
+  131          //    if(P4x_IRQ)
+  132          //    {
+  133          //        P4INTF = 0x00;      //清除P4端口中断标志位
+  134          //        if(P4x_IRQ&GPIO_Pin_0)    /* P4.0中断服务*/
+  135          //        {
+  136          //            // TODO: 在此处添加用户代码
+  137          ////            LED_Ctrl(LED0,RVS);
+  138          //        }
+  139          /*  还可以继续添加其他管脚的中断服务程序  */
+  140          //    }
+  141          //}
+  142          
+  143          //========================================================================
+  144          // 函数: void P5INT_ISR_Handler
+  145          // 描述: GPIO P5端口中断函数.
+  146          // 参数: none.
+  147          // 返回: none.
+  148          // 版本: V1.0, 2024-11-18
+  149          //========================================================================
+  150          //void P5INT_ISR_Handler (void) interrupt P5INT_VECTOR          //进中断后手动经清除标志位
+  151          //{
+  152          //    u8 P5x_IRQ;
+  153          //    P5x_IRQ = P5INTF;
+  154          //    if(P5x_IRQ)
+  155          //    {
+  156          //        P7INTF = 0x00;      //清除P5端口中断标志位
+  157          //        if(P5x_IRQ&GPIO_Pin_0)    /* P5.0中断服务*/
+  158          //        {
+  159          //            // TODO: 在此处添加用户代码
+  160          ////            LED_Ctrl(LED0,RVS);
+  161          //        }
+  162          /*  还可以继续添加其他管脚的中断服务程序  */
+  163          
+  164          //    }
+  165          //}
+  166          
+  167          //========================================================================
+  168          // 函数: void P6INT_ISR_Handler
+  169          // 描述: GPIO P6端口中断函数.
+  170          // 参数: none.
+  171          // 返回: none.
+  172          // 版本: V1.0, 2024-11-18
+  173          //========================================================================
+  174          //void P6INT_ISR_Handler (void) interrupt P6INT_VECTOR          //进中断后手动经清除标志位
+  175          //{
+  176          //    u8 P6x_IRQ;
+  177          //    P6x_IRQ = P6INTF;
+  178          //    if(P6x_IRQ)
+  179          //    {
+  180          //        P7INTF = 0x00;      //清除P6端口中断标志位
+  181          //        if(P6x_IRQ&GPIO_Pin_0)    /* P6.0中断服务*/
+  182          //        {
+  183          //            // TODO: 在此处添加用户代码
+  184          ////            LED_Ctrl(LED0,RVS);
+  185          //        }
+  186          /*  还可以继续添加其他管脚的中断服务程序  */
+  187          
+  188          //    }
+C251 COMPILER V5.60.0,  AI8051U_GPIO_Isr                                                   18/11/25  13:12:27  PAGE 4   
+
+  189          //}
+  190          
+  191          //========================================================================
+  192          // 函数: void P7xINT_ISR_Handler
+  193          // 描述: GPIO P7端口中断函数.
+  194          // 参数: none.
+  195          // 返回: none.
+  196          // 版本: V1.0, 2024-11-18
+  197          //========================================================================
+  198          //void P7INT_ISR_Handler (void) interrupt P7INT_VECTOR          //进中断后手动经清除标志位
+  199          //{
+  200          //    u8 P7x_IRQ;
+  201          //    P7x_IRQ = P7INTF;
+  202          //    if(P7x_IRQ)
+  203          //    {
+  204          //        P7INTF = 0x00;      //清除P7端口中断标志位
+  205          //        if(P7x_IRQ&GPIO_Pin_0)    /* P7.0中断服务*/
+  206          //        {
+  207          //            // TODO: 在此处添加用户代码
+  208          ////            LED_Ctrl(LED0,RVS);
+  209          //        }
+  210          
+  211          //    }
+  212          //}
+  213          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,570 @@
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LCD_7735
+OBJECT MODULE PLACED IN .\OUT\LCD_7735.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE USER\LCD_7735.C SMALL INTR2 BROWSE INCDIR(.\USER) DEBUG PRINT(.\OUT\LCD_77
+                    -35.lst) OBJECT(.\OUT\LCD_7735.obj) 
+
+stmt  level    source
+
+    1          //========================================================
+    2          // TFT 1.8" ²ÊÉ«ÏÔÊ¾ÆÁ 160*128
+    3          // Çý¶¯:ST7735 
+    4          // »ùÓÚ:STC32G12K128Ð¾Æ¬ ÍÀÁúµ¶ÈýºËÐÄÊµÑé°å
+    5          // ±à³Ì:ÆÖÏþÃ÷(ÆÖ½­Ò»Ë®) 2024-06-01 PXM
+    6          //========================================================
+    7          #include <stdio.h>
+    8          #include <stdlib.h>
+    9          #include <string.h>
+   10          #include "STC32G.h"
+   11          #include "LCD_7735.H"
+   12          #include "ASCII.H"
+   13          #include "LCD_HZK.H"
+   14          
+   15          //Êý¾ÝÀàÐÍ¶¨Òå
+   16          #define u8  unsigned char 
+   17          #define u16 unsigned int
+   18          //ÆÁÄ»ÏñËØËµÃ÷
+   19          #define Height 160      //¸ß
+   20          #define Width  128      //¿í
+   21          //RGB_565_16Î»É«²Ê¶¨Òå
+   22          #define RED    0xF800   //ºìÉ«
+   23          #define GREEN  0x07E0   //ÂÌÉ«
+   24          #define BLUE   0x001F   //À¶É«
+   25          #define YELLOW 0xFFE0   //»ÆÉ«
+   26          #define WHITE  0xFFFF   //°×É«
+   27          #define BLACK  0x0000   //ºÚÉ«
+   28          #define PURPLE 0xF81F   //×ÏÉ«
+   29          /* 32²ÊÉ«±íÉ«ºÅ¶¨Òå */
+   30          unsigned int code COLOR[]={
+   31            0x0000,   //0ºÚÉ«  00000 000000 00000
+   32            0x1048,   //1À¶É«  00010 000010 01000
+   33            0x1442,   //2ÂÌÉ«  00010 100010 00010
+   34            0x1452,   //3ÇàÉ«  00010 100010 10010
+   35            0x9042,   //4ºìÉ«  10010 000010 00010
+   36            0x9052,   //5×ÏÉ«  10010 000010 10010
+   37            0xA484,   //6³ÈÉ«  10100 100100 00100
+   38            0x8410,   //7»ÒÉ«  10000 100000 10000
+   39            0xC618,   //8ÁÁ»Ò  11000 110000 11000
+   40            0x001F,   //9ÁÁÀ¶  00000 000000 11111 
+   41            0x07E0,   //10ÁÁÂÌ
+   42            0x07FF,   //11ÁÁÇà 0000 0111 1111 1111
+   43            0xF800,   //12ÁÁºì
+   44            0xF81F,   //13ÁÁ×Ï
+   45            0xFFE0,   //14»ÆÉ«
+   46            0xFFFF,   //15°×É«
+   47            0x2104,   //16Éî»Ò
+   48            0x0006,   //17°µÀ¶
+   49            0x79EF,   //18Ç³×Ï
+   50            0x8408,   //19ÍÁ»Æ
+   51            0x0180,   //20°µÂÌ 0000 0001 1000 0000 
+   52            0x041F,   //21ºÓÀ¶
+   53            0x0210,   //22À¶ºÚ
+   54            0x801F,   //23×ÏÉ«
+   55            0x8200,   //24¿§·È
+   56            0xF81F,   //25ÁÁ×Ï
+   57            0xFFF0,   //26Ç³»Æ
+   58            0x0700,   //27´äÂÌ 0000 0111 0000 0000
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 2   
+
+   59            0xC7FF,   //28ÁÁÇà 1100 0111 1111 1111
+   60            0x841F,   //29Çà»Ò
+   61            0xF810,   //30Òóºì
+   62            0xFC08,   //31³ÈÉ«
+   63          };
+   64          //================================================================
+   65          // ½Ó¿Ú¶¨Òå: ÀûÓÃLCD1602½Ó¿Ú(·´ÏàÅÅÐò)
+   66          // 1602:  K- A+  D7  D6  D5  D4  D3  D2 D1 D0 E WR RS Vo VCC GND
+   67          // OLED: GND VCC SCL SDA RES DC  CS     12864µ¥É«OLED
+   68          // TFT:  GND VCC P25 P23 P20 P21 P22 BL 128160 TFT     
+   69          //================================================================
+   70          sbit SCL = P2^5;  //Ê±ÖÓ¶Ë
+   71          sbit SDA = P2^3;  //Êý¾Ý¶Ë
+   72          sbit RES = P2^0;  //¸´Î»¶Ë 0:¸´Î»
+   73          sbit  DC = P2^1;  //0:Ö¸Áî/1:Êý¾Ý
+   74          sbit  CS = P2^2;  //Æ¬Ñ¡ 0:Ñ¡ÖÐ
+   75          sbit  BL = P2^7;  //±³¹â 0:Ãð 1:ÁÁ
+   76          //========================================================
+   77          //º¯ÊýËµÃ÷
+   78          void delay(u16 count);     //ÑÓÊ±
+   79          void LCD_WR_CMD(u8 Cmd);   //Ð´ÃüÁî 
+   80          void LCD_WR_DAT(u8 Dat);   //Ð´Êý¾Ý 
+   81          //========================================================
+   82          // ·Ç¾«È·ÑÓÊ±º¯Êý
+   83          //========================================================
+   84          void delay(u16 count)
+   85          { unsigned int i,j;
+   86   1        for(i=0;i<count;i++)       
+   87   1          for(j=0;j<500;j++);             
+   88   1      }
+   89          //========================================================
+   90          // SPI½Ó¿ÚÐ´Ò»×Ö½ÚÊý¾Ý»ù±¾º¯Êý
+   91          //========================================================
+   92          void SPI_WriteByte(u8 Byte)
+   93          { int i;
+   94   1        for(i=0;i<8;i++)
+   95   1        { if(Byte &0x80)SDA=1;
+   96   2          else          SDA=0;
+   97   2          SCL=0;
+   98   2          SCL=1;
+   99   2          Byte<<=1;
+  100   2        }
+  101   1      }
+  102          //========================================================
+  103          // Ð´ÃüÁî»ù±¾º¯Êý 8Î»Êý Ò»×Ö½Ú
+  104          //========================================================
+  105          void LCD_WR_CMD(u8 Cmd)
+  106          { 
+  107   1        CS=0;
+  108   1        DC=0;
+  109   1        SPI_WriteByte(Cmd);
+  110   1        CS=1; 
+  111   1      }
+  112          //========================================================
+  113          // Ð´Êý¾ÝÁî»ù±¾º¯Êý 8Î»Êý Ò»×Ö½Ú
+  114          //========================================================
+  115          void LCD_WR_DAT(u8 Dat)
+  116          { 
+  117   1        CS=0;
+  118   1        DC=1;
+  119   1        SPI_WriteByte(Dat);
+  120   1        CS=1;
+  121   1      }
+  122          //========================================================
+  123          // Ð´Êý¾ÝÁî»ù±¾º¯Êý 16Î»Êý 2×Ö½Ú
+  124          //========================================================
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 3   
+
+  125          void LCD_WR_DATA(u16 Data)
+  126          {
+  127   1        CS=0;
+  128   1        DC=1;
+  129   1        SPI_WriteByte((u8)(Data/256));
+  130   1        SPI_WriteByte((u8)(Data%256));
+  131   1        CS=1;
+  132   1      }
+  133          //========================================================
+  134          // ÏÔÊ¾ÆÁ³õÊ¼»¯
+  135          //========================================================
+  136          void  LCD_Init(void)
+  137          { 
+  138   1        //CS=0;  //Æ¬Ñ¡ÖÐ
+  139   1        //BL=1;  //±³¹âÁÁ
+  140   1        //--ST7735R Reset Sequence--
+  141   1        //RES =1; delay(20);   //Delay 20ms 
+  142   1        RES =0; delay(120);  //Delay 120ms 
+  143   1        RES =1; delay(100);  //Delay 100ms 
+  144   1        //--End ST7735S Reset Sequence--
+  145   1        LCD_WR_CMD(0x11);  //Sleep out 
+  146   1        delay(120);          //Delay 120ms 
+  147   1        //--ST7735S Frame Rate-- 
+  148   1        LCD_WR_CMD(0xB1); LCD_WR_DAT(0x01); LCD_WR_DAT(0x2C); LCD_WR_DAT(0x2D); 
+  149   1        LCD_WR_CMD(0xB2); LCD_WR_DAT(0x01); LCD_WR_DAT(0x2C); LCD_WR_DAT(0x2D); 
+  150   1        LCD_WR_CMD(0xB3); LCD_WR_DAT(0x01); LCD_WR_DAT(0x2C); LCD_WR_DAT(0x2D); 
+  151   1                          LCD_WR_DAT(0x01); LCD_WR_DAT(0x2C); LCD_WR_DAT(0x2D); 
+  152   1        //--End ST7735S Frame Rate--
+  153   1        LCD_WR_CMD(0xB4); LCD_WR_DAT(0x07); //Dot inversion 
+  154   1        //--ST7735S Power Sequence--
+  155   1        LCD_WR_CMD(0xC0); LCD_WR_DAT(0xA2); LCD_WR_DAT(0x02); LCD_WR_DAT(0x84); 
+  156   1        LCD_WR_CMD(0xC1); LCD_WR_DAT(0xC5); 
+  157   1        LCD_WR_CMD(0xC2); LCD_WR_DAT(0x0A); LCD_WR_DAT(0x00); 
+  158   1        LCD_WR_CMD(0xC3); LCD_WR_DAT(0x8A); LCD_WR_DAT(0x2A); 
+  159   1        LCD_WR_CMD(0xC4); LCD_WR_DAT(0x8A); LCD_WR_DAT(0xEE); 
+  160   1        //--End ST7735S Power Sequence--
+  161   1        LCD_WR_CMD(0xC5); LCD_WR_DAT(0x0E); //VCOM //1a
+  162   1        LCD_WR_CMD(0x36); LCD_WR_DAT(0xC0); //LCD_WR_DAT(0xC0);ÊúÆÁ // LCD_WR_DAT(0xA8); ºáÆÁ  //MX, MY, RGB mo
+             -de 
+  163   1        //--ST7735S Gamma Sequence--
+  164   1        LCD_WR_CMD(0xE0); LCD_WR_DAT(0x0F); LCD_WR_DAT(0x1A); LCD_WR_DAT(0x0F); LCD_WR_DAT(0x18); 
+  165   1                          LCD_WR_DAT(0x2F); LCD_WR_DAT(0x28); LCD_WR_DAT(0x20); LCD_WR_DAT(0x22); 
+  166   1                          LCD_WR_DAT(0x1F); LCD_WR_DAT(0x1B); LCD_WR_DAT(0x23); LCD_WR_DAT(0x37); 
+  167   1                          LCD_WR_DAT(0x00); LCD_WR_DAT(0x07); LCD_WR_DAT(0x02); LCD_WR_DAT(0x10); 
+  168   1        LCD_WR_CMD(0xE1); LCD_WR_DAT(0x0F); LCD_WR_DAT(0x1B); LCD_WR_DAT(0x0F); LCD_WR_DAT(0x17); 
+  169   1                          LCD_WR_DAT(0x33); LCD_WR_DAT(0x2C); LCD_WR_DAT(0x29); LCD_WR_DAT(0x2E); 
+  170   1                          LCD_WR_DAT(0x30); LCD_WR_DAT(0x30); LCD_WR_DAT(0x39); LCD_WR_DAT(0x3F); 
+  171   1                          LCD_WR_DAT(0x00); LCD_WR_DAT(0x07); LCD_WR_DAT(0x03); LCD_WR_DAT(0x10); 
+  172   1        LCD_WR_CMD(0x2A); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); LCD_WR_DAT(0x80);  //¿í¶È128
+  173   1        LCD_WR_CMD(0x2B); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); LCD_WR_DAT(0x00); LCD_WR_DAT(0xA0);  //¸ß¶È160
+  174   1              LCD_WR_CMD(0xF0); LCD_WR_DAT(0x01);  //Enable test command  
+  175   1              LCD_WR_CMD(0xF6); LCD_WR_DAT(0x00);  //Disable ram power save mode 
+  176   1      //LCD_WR_CMD(0x2C); 
+  177   1        //--End ST7735S Gamma Sequence--
+  178   1        LCD_WR_CMD(0x3A); LCD_WR_DAT(0x05); //65k mode 
+  179   1        LCD_WR_CMD(0x29); //Display on
+  180   1        BL=1;  //±³¹âÁÁ
+  181   1      }
+  182          //========================================================
+  183          //ÉèÖÃÏÔÊ¾´°¿Ú: X,Y×óÉÏ×ø±ê,W¿í,H¸ß 
+  184          //========================================================
+  185          void LCD_SetBox(unsigned char X,unsigned char Y,unsigned char W,unsigned char H)
+  186          { 
+  187   1        LCD_WR_CMD(0x2A); LCD_WR_DAT(0); LCD_WR_DAT(X); LCD_WR_DAT((unsigned char)(X+W-1)); LCD_WR_DAT((unsigne
+             -d char)(X+W-1));
+  188   1        LCD_WR_CMD(0x2B); LCD_WR_DAT(0); LCD_WR_DAT(Y); LCD_WR_DAT((unsigned char)(Y+H-1)); LCD_WR_DAT((unsigne
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 4   
+
+             -d char)(Y+H-1));
+  189   1        LCD_WR_CMD(0x2C);
+  190   1      }
+  191          //========================================================
+  192          // Ö¸¶¨16Î»É«ÇåÆÁ Color (16Î» RGB É«)
+  193          //========================================================
+  194          //void LCD_CLS(u16 Color)
+  195          //{ int i,j;
+  196          //  LCD_SetBox(0,0,128,160);
+  197          //      for (i=0;i<Height;i++)
+  198          //      { for (j=0;j<Width; j++)
+  199          //        LCD_WR_DATA(Color);   //16Î»Êý¾Ý
+  200          //  }
+  201          //}
+  202          /*===========================================================================
+  203          ** º¯ÊýÃû³Æ: CLS(unsigned int Color) 
+  204          ** ¹¦ÄÜÃèÊö: ¶ÔLCD½øÐÐ³õÊ¼»¯ Í¬Ê±ÓÃÄ³É«ÇåÆÁ
+  205          ============================================================================*/
+  206          void LCD_CLS(unsigned char Bcolor)
+  207          { u16 temp;
+  208   1        LCD_WR_CMD(0x2A);LCD_WR_DAT(0x00);LCD_WR_DAT(0x00);LCD_WR_DAT(0x00);LCD_WR_DAT(0x80);   //ÉèÖÃË®Æ½GRAMÆ
+             -ðÖ¹µØÖ·
+  209   1        LCD_WR_CMD(0x2B);LCD_WR_DAT(0x00);LCD_WR_DAT(0x00);LCD_WR_DAT(0x00);LCD_WR_DAT(0xA0);   //ÉèÖÃ´¹Ö±GRAMÆ
+             -ðÖ¹µØÖ·
+  210   1        LCD_WR_CMD(0x2C); //LCD_WR_Start();
+  211   1        for (temp = 0; temp < 20480; temp++) LCD_WR_DATA(COLOR[Bcolor]); //128*160*2=40960
+  212   1      }
+  213          /*===========================================================================
+  214          ** ÒÆ¶¯µã×ø±ê(×ª»»³ÉÏÔ´æµØÖ·,²¢×öºÃ¶ÁÐ´Êý¾Ý×¼±¸).
+  215          ** µ÷ÓÃ²ÎÊý: XÁÐ(0--159) YÐÐ(0--127) 
+  216          ============================================================================*/
+  217          void LCD_MoveTo(unsigned int X,unsigned int Y)
+  218          {
+  219   1       LCD_WR_CMD(0x2A); LCD_WR_DAT((u8)(X/256)); LCD_WR_DAT((u8)(X%256)); LCD_WR_DAT(0x00); LCD_WR_DAT(0x80); 
+             - //¶¨X×ø±ê
+  220   1       LCD_WR_CMD(0x2B); LCD_WR_DAT((u8)(Y/256)); LCD_WR_DAT((u8)(Y%256)); LCD_WR_DAT(0x00); LCD_WR_DAT(0xA0); 
+             - //¶¨Y×ø±ê    
+  221   1       LCD_WR_CMD(0x2C);
+  222   1      }
+  223          /*================================================================================
+  224          ** ×÷Í¼º¯Êý×Ó¼¯
+  225          ==================================================================================*/
+  226          /* »­²ÊÉ«µãº¯Êý. µ÷ÓÃ²ÎÊý: XÁÐ YÐÐ colorÉ« */
+  227          void LCD_Point(unsigned int X,unsigned int Y,unsigned char Fcolor)
+  228          { LCD_MoveTo(X,Y); LCD_WR_DATA(COLOR[Fcolor]); }
+  229          /* »­²ÊÉ«Ë®Æ½Ïßº¯Êý.µ÷ÓÃ²ÎÊý: ÆðÊ¼µãXÁÐ YÐÐ w³¤¶È ColorÉ« */
+  230          void LCD_LineH(unsigned int X,unsigned int Y,unsigned int H,unsigned char Fcolor)
+  231          { unsigned int n;
+  232   1        LCD_MoveTo(X,Y);
+  233   1        for(n=0;n<H;n++)LCD_WR_DATA(COLOR[Fcolor]);
+  234   1      }
+  235          /* »­²ÊÉ«´¹Ö±Ïßº¯Êý.µ÷ÓÃ²ÎÊý: ÆðÊ¼µãXÁÐ YÐÐ h³¤¶È ColorÉ« */
+  236          void LCD_LineV(unsigned int X,unsigned int Y,unsigned int V,unsigned char Fcolor)
+  237          { unsigned int n;
+  238   1        for(n=0;n<V;n++){ LCD_MoveTo(X,Y+n); LCD_WR_DATA(COLOR[Fcolor]); }
+  239   1      }
+  240          /* ÈÎÒâÁ½µã»­Ö±Ïßº¯Êý µ÷ÓÃ²ÎÊý:ÆðÊ¼µãX0ÁÐY0ÐÐ,½áÊøµãX1ÁÐY1ÐÐ,ColorÉ« */
+  241          void LCD_Line(unsigned int X1,unsigned int Y1,unsigned int X2,unsigned int Y2,unsigned char Color)
+  242          { unsigned int i;
+  243   1        float r;
+  244   1        if(X1==X2)                                         /* ´¹Ö±Ïß */
+  245   1        { if(Y1==Y2){ LCD_Point(X1,Y1,Color); return;          /* »­µã */  }
+  246   2          if(Y1<Y2)LCD_LineV(X1,Y1,Y2-Y1+1,Color);
+  247   2          else     LCD_LineV(X1,Y2,Y1-Y2+1,Color); return;
+  248   2        }
+  249   1        if(X1>X2){ i=X1;X1=X2;X2=i;i=Y1;Y1=Y2;Y2=i; }      /* ½»»»×ø±ê */
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 5   
+
+  250   1        if(Y1==Y2){ LCD_LineH(X1,Y1,X2-X1,Color);return; }     /* »­Ë®Æ½Ïß */
+  251   1        r=(float)(Y2-Y1)/(float)(X2-X1);                   /* ¼ÆËãÐ±ÂÊ */
+  252   1        if(r>=-1&&r<=1)                                    /* ÓëË®Æ½¼Ð½Ç<=45¶È */
+  253   1         for(i=0;i<(X2-X1);i++)LCD_Point(X1+i,Y1+i*r,Color);   /* »­³öÐ±Ïß */
+  254   1        else                                               /* Ð±ÂÊ>1  */
+  255   1        { r=1/r;
+  256   2         if(r>0)                                           /* ÓëË®Æ½¼Ð½Ç>45¶È */ 
+  257   2           for(i=0;i<(Y2-Y1);i++)LCD_Point(X1+i*r,Y1+i,Color); /* »­³öÐ±Ïß */
+  258   2         else 
+  259   2         { r=-r;
+  260   3           for(i=0;i<(Y1-Y2);i++)LCD_Point(X1+i*r,Y1-i,Color); /* »­³öÐ±Ïß */
+  261   3         }  
+  262   2        }
+  263   1      }
+  264          /*=======================================================================================================
+             -=======*/
+  265          /* »­²ÊÉ«Ïß·½¿ò³ÌÐò µ÷ÓÃ²ÎÊý: ÆðÊ¼µãXÁÐ YÐÐ,¿í¶Èw ¸ß¶Èh, ×óÉÏ±ßÉ«C1,ÓÒÏÂ±ßÉ«C2,±³¾°É«BC(Ô¼¶¨80ÎªÍ¸Ã÷) */
+  266          /*=======================================================================================================
+             -=======*/
+  267          void LCD_Box(unsigned int X,unsigned int Y,unsigned int H,unsigned int V,unsigned char C1,unsigned char C
+             -2,unsigned char BC)
+  268          { int l; 
+  269   1        LCD_LineH(X,Y,H,C1);  LCD_LineV(X,Y,V,C1);
+  270   1        LCD_LineH(X,Y+V,H,C2);LCD_LineV(X+H,Y,V+1,C2);
+  271   1        if(BC!=80)
+  272   1        for(l=1;l<V;l++)LCD_LineH(X+1,Y+l,H-1,BC);
+  273   1      }
+  274          /*=======================================================================================================
+             -=======
+  275          ** ÔÚÒº¾§ÏÔÊ¾ÆÁÏÔÊ¾5*7µãÕóASC×Ö·û´®º¯Êý(Õ¼ÓÃ6*8µãÕó)
+  276          ** ²ÎÊý: ×ø±ê Ë®Æ½ÁÐX(0-127) ´¹Ö±ÐÐY(0-159), * str´®Ö¸Õë,Fcolor×ÖÇ°¾°É«,Bcolor×Ö±³¾°É«,Ô¼¶¨:É«ºÅ80ÎªÍ¸Ã÷,
+             -LenÖ¸¶¨³¤¶È 
+  277          =========================================================================================================
+             -======*/
+  278          void LCD_A08(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor,unsigned 
+             -char Len)
+  279          { unsigned char i,n,buf,A;
+  280   1        unsigned int j,l;
+  281   1        l=Len; //Strlen(str);          /* ¼ÆËã×Ö·û´®×Ö·ûÊý */
+  282   1        for(j=0;j<l;j++)               /* ´®×Ö·ûÂÖÁ÷´¦Àí  */
+  283   1        {                              /* Öð¸öÏÔÊ¾×Ö·û´® */
+  284   2          A=str[j]-32;                 /* È¡×Ö·ûµÄASCÂë */
+  285   2          for(i=0;i<8;i++)             /* ÒªÐ´8ÐÐ    */
+  286   2          {  buf = ASC8[A][i];         /* È¡×ÖÄ£     */
+  287   3             LCD_MoveTo(X+j*6,Y+i);    /* ¶¨ÏÔÊ¾µØÖ· */
+  288   3             for(n=0;n<6;n++)          /* ºáÏòÏÔÊ¾6µã*/
+  289   3            { if((buf&0x80)==0x80)LCD_WR_DATA(COLOR[Fcolor]); /* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  290   4              else                                            /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  291   4              { if(Bcolor==80){ LCD_MoveTo(X+j*6+n,Y+i); }    /* Í¸Ã÷ÏÔÊ¾Ä£Ê½:½ö×öµØÖ·+1¶¨Î» */
+  292   5                else  LCD_WR_DATA(COLOR[Bcolor]);             /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  293   5              }
+  294   4             buf = buf << 1;           /* Ë®Æ½ÒÆÎ»È¡µã */
+  295   4            }                          /* Ë®Æ½6µãÏÔÊ¾±Ï*/
+  296   3          } /* Ò»¸ö6*8µãÕóÎ÷ÎÄ×Ö·ûÏÔÊ¾Íê±Ï */
+  297   2        }  /* Ò»×Ö·û´®ÏÔÊ¾Íê±Ï */
+  298   1      }   /* A8()   */
+  299          /*=======================================================================================================
+             -========
+  300          ** ÔÚ²ÊÉ«LCDÒº¾§ÏÔÊ¾ÆÁÏÔÊ¾16µãÕó×Ö·û´®º¯Êý 
+  301          ** ²ÎÊý: XÁÐYÐÐ×ø±ê, * str´®Ö¸Õë, Fcolor×ÖÇ°¾°É«,Bcolor×Ö±³¾°É«,Ô¼¶¨:É«ºÅ80ÎªÍ¸Ã÷,LenÖ¸¶¨³¤¶È
+  302          =========================================================================================================
+             -========*/
+  303          void LCD_A12(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor,unsigned 
+             -char Len)
+  304          { /* ÐÐY(0-479) ÁÐX(0-319) */
+  305   1        unsigned char i,buf,A[3],n;
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 6   
+
+  306   1        unsigned int j,l;
+  307   1        A[1]=0;A[2]=0;
+  308   1        l=Len;                          //Strlen(str);
+  309   1        for(i=0;i<l;i++)                /* Öð¸öÏÔÊ¾×Ö·û´® */
+  310   1        {                               
+  311   2         A[0]=str[i];A[1]=str[i+1];
+  312   2         for(j=0;j<12;j++)
+  313   2         { /* Ð´12ÐÐ */
+  314   3           buf = ASC12[A[0]-32][j];     /* È¡×ÖÄ£ */
+  315   3           LCD_MoveTo(X+i*8,Y+j);           /* ×Ö·û×óÉÏ½ÇÏÔÊ¾µØÖ·  */
+  316   3           for(n=0;n<8;n++)             /* Î÷ÎÄ×ÖÄ¸ºáÏòÏÔÊ¾8µã */
+  317   3           { if((buf&0x80)==0x80)LCD_WR_DATA(COLOR[Fcolor]);   /* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  318   4             else                                             /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  319   4             { if(Bcolor==80){ LCD_MoveTo(X+i*8+n,Y+j); }         /* Í¸Ã÷ÏÔÊ¾Ä£Ê½: ½öµØÖ·+1¶¨Î» */
+  320   5               else  LCD_WR_DATA(COLOR[Bcolor]);               /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  321   5             }
+  322   4             buf = buf << 1; 
+  323   4           } /* Ë®Æ½8µãÏÔÊ¾Íê±Ï */
+  324   3          } /* Ò»¸ö8*16µãÕóÎ÷ÎÄ×Ö·ûÏÔÊ¾Íê±Ï */
+  325   2         } /* for(i)  */
+  326   1      }   /* A12()  */
+  327          /*=======================================================================================================
+             -===========
+  328          ** ÔÚ²ÊÉ«LCDÒº¾§ÏÔÊ¾ÆÁÏÔÊ¾16µãÕóÎ÷ÎÄ×Ö·û´®º¯Êý(×ÖÄ£È¡×ÔROM) 
+  329          ** ²ÎÊý: XÁÐYÐÐ×ø±ê, * str´®Ö¸Õë, Fcolor×ÖÇ°¾°É«,Bcolor×Ö±³¾°É«,Ô¼¶¨:É«ºÅ80ÎªÍ¸Ã÷,LenÖ¸¶¨³¤¶È
+  330          =========================================================================================================
+             -==========*/
+  331          void LCD_A16(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor,unsigned 
+             -char Len)
+  332          { /* ÐÐY(0-479) ÁÐX(0-319) */
+  333   1        char i,buf,A,n;
+  334   1        unsigned int j,l;
+  335   1        l=Len;                          //strlen(str);
+  336   1        for(i=0;i<l;i++)                /* Öð¸öÏÔÊ¾×Ö·û´® */
+  337   1        {  A=str[i];                    /* ÏÔÊ¾Î÷ÎÄASCII×Ö·û   */
+  338   2           for(j=0;j<16;j++)
+  339   2           { /* Ð´16ÐÐ */
+  340   3             buf = ASC16[A-32][j];      /* È¡×ÖÄ£ */
+  341   3             LCD_MoveTo(X+i*8,Y+j);         /* ×Ö·û×óÉÏ½ÇÏÔÊ¾µØÖ· */
+  342   3             for(n=0;n<8;n++)          /* Î÷ÎÄ×ÖÄ¸ºáÏòÏÔÊ¾8µã */
+  343   3             { if((buf&0x80)==0x80)LCD_WR_DATA(COLOR[Fcolor]);   /* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  344   4              else                                              /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  345   4              { if(Bcolor==80){ LCD_MoveTo(X+i*8+n,Y+j); }          /* Í¸Ã÷ÏÔÊ¾Ä£Ê½: ½öµØÖ·+1¶¨Î» */
+  346   5                else  LCD_WR_DATA(COLOR[Bcolor]);                /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  347   5              }
+  348   4              buf = buf << 1; 
+  349   4             } /* Ë®Æ½8µãÏÔÊ¾Íê±Ï */
+  350   3           }  /* Ò»¸ö8*16µãÕóÎ÷ÎÄ×Ö·ûÏÔÊ¾Íê±Ï */
+  351   2        }    /* while   */
+  352   1      }     /* A16()   */
+  353          /*===================================================================================================
+  354          ** ÔÚµ¥É«LCDÒº¾§ÏÔÊ¾ÆÁÏÔÊ¾24*16µãÕóÊý×Ö´®º¯Êý 
+  355          ** µ÷ÓÃ²ÎÊý: XÁÐYÐÐ×ø±ê, * str´®Ö¸Õë, Fcolor×ÖÇ°¾°É«,Bcolor×Ö±³¾°É«,Ô¼¶¨:É«ºÅ80ÎªÍ¸Ã÷,LenÖ¸¶¨³¤¶È
+  356          =====================================================================================================*/
+  357          void LCD_A24(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor,unsigned 
+             -char Len)
+  358          {  /* X(0-319) Y(0-479) */
+  359   1        unsigned char n,C;
+  360   1        unsigned int i,j,L,Lw=0,ZM;
+  361   1        L=Len;                          //strlen(str);
+  362   1        for(j=0;j<L;j++)
+  363   1        { C=str[j];                     /* Öð¸öÏÔÊ¾×Ö·û´® */
+  364   2          for(i=0;i<24;i++)
+  365   2          { /* Ð´24ÐÐ */
+  366   3            ZM=ASC24[C-32][i*2];           /* È¡×ÖÄ£Âë1 */
+  367   3            ZM=ZM*256+ASC24[C-32][i*2+1];  /* È¡×ÖÄ£Âë2 */
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 7   
+
+  368   3            LCD_MoveTo(X+Lw,Y+i);              /* ¶¨Î»×óÉÏ½Ç */
+  369   3            for(n=0;n<12;n++)
+  370   3            { if((ZM&0x8000)==0x8000)LCD_WR_DATA(COLOR[Fcolor]);/* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  371   4              else                                             /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  372   4              { if(Bcolor==80) { LCD_MoveTo(X+Lw+n,Y+i); }         /* Í¸Ã÷ÏÔÊ¾Ä£Ê½: ½öµØÖ·+1¶¨Î» */
+  373   5                 else LCD_WR_DATA(COLOR[Bcolor]);               /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  374   5              }
+  375   4              ZM = ZM << 1; 
+  376   4            }         /* Ë®Æ½16µãÏÔÊ¾Íê±Ï */
+  377   3          } Lw=Lw+12; /* Ë®Æ½×ø±êÎ»ÒÆ */
+  378   2        }             /* Ò»Î»Êý×ÖÏÔÊ¾Íê±Ï  */
+  379   1      }   /* A24()   */
+  380          /*=======================================================================================================
+             -===========
+  381          ** ÔÚ²ÊÉ«LCDÒº¾§ÏÔÊ¾ÆÁÏÔÊ¾16µãÕóÖÐÎ÷ÎÄ»ìºÏ×Ö·û´®º¯Êý(Ð¡×Ö¿â×ÖÄ£È¡×ÔROM) 
+  382          ** ²ÎÊý: XÁÐYÐÐ×ø±ê, * str´®Ö¸Õë, Fcolor×ÖÇ°¾°É«,Bcolor×Ö±³¾°É«,Ô¼¶¨:±³¾°É«ºÅ80ÎªÍ¸Ã÷
+  383          =========================================================================================================
+             -==========*/
+  384          void LCD_H16(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor)
+  385          { /* ÐÐY(0-159) ÁÐX(0-127) */
+  386   1        unsigned int i,j,l,m=1,p=0,HZM;
+  387   1        unsigned char ch[3],zm,n;
+  388   1        l=strlen(str);                  //Çó×Ö·û´®³¤¶È
+  389   1        for(i=0;i<l;i++)                //Ñ­»·ÏÔÊ¾
+  390   1        { ch[0]=str[i];ch[1]=str[i+1];
+  391   2          if(ch[0]>160)                 //ÈôÊÇºº×Ö...
+  392   2          { m=1;p=0;
+  393   3            while(m!=0&&p<TotalHZ16)    /* ²éÐ¡×Ö¿âºº×Ö,ÈôÕÒµ½·µm=0ºÍÖ¸Õëp */
+  394   3            { m=strncmp(ch,HZ16M[p],2); //±È½Ï...
+  395   4              if(m)p=p+1;               //
+  396   4            }
+  397   3            for(j=0;j<16;j++)           /* ÏÔÊ¾16ÐÐ */ 
+  398   3            { HZM = HZ16[p][j*2];       /* È¡ºº×ÖÄ£ */
+  399   4              HZM = 256*HZM+(unsigned char)HZ16[p][j*2+1];  
+  400   4              LCD_MoveTo(X+i*8,Y+j);    /* ÆðÊ¼ÏÔÊ¾µã */
+  401   4              for(n=0;n<16;n++)         /* ºº×ÖºáÏòÏÔÊ¾16µã   */
+  402   4              { if((HZM&0x8000)==0x8000)LCD_WR_DATA(COLOR[Fcolor]); /* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  403   5                else                                                /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  404   5                { if(Bcolor==80){ LCD_MoveTo(X+i*8+n,Y+j); }        /* Í¸Ã÷ÏÔÊ¾Ä£Ê½: ½öµØÖ·+1¶¨Î» */
+  405   6                  else  LCD_WR_DATA(COLOR[Bcolor]);                 /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  406   6                }
+  407   5                HZM=HZM<<1;             /* ºº×ÖµãÄ£×óÒÆ³ö */
+  408   5              }                         /* Ë®Æ½16µãÏÔÊ¾Íê±Ï */                       
+  409   4            } i++;
+  410   3          }                             /* Ò»¸öºº×ÖÏÔÊ¾Íê±Ï */
+  411   2          else
+  412   2          { for(j=0;j<16;j++)
+  413   3            { /* Ð´16ÐÐ */
+  414   4              zm = ASC16[ch[0]-32][j];  /* È¡×ÖÄ£ */
+  415   4              LCD_MoveTo(X+i*8,Y+j);    /* ×Ö·û×óÉÏ½ÇÏÔÊ¾µØÖ· */
+  416   4              for(n=0;n<8;n++)          /* Î÷ÎÄ×ÖÄ¸ºáÏòÏÔÊ¾8µã */
+  417   4              { if((zm&0x80)==0x80)LCD_WR_DATA(COLOR[Fcolor]);   /* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  418   5                else                                             /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  419   5                { if(Bcolor==80){ LCD_MoveTo(X+i*8+n,Y+j); }         /* Í¸Ã÷ÏÔÊ¾Ä£Ê½: ½öµØÖ·+1¶¨Î» */
+  420   6                  else  LCD_WR_DATA(COLOR[Bcolor]);              /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  421   6                }
+  422   5                zm = zm << 1; 
+  423   5              } /* Ë®Æ½8µãÏÔÊ¾Íê±Ï */
+  424   4            }  /* Ò»¸ö8*16µãÕóÎ÷ÎÄ×Ö·ûÏÔÊ¾Íê±Ï */
+  425   3          }   /* else_if */
+  426   2        }   // Ñ­»·ÏÔÊ¾str 
+  427   1      }    /* H16()   */
+  428          /*===================================================================================================
+  429          ** ÔÚµ¥É«LCDÒº¾§ÏÔÊ¾ÆÁÏÔÊ¾24µãÕóÖÐÎ÷ÎÄ»ìºÏ×Ö·û´®º¯Êý  (Ð¡×Ö¿â×ÖÄ£È¡×ÔROM)
+  430          ** µ÷ÓÃ²ÎÊý: XÁÐYÐÐ×ø±ê, * str´®Ö¸Õë, Fcolor×ÖÇ°¾°É«,Bcolor×Ö±³¾°É«,Ô¼¶¨:É«ºÅ80ÎªÍ¸Ã÷
+  431          =====================================================================================================*/
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 8   
+
+  432          void LCD_H24(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor)
+  433          {  /* X(0-127) Y(0-159) */
+  434   1        unsigned char C[3];
+  435   1        unsigned int i,j,l,m,n,p,ZM;
+  436   1        unsigned long HZM;
+  437   1        l=strlen(str);
+  438   1        for(i=0;i<l;i++)
+  439   1        { /* Öð¸öÏÔÊ¾×Ö·û´® */
+  440   2          C[0]=str[i];C[1]=str[i+1];   //È¡ºº×ÖÄÚÂë
+  441   2          if(C[0]>160)                 //ÊÇºº×Ö...
+  442   2          { m=1;p=0;
+  443   3            while(m!=0&&p<TotalHZ24)   /* ËÑË÷ºº×Ö,ÈôÕÒµ½·µm=0ºÍÖ¸Õëp */
+  444   3            { m=strncmp(C,HZ24M[p],2);
+  445   4              if(m)p=p+1;
+  446   4            }
+  447   3            for(j=0;j<24;j++)
+  448   3            { /* Ñ­»·Ð´24ÐÐ */
+  449   4              HZM = HZ24[p][j*3];           /* È¡×ÖÄ£Âë */
+  450   4              HZM = HZM*256+(unsigned char)HZ24[p][j*3+1];
+  451   4              HZM = HZM*256+(unsigned char)HZ24[p][j*3+2];
+  452   4              LCD_MoveTo(X+i*12,Y+j);       /* ×Ö·û×óÉÏ½ÇÏÔÊ¾µØÖ· */
+  453   4              for(n=0;n<24;n++)             /* ºº×ÖºáÏòÏÔÊ¾24µã   */
+  454   4              { if((HZM&0x800000)==0x800000)LCD_WR_DATA(COLOR[Fcolor]); /* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  455   5                else                                                    /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  456   5                { if(Bcolor==80){ LCD_MoveTo(X+i*12+n,Y+j); }   /* Í¸Ã÷ÏÔÊ¾Ä£Ê½:½ö×öµØÖ·+1¶¨Î» */
+  457   6                  else  LCD_WR_DATA(COLOR[Bcolor]);             /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  458   6                }
+  459   5                HZM = HZM << 1; 
+  460   5              }                             /* Ë®Æ½24µãÏÔÊ¾Íê±Ï */
+  461   4            }
+  462   3            i++;
+  463   3          }
+  464   2          else
+  465   2          { for(j=0;j<24;j++)
+  466   3            { /* Ð´24ÐÐ */
+  467   4              ZM=ASC24[C[0]-32][j*2];          /* È¡×ÖÄ£Âë1 */
+  468   4              ZM=ZM*256+ASC24[C[0]-32][j*2+1]; /* È¡×ÖÄ£Âë2 */
+  469   4              LCD_MoveTo(X+i*12,Y+j);          /* ¶¨Î»×óÉÏ½Ç */
+  470   4              for(n=0;n<12;n++)
+  471   4              { if((ZM&0x8000)==0x8000)LCD_WR_DATA(COLOR[Fcolor]);/* ×ÖÄ£µãÎª1ÏÔÊ¾Ç°¾°É« */
+  472   5                else                                              /* ×ÖÄ£µãÎª0ÏÔÊ¾Ô­µ×É«»ò±³¾°É« */
+  473   5                { if(Bcolor==80) { LCD_MoveTo(X+i*12+n,Y+j); }         /* Í¸Ã÷ÏÔÊ¾Ä£Ê½: ½öµØÖ·+1¶¨Î» */
+  474   6                  else LCD_WR_DATA(COLOR[Bcolor]);                /* Õý³£ÏÔÊ¾Ä£Ê½:±³¾°É« */
+  475   6                }
+  476   5                ZM = ZM << 1; 
+  477   5              } /* Ë®Æ½12µãÏÔÊ¾Íê±Ï */
+  478   4            } /* Ò»¸ö12*24µãÕó×Ö·ûÏÔÊ¾Íê±Ï  */
+  479   3          } /* else_if */  
+  480   2        }  /* Ñ­»·Öð¸öÏÔÊ¾×Ö·û´® */
+  481   1      }  /* H24()   */
+  482          //========================================================
+  483          // ÏÔÊ¾Í¼Æ¬
+  484          //========================================================
+  485          void LCD_BMP(unsigned char X,unsigned char Y,unsigned char W,unsigned char H,unsigned char * pic)
+  486          {       u16 i;
+  487   1        u8 h,l;
+  488   1              LCD_SetBox(X,Y,W,H);         //ÉèÖÃÏÔÊ¾´°¿Ú
+  489   1        for(i=0;i<W*H;i++)
+  490   1        { l=pic[2*i]; h=pic[2*i+1];  //Í¼ÏñÊý¾Ý:µÍÎ»ÔÚÇ°/¸ßÎ»ÔÚºó
+  491   2          LCD_WR_DAT(h);             //ÏÔÊ¾²ÊÉ«µã(¸ßÎ»ÔÚÇ°)
+  492   2          LCD_WR_DAT(l);             //ÏÔÊ¾²ÊÉ«µã(µÍÎ»ÔÚºó) 
+  493   2        }
+  494   1              LCD_SetBox(0,0,Width,Height);//»Ö¸´È«ÆÁÇøÓò
+  495   1      }
+  496          
+  497          //=== END ===============================================================================================
+C251 COMPILER V5.60.0,  LCD_7735                                                           14/11/25  19:39:06  PAGE 9   
+
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      3620     ------
+  ecode size           =    ------     ------
+  data size            =    ------        153
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =      8388     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

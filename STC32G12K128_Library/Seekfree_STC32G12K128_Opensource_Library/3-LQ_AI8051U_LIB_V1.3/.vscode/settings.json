@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "*.ino": "c",
+        "*.cjson": "jsonc",
+        "*.wxss": "css",
+        "*.wxs": "javascript",
+        "*.c": "c",
+        "include.h": "c",
+        "stdio.h": "c",
+        "intrins.h": "c",
+        "stc_ai8051u_x.h": "c",
+        "lq_lsm6dsr.h": "c",
+        "ai8051u_exti.h": "c",
+        "ai8051u_switch.h": "c",
+        "compare": "c",
+        "type_traits": "c",
+        "lq_hard_i2c.h": "c",
+        "config.h": "c",
+        "ai8051u_i2c.h": "c"
+    }
+}

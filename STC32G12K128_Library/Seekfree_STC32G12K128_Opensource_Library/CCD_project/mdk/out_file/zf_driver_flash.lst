@@ -1,0 +1,231 @@
+C251 COMPILER V5.60.0,  zf_driver_flash                                                    18/11/25  17:06:18  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE zf_driver_flash
+OBJECT MODULE PLACED IN .\out_file\zf_driver_flash.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\Libraries\zf_driver\zf_driver_flash.c LARGE NOALIAS FLOAT64 WARNINGL
+                    -EVEL(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;.
+                    -.\..\libraries\zf_driver;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\zf_driver_flash.lst) OBJECT(.\out_file\zf_d
+                    -river_flash.obj) 
+
+stmt  level    source
+
+    1          ///******************************************************************************************************
+             -***************
+    2          //* CH32V307VCT6 Opensourec Library ¼´£¨CH32V307VCT6 ¿ªÔ´¿â£©ÊÇÒ»¸ö»ùÓÚ¹Ù·½ SDK ½Ó¿ÚµÄµÚÈı·½¿ªÔ´¿â
+    3          //* Copyright (c) 2022 SEEKFREE Öğ·É¿Æ¼¼
+    4          //*
+    5          //* ±¾ÎÄ¼şÊÇCH32V307VCT6 ¿ªÔ´¿âµÄÒ»²¿·Ö
+    6          //*
+    7          //* CH32V307VCT6 ¿ªÔ´¿â ÊÇÃâ·ÑÈí¼ş
+    8          //* Äú¿ÉÒÔ¸ù¾İ×ÔÓÉÈí¼ş»ù½ğ»á·¢²¼µÄ GPL£¨GNU General Public License£¬¼´ GNUÍ¨ÓÃ¹«¹²Ğí¿ÉÖ¤£©µÄÌõ¿î
+    9          //* ¼´ GPL µÄµÚ3°æ£¨¼´ GPL3.0£©»ò£¨ÄúÑ¡ÔñµÄ£©ÈÎºÎºóÀ´µÄ°æ±¾£¬ÖØĞÂ·¢²¼ºÍ/»òĞŞ¸ÄËü
+   10          //*
+   11          //* ±¾¿ªÔ´¿âµÄ·¢²¼ÊÇÏ£ÍûËüÄÜ·¢»Ó×÷ÓÃ£¬µ«²¢Î´¶ÔÆä×÷ÈÎºÎµÄ±£Ö¤
+   12          //* ÉõÖÁÃ»ÓĞÒşº¬µÄÊÊÏúĞÔ»òÊÊºÏÌØ¶¨ÓÃÍ¾µÄ±£Ö¤
+   13          //* ¸ü¶àÏ¸½ÚÇë²Î¼û GPL
+   14          //*
+   15          //* ÄúÓ¦¸ÃÔÚÊÕµ½±¾¿ªÔ´¿âµÄÍ¬Ê±ÊÕµ½Ò»·İ GPL µÄ¸±±¾
+   16          //* Èç¹ûÃ»ÓĞ£¬Çë²ÎÔÄ<https://www.gnu.org/licenses/>
+   17          //*
+   18          //* ¶îÍâ×¢Ã÷£º
+   19          //* ±¾¿ªÔ´¿âÊ¹ÓÃ GPL3.0 ¿ªÔ´Ğí¿ÉÖ¤Ğ­Òé ÒÔÉÏĞí¿ÉÉêÃ÷ÎªÒëÎÄ°æ±¾
+   20          //* Ğí¿ÉÉêÃ÷Ó¢ÎÄ°æÔÚ libraries/doc ÎÄ¼ş¼ĞÏÂµÄ GPL3_permission_statement.txt ÎÄ¼şÖĞ
+   21          //* Ğí¿ÉÖ¤¸±±¾ÔÚ libraries ÎÄ¼ş¼ĞÏÂ ¼´¸ÃÎÄ¼ş¼ĞÏÂµÄ LICENSE ÎÄ¼ş
+   22          //* »¶Ó­¸÷Î»Ê¹ÓÃ²¢´«²¥±¾³ÌĞò µ«ĞŞ¸ÄÄÚÈİÊ±±ØĞë±£ÁôÖğ·É¿Æ¼¼µÄ°æÈ¨ÉùÃ÷£¨¼´±¾ÉùÃ÷£©
+   23          //*
+   24          //* ÎÄ¼şÃû³Æ          zf_driver_flash
+   25          //* ¹«Ë¾Ãû³Æ          ³É¶¼Öğ·É¿Æ¼¼ÓĞÏŞ¹«Ë¾
+   26          //* °æ±¾ĞÅÏ¢          ²é¿´ libraries/doc ÎÄ¼ş¼ĞÄÚ version ÎÄ¼ş °æ±¾ËµÃ÷
+   27          //* ¿ª·¢»·¾³          MounRiver Studio V1.8.1
+   28          //* ÊÊÓÃÆ½Ì¨          CH32V307VCT6
+   29          //* µêÆÌÁ´½Ó          https://seekfree.taobao.com/
+   30          //*
+   31          //* ĞŞ¸Ä¼ÇÂ¼
+   32          //* ÈÕÆÚ                                      ×÷Õß                             ±¸×¢
+   33          //* 2022-09-15        ´óW            first version
+   34          //*******************************************************************************************************
+             -*************/
+   35          
+   36          
+   37          
+   38          #include "zf_common_debug.h"
+   39          #include "zf_common_interrupt.h"
+   40          #include "zf_common_clock.h"
+   41          
+   42          #include "zf_driver_flash.h"
+   43          
+   44          flash_data_union flash_union_buffer[FLASH_DATA_BUFFER_SIZE];               // FLASH ²Ù×÷µÄÊı¾İ»º³åÇø
+   45          
+   46          //-------------------------------------------------------------------------------------------------------
+             -------------
+   47          // º¯Êı¼ò½é     Ğ£Ñé FLASH ÊÇ·ñÓĞÊı¾İ
+   48          // ²ÎÊıËµÃ÷     sector_num      ĞèÒªĞ´ÈëµÄÉÈÇø±àºÅ ²ÎÊı·¶Î§ <0 - 63>
+   49          // ²ÎÊıËµÃ÷     page_num        µ±Ç°ÉÈÇøÒ³µÄ±àºÅ   ²ÎÊı·¶Î§ <0 - 3>
+   50          // ·µ»Ø²ÎÊı     uint8           1-ÓĞÊı¾İ 0-Ã»ÓĞÊı¾İ Èç¹ûĞèÒª¶ÔÓĞÊı¾İµÄÇøÓòĞ´ÈëĞÂµÄÊı¾İÔòÓ¦¸Ã¶ÔËùÔÚÉÈÇø½øĞ
+             -Ğ²Á³ı²Ù×÷
+   51          // Ê¹ÓÃÊ¾Àı     flash_check(63, 3);
+   52          // ±¸×¢ĞÅÏ¢
+C251 COMPILER V5.60.0,  zf_driver_flash                                                    18/11/25  17:06:18  PAGE 2   
+
+   53          //-------------------------------------------------------------------------------------------------------
+             -------------
+   54          uint8 flash_check (uint32 sector_num, uint32 page_num)
+   55          {
+   56   1          //zf_assert(sector_num <= FLASH_MAX_SECTION_INDEX);                                                  
+             - // ²ÎÊı·¶Î§ 0-63
+   57   1          //zf_assert(page_num <= FLASH_MAX_PAGE_INDEX);                                                       
+             - // ²ÎÊı·¶Î§ 0-3
+   58   1      
+   59   1          uint8  return_state = 0;
+   60   1          uint16 temp_loop;
+   61   1          uint32 flash_addr = ((FLASH_BASE_ADDR+FLASH_SECTION_SIZE*sector_num+FLASH_PAGE_SIZE*page_num));     /
+             -/ ÌáÈ¡µ±Ç° Flash µØÖ·
+   62   1      
+   63   1              interrupt_global_disable();
+   64   1      
+   65   1          //clock_reset();                                  // ¸´Î»Ê±ÖÓ
+   66   1          //clock_set_freq(SYSTEM_CLOCK_120M);          // ÉèÖÃÏµÍ³ÆµÂÊÎª120Mhz
+   67   1      
+   68   1          for(temp_loop = 0; temp_loop < FLASH_PAGE_SIZE; temp_loop+=4)                                       /
+             -/ Ñ­»·¶ÁÈ¡ Flash µÄÖµ
+   69   1          {
+   70   2              if( (*(__IO u32*) (flash_addr+temp_loop)) != 0xFFFFFFFF )                                       /
+             -/ ¸Ãµ¥Æ¬»ú²Á³ıºóÈç¹û²»ÊÇ 0xE339E339 ÄÇ¾ÍÊÇÓĞÖµ
+*** ERROR C67 IN LINE 70 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: '__IO': undefined identifier
+*** ERROR C25 IN LINE 70 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near 'u32'
+*** ERROR C25 IN LINE 70 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near ')'
+   71   2              {
+   72   2                  return_state = 1;
+   73   2                  break;
+*** ERROR C25 IN LINE 73 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near 'break'
+   74   2              }
+   75   2          }
+   76   2      
+   77   2          //clock_reset();                                  // ¸´Î»Ê±ÖÓ
+   78   2          //clock_set_freq(system_clock);       // ÉèÖÃ»ØÔ­À´µÄÏµÍ³ÆµÂÊ
+   79   2          interrupt_global_enable();
+*** ERROR C53 IN LINE 79 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: redefinition of 'interrupt_global_enable': diff
+             -erent return types
+   80   2      
+   81   2          return return_state;
+*** ERROR C25 IN LINE 81 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near 'return'
+*** WARNING C34 IN LINE 81 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'return_state': missing declaration specifier
+             -s
+*** ERROR C53 IN LINE 81 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: redefinition of 'return_state'
+   82   2      }
+*** ERROR C25 IN LINE 82 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near '}'
+   83   2      
+   84   2      //-------------------------------------------------------------------------------------------------------
+             -------------
+   85   2      // º¯Êı¼ò½é     ²Á³ıÒ»¸öÉÈÇøÊı¾İ(4KB)
+   86   2      // ²ÎÊıËµÃ÷     sector_num      ĞèÒªĞ´ÈëµÄÉÈÇø±àºÅ ²ÎÊı·¶Î§ <0 - 63>
+   87   2      // ²ÎÊıËµÃ÷     page_num        µ±Ç°ÉÈÇøÒ³µÄ±àºÅ   ²ÎÊı·¶Î§ <0 - 3>
+   88   2      // ·µ»Ø²ÎÊı     uint8           1-±íÊ¾Ê§°Ü 0-±íÊ¾³É¹¦
+   89   2      // Ê¹ÓÃÊ¾Àı     flash_erase_page(63, 3);
+   90   2      // ±¸×¢ĞÅÏ¢
+   91   2      //          ±ê×¼²Á³ıÖ»ÄÜÊÇ²ÁÒ»¸öÉÈÇøµÄÊı¾İ£¬4KB×Ö½Ú³¤¶È
+   92   2      //-------------------------------------------------------------------------------------------------------
+             -------------
+   93   2      uint8 flash_erase_sector (uint32 sector_num, uint32 page_num)
+   94   2      {
+   95   3          //zf_assert(sector_num <= FLASH_MAX_SECTION_INDEX);                                                  
+             - // ²ÎÊı·¶Î§ 0-63
+   96   3          //zf_assert(page_num <= FLASH_MAX_PAGE_INDEX);                                                       
+             - // ²ÎÊı·¶Î§ 0-3
+   97   3      
+C251 COMPILER V5.60.0,  zf_driver_flash                                                    18/11/25  17:06:18  PAGE 3   
+
+   98   3          uint8 return_state = 0;
+   99   3      
+  100   3          static volatile FLASH_Status gFlashStatus = FLASH_COMPLETE;
+*** ERROR C25 IN LINE 100 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near 'gFlashStatus'
+*** ERROR C67 IN LINE 100 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_COMPLETE': undefined identifier
+  101   3          uint32 flash_addr = ((FLASH_BASE_ADDR+FLASH_SECTION_SIZE*sector_num+FLASH_PAGE_SIZE*page_num));     /
+             -/ ÌáÈ¡µ±Ç° Flash µØÖ·
+  102   3      
+  103   3          uint32 primask = interrupt_global_disable();
+  104   3          //clock_reset();                      // ¸´Î»Ê±ÖÓ
+  105   3          //clock_set_freq(SYSTEM_CLOCK_120M);          // ÉèÖÃÏµÍ³ÆµÂÊÎª120Mhz
+  106   3      
+  107   3          FLASH_Unlock();                                                                                     /
+             -/ ½âËø Flash
+*** WARNING C140 IN LINE 107 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_Unlock' undefined; assuming 'extern 
+             -int FLASH_Unlock()'
+  108   3          FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPRTERR);                           /
+             -/ Çå³ı²Ù×÷±êÖ¾
+*** ERROR C67 IN LINE 108 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_FLAG_EOP': undefined identifier
+*** ERROR C67 IN LINE 108 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_FLAG_PGERR': undefined identifier
+*** ERROR C67 IN LINE 108 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_FLAG_WRPRTERR': undefined identifier
+*** WARNING C140 IN LINE 108 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_ClearFlag' undefined; assuming 'exte
+             -rn int FLASH_ClearFlag()'
+  109   3          gFlashStatus = FLASH_ErasePage(flash_addr);                                                         /
+             -/ ²Á³ı
+*** WARNING C140 IN LINE 109 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_ErasePage' undefined; assuming 'exte
+             -rn int FLASH_ErasePage()'
+*** WARNING C95 IN LINE 109 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_ErasePage': too many actual parameter
+             -s
+  110   3          FLASH_ClearFlag(FLASH_FLAG_EOP );                                                                   /
+             -/ Çå³ş²Ù×÷±êÖ¾
+*** ERROR C67 IN LINE 110 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_FLAG_EOP': undefined identifier
+  111   3          FLASH_Lock();                                                                                       /
+             -/ Ëø¶¨ Flash
+*** WARNING C140 IN LINE 111 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_Lock' undefined; assuming 'extern in
+             -t FLASH_Lock()'
+  112   3          if(gFlashStatus != FLASH_COMPLETE)          // ÅĞ¶Ï²Ù×÷ÊÇ·ñ³É¹¦
+*** ERROR C67 IN LINE 112 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'FLASH_COMPLETE': undefined identifier
+  113   3          {
+  114   4              return_state = 1;
+  115   4          }
+  116   3      
+  117   3          //clock_reset();                      // ¸´Î»Ê±ÖÓ
+  118   3          //clock_set_freq(system_clock);       // ÉèÖÃ»ØÔ­À´µÄÏµÍ³ÆµÂÊ
+  119   3          interrupt_global_enable(primask);
+*** ERROR C94 IN LINE 119 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'interrupt_global_enable': declared with 'void
+             -' parameter list
+  120   3          return return_state;
+  121   3      }
+  122   2      
+  123   2      //-------------------------------------------------------------------------------------------------------
+             -------------
+  124   2      // º¯Êı¼ò½é     ¶ÁÈ¡Ò»Ò³
+  125   2      // ²ÎÊıËµÃ÷     sector_num      ĞèÒªĞ´ÈëµÄÉÈÇø±àºÅ ²ÎÊı·¶Î§ <0 - 63>
+  126   2      // ²ÎÊıËµÃ÷     page_num        µ±Ç°ÉÈÇøÒ³µÄ±àºÅ   ²ÎÊı·¶Î§ <0 - 3>
+  127   2      // ²ÎÊıËµÃ÷     buf             ĞèÒª¶ÁÈ¡µÄÊı¾İµØÖ·   ´«ÈëµÄÊı×éÀàĞÍ±ØĞëÎªuint32
+  128   2      // ²ÎÊıËµÃ÷     len             ĞèÒªĞ´ÈëµÄÊı¾İ³¤¶È   ²ÎÊı·¶Î§ 1-256
+  129   2      // ·µ»Ø²ÎÊı     void
+  130   2      // Ê¹ÓÃÊ¾Àı     flash_read_page(63, 3, data_buffer, 256);
+  131   2      // ±¸×¢ĞÅÏ¢
+  132   2      //-------------------------------------------------------------------------------------------------------
+             -------------
+  133   2      void flash_read_page (uint32 sector_num, uint32 page_num, uint32 *buf, uint16 len)
+  134   2      {
+  135   3          //zf_assert(sector_num <= FLASH_MAX_SECTION_INDEX);                                                  
+             - // ²ÎÊı·¶Î§ 0-63
+C251 COMPILER V5.60.0,  zf_driver_flash                                                    18/11/25  17:06:18  PAGE 4   
+
+  136   3          //zf_assert(page_num <= FLASH_MAX_PAGE_INDEX);                                                       
+             - // ²ÎÊı·¶Î§ 0-3
+  137   3          //zf_assert(len <= FLASH_DATA_BUFFER_SIZE);
+  138   3      
+  139   3          uint16 temp_loop = 0;
+  140   3          uint32 flash_addr = 0;
+  141   3          flash_addr = ((FLASH_BASE_ADDR+FLASH_SECTION_SIZE*sector_num+FLASH_PAGE_SIZE*page_num));            /
+             -/ ÌáÈ¡µ±Ç° Flash µØÖ·
+  142   3      
+  143   3          uint32 primask = interrupt_global_disable();
+*** ERROR C25 IN LINE 143 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near 'uint32'
+  144   3          //clock_reset();                      // ¸´Î»Ê±ÖÓ
+  145   3          //clock_set_freq(SYSTEM_CLOCK_120M);          // ÉèÖÃÏµÍ³ÆµÂÊÎª120Mhz
+  146   3      
+  147   3      
+  148   3          for(temp_loop = 0; temp_loop < len; temp_loop++)                                                    /
+             -/ ¸ù¾İÖ¸¶¨³¤¶È¶ÁÈ¡
+*** ERROR C25 IN LINE 148 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near 'for'
+*** ERROR C25 IN LINE 148 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near '='
+*** ERROR C25 IN LINE 148 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near '<'
+*** WARNING C34 IN LINE 148 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: 'len': missing declaration specifiers
+*** ERROR C25 IN LINE 148 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: syntax error near '++'
+*** ERROR C7 IN LINE 148 OF ..\..\Libraries\zf_driver\zf_driver_flash.c: compilation aborted
+
+C251 COMPILATION COMPLETE.  7 WARNING(S),  22 ERROR(S)

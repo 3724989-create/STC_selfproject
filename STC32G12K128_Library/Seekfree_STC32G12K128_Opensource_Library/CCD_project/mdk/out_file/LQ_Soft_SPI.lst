@@ -1,0 +1,150 @@
+C251 COMPILER V5.60.0,  LQ_Soft_SPI                                                        18/11/25  13:07:51  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_Soft_SPI
+OBJECT MODULE PLACED IN .\out_file\LQ_Soft_SPI.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\lq_libraries\LQ_LIB\Src\LQ_Soft_SPI.c LARGE NOALIAS FLOAT64 WARNINGLEVE
+                    -L(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\.
+                    -.\libraries\zf_driver;..\user;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_libraries\Dri
+                    -ver\Inc) DEBUG PRINT(.\out_file\LQ_Soft_SPI.lst) OBJECT(.\out_file\LQ_Soft_SPI.obj) 
+
+stmt  level    source
+
+    1          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+    2           ¡¾Æ½    Ì¨¡¿±±¾©ÁúÇñÖÇÄÜ¿Æ¼¼STC32Î»ºËÐÄ°å
+    3           ¡¾±à    Ð´¡¿ÁúÇñ¿Æ¼¼
+    4           ¡¾E-mail  ¡¿chiusir@163.com
+    5           ¡¾Èí¼þ°æ±¾¡¿V1.0 °æÈ¨ËùÓÐ£¬µ¥Î»Ê¹ÓÃÇëÏÈÁªÏµÊÚÈ¨
+    6           ¡¾Ïà¹ØÐÅÏ¢²Î¿¼ÏÂÁÐµØÖ·¡¿
+    7           ¡¾Íø    Õ¾¡¿http://www.lqist.cn
+    8           ¡¾ÌÔ±¦µêÆÌ¡¿http://longqiu.taobao.com
+    9           --------------------------------------------------------------------------------
+   10           ¡¾  IDE  ¡¿ keil C251 V5.60
+   11           ¡¾Target ¡¿ STC32G/STC8051U/AI8051U 32Î»Ä£Ê½
+   12           ¡¾SYS CLK¡¿ 42 MHzÊ¹ÓÃÄÚ²¿¾§Õñ
+   13          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   14          
+   15          
+   16          #include "LQ_Soft_SPI.h"
+   17          
+   18          #include "include.h"
+   19          
+   20          /*************************************************************************
+   21          *  º¯ÊýÃû³Æ£ºvoid SPI_SoftInit(void)
+   22          *  ¹¦ÄÜËµÃ÷£ºÄ£ÄâSPI¿Ú³õÊ¼»¯
+   23          *  ²ÎÊýËµÃ÷£ºÎÞ
+   24          *  º¯Êý·µ»Ø£ºÎÞ
+   25          *  ÐÞ¸ÄÊ±¼ä£º2020Äê8ÔÂ10ÈÕ
+   26          *  ±¸    ×¢£º
+   27          *************************************************************************/
+   28          void Soft_SPI_Init(void)
+   29          {
+   30   1          GPIO_InitTypeDef GPIO_Soft_SPI;
+   31   1      
+   32   1      //    GPIO_Soft_SPI.Pin  = Soft_SPI_SCK_Pin|Soft_SPI_MOSI_Pin|Soft_SPI_MISO_Pin|Soft_SPI_CS_Pin;         
+             -//Òª³õÊ¼»¯µÄI/O
+   33   1          GPIO_Soft_SPI.Pin  = Soft_SPI_Pin;              //³õÊ¼»¯µÄ¹Ü½Å£¬µÍËÄÎ»£¬P40~P43    //·½Ê½2£¬Ò»´ÎÐÔ³õÊ
+             -¼
+   34   1          GPIO_Soft_SPI.Mode = GPIO_PullUp;               //Òª³õÊ¼»¯µÄI/O ×¼Ë«Ïò¿Ú
+   35   1          GPIO_Inilize(Soft_SPI_PORT,&GPIO_Soft_SPI);     //³õÊ¼»¯¹Ü½ÅÅäÖÃ
+   36   1      }
+   37          
+   38          /*************************************************************************
+   39          *  º¯ÊýÃû³Æ£ºvoid SPI_SoftReadWriteNbyte(u8 *lqbuff, u16 len)
+   40          *  ¹¦ÄÜËµÃ÷£ºSPI¶ÁÐ´Êý¾Ý¼°³¤¶È
+   41          *  ²ÎÊýËµÃ÷£ºu8 *bufÊý¾ÝÖ¸Õë,u16 len³¤¶È
+   42          *  º¯Êý·µ»Ø£º
+   43          *  ÐÞ¸ÄÊ±¼ä£º2020Äê8ÔÂ10ÈÕ
+   44          *  ±¸    ×¢£º
+   45          *************************************************************************/
+   46          void Soft_SPI_ReadWriteNbyte(u8 *lqbuff, u16 len)
+   47          {
+   48   1              u8 i;
+   49   1      
+   50   1          SPI_CS = 0;
+   51   1          SPI_SCK= 1;
+   52   1          do
+   53   1          {
+   54   2              for(i = 0; i < 8; i++)
+C251 COMPILER V5.60.0,  LQ_Soft_SPI                                                        18/11/25  13:07:51  PAGE 2   
+
+   55   2              {
+   56   3                  SPI_MOSI = ((*lqbuff) >= 0x80);
+   57   3                  SPI_SCK= 0;
+   58   3                  (*lqbuff) = (*lqbuff)<<1;
+   59   3      
+   60   3                  SPI_SCK= 1;
+   61   3      
+   62   3                  (*lqbuff) |= SPI_MISO;
+   63   3              }
+   64   2          lqbuff++;
+   65   2        }while(--len);
+   66   1        SPI_CS = 1;
+   67   1      }
+   68          
+   69          
+   70          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   71          @º¯ÊýÃû³Æ£ºvoid LQ_SPI_Read(unsigned char reg, unsigned short len, unsigned char* buf)
+   72          @¹¦ÄÜËµÃ÷£ºSPI´ÓÉè±¸¶ÁÈ¡Êý¾Ý
+   73          @²ÎÊýËµÃ÷£ºunsigned char reg,Éè±¸ÆðÊ¼µØÖ·unsigned char* buf,Êý¾Ý´æ·ÅµØÖ·unsigned short len,´ýÐ´ÈëµÄÊý¾Ý³¤
+             -¶È
+   74          @º¯Êý·µ»Ø£ºÎÞ
+   75          @ÐÞ¸ÄÊ±¼ä£º2022/02/24
+   76          @µ÷ÓÃ·½·¨£ºSPI_Read_Nbytes(SPI1,reg|0x80,buf,len);
+   77          @±¸    ×¢£ºÎÞ
+   78          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   79          void LQ_SPI_Read(unsigned char reg, unsigned short len, unsigned char* buf)
+   80          {
+   81   1          unsigned short i;
+   82   1          unsigned char buff[32];
+   83   1          buff[0] = reg | 0x80;
+   84   1      
+   85   1          Soft_SPI_ReadWriteNbyte(buff, len+1);
+   86   1          for(i=0;i<len;i++)
+   87   1              buf[i]=buff[i+1];
+   88   1      }
+   89          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   90          @º¯ÊýÃû³Æ£ºvoid LQ_SPI_Write(unsigned char reg, unsigned short len, unsigned char* buf)
+   91          @¹¦ÄÜËµÃ÷£ºSPIÏòÉè±¸Ð´ÈëÊý¾Ý
+   92          @²ÎÊýËµÃ÷£ºunsigned char reg,Éè±¸ÆðÊ¼µØÖ·unsigned char* buf,Êý¾Ý´æ·ÅµØÖ·unsigned short len,´ýÐ´ÈëµÄÊý¾Ý³¤
+             -¶È
+   93          @º¯Êý·µ»Ø£ºÎÞ
+   94          @ÐÞ¸ÄÊ±¼ä£º2022/02/24
+   95          @µ÷ÓÃ·½·¨£ºÎÞ
+   96          @±¸    ×¢£ºÎÞ
+   97          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   98          void LQ_SPI_Write(unsigned char reg, unsigned char value)
+   99          {
+  100   1          unsigned char buff[2];
+  101   1      
+  102   1          buff[0] = reg & 0x7f;   //ÏÈ·¢ËÍ¼Ä´æÆ÷
+  103   1          buff[1] = value;        //ÔÙ·¢ËÍÊý¾Ý
+  104   1          Soft_SPI_ReadWriteNbyte(buff, 2);
+  105   1      }
+  106          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       192     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------         39
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+C251 COMPILER V5.60.0,  LQ_Soft_SPI                                                        18/11/25  13:07:51  PAGE 3   
+
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

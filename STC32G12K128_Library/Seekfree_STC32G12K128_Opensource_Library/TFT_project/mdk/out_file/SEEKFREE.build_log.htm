@@ -26,14 +26,25 @@ Project File Date:  11/15/2025
 
 <h2>Output:</h2>
 Build target 'STC32G'
+compiling bsp.c...
+compiling my_uart.c...
+compiling my_pit.c...
 compiling main.c...
 ..\user\main.c(9): warning C183: dead assignment eliminated
 ..\user\main.c(10): warning C183: dead assignment eliminated
+compiling IIC.c...
+..\Hardware\IIC.c(375): warning C47: 'i': unreferenced local variable
+..\Hardware\IIC.c(386): warning C183: dead assignment eliminated
+..\Hardware\IIC.c(387): warning C183: dead assignment eliminated
+..\Hardware\IIC.c(386): warning C184: value of 'heartbeat_counter' possibly undefined
+..\Hardware\IIC.c(572): warning C183: dead assignment eliminated
+..\Hardware\IIC.c(572): warning C183: dead assignment eliminated
+..\Hardware\IIC.c(638): warning C183: dead assignment eliminated
 linking...
 Program Size: data=9.3 edata+hdata=2048 xdata=2293 const=7239 code=26959
 creating hex file from ".\out_file\SEEKFREE"...
-".\out_file\SEEKFREE" - 0 Error(s), 2 Warning(s).
-Build Time Elapsed:  00:00:00
+".\out_file\SEEKFREE" - 0 Error(s), 9 Warning(s).
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

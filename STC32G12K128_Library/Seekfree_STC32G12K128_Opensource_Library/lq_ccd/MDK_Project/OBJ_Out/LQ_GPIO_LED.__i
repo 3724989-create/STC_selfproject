@@ -1,0 +1,1 @@
+"..\..\libraries\LQ_LIB\Src\LQ_GPIO_LED.c" XSMALL UNSIGNED_CHAR FLOAT64 BROWSE INCDIR(..\..\libraries\Driver;..\..\libraries\Include;..\..\libraries\Driver\Inc;..\..\libraries\LQ_LIB\Inc;..\User) DEFINE (AI8051U_32Bit) DEBUG PRINT(.\OBJ_Out\LQ_GPIO_LED.lst) OBJECT(.\OBJ_Out\LQ_GPIO_LED.obj)

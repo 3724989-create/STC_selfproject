@@ -1,11 +1,12 @@
-C251 COMPILER V5.60.0,  isr                                                                15/11/25  21:23:37  PAGE 1   
+C251 COMPILER V5.60.0,  isr                                                                18/11/25  13:07:40  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE isr
 OBJECT MODULE PLACED IN .\out_file\isr.obj
 COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\user\isr.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE 
                     -INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\us
-                    -er;..\code;..\Hardware) DEBUG PRINT(.\out_file\isr.lst) OBJECT(.\out_file\isr.obj) 
+                    -er;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_libraries\Driver\Inc) DEBUG PRINT(.\out_
+                    -file\isr.lst) OBJECT(.\out_file\isr.obj) 
 
 stmt  level    source
 
@@ -65,9 +66,9 @@ stmt  level    source
    48   2              if (uart_rx_buff[UART_1][0] == 0x7F)
    49   2              {
    50   3                  if (dwon_count++ > 20)
-   51   3                  {
-C251 COMPILER V5.60.0,  isr                                                                15/11/25  21:23:37  PAGE 2   
+C251 COMPILER V5.60.0,  isr                                                                18/11/25  13:07:40  PAGE 2   
 
+   51   3                  {
    52   4                      IAP_CONTR = 0x60;
    53   4                  }
    54   3              }
@@ -133,9 +134,9 @@ stmt  level    source
   114   2              DMA_UR3R_STA &= ~0x02;      // 清标志位
   115   2              uart_rx_start_buff(UART_3); // 设置下一次接收，务必保留
   116   2              // 如果进入了这个中断，则代表UART的数据在没有取走之前被覆盖!
-  117   2              // 如果进入了这个中断，则代表UART的数据在没有取走之前被覆盖!
-C251 COMPILER V5.60.0,  isr                                                                15/11/25  21:23:37  PAGE 3   
+C251 COMPILER V5.60.0,  isr                                                                18/11/25  13:07:40  PAGE 3   
 
+  117   2              // 如果进入了这个中断，则代表UART的数据在没有取走之前被覆盖!
   118   2              // 如果进入了这个中断，则代表UART的数据在没有取走之前被覆盖!
   119   2          }
   120   1      }
@@ -201,9 +202,9 @@ stmt  level    source
   180   1          {
   181   2              tim3_irq_handler();
   182   2          }
-  183   1      }
-C251 COMPILER V5.60.0,  isr                                                                15/11/25  21:23:37  PAGE 4   
+C251 COMPILER V5.60.0,  isr                                                                18/11/25  13:07:40  PAGE 4   
 
+  183   1      }
   184          
   185          void TM4_IRQHandler() interrupt 20
   186          {
@@ -269,9 +270,9 @@ stmt  level    source
   246          //#define     DMA_UR4T_VECTOR         56      //01C3H
   247          //#define     DMA_UR4R_VECTOR         57      //01CBH
   248          //#define     DMA_LCM_VECTOR          58      //01D3H
-  249          //#define     LCM_VECTOR              59      //01DBH
-C251 COMPILER V5.60.0,  isr                                                                15/11/25  21:23:37  PAGE 5   
+C251 COMPILER V5.60.0,  isr                                                                18/11/25  13:07:40  PAGE 5   
 
+  249          //#define     LCM_VECTOR              59      //01DBH
   250          //#define     DMA_I2CT_VECTOR         60      //01E3H
   251          //#define     DMA_I2CR_VECTOR         61      //01EBH
   252          //#define     I2S_VECTOR              62      //01F3H

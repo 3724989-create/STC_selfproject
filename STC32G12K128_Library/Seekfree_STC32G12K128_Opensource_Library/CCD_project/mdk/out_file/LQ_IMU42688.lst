@@ -1,0 +1,344 @@
+C251 COMPILER V5.60.0,  LQ_IMU42688                                                        18/11/25  13:12:28  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LQ_IMU42688
+OBJECT MODULE PLACED IN .\out_file\LQ_IMU42688.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c LARGE NOALIAS FLOAT64 WARNINGLEVE
+                    -L(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\.
+                    -.\libraries\zf_driver;..\user;..\code;..\Hardware;..\lq_libraries\LQ_LIB\Inc;..\lq_libraries\Include;..\lq_libraries\Dri
+                    -ver\Inc) DEBUG PRINT(.\out_file\LQ_IMU42688.lst) OBJECT(.\out_file\LQ_IMU42688.obj) 
+
+stmt  level    source
+
+    1          #include "include.h"
+    2          #include "LQ_IMU42688.h"
+    3          
+    4          
+    5          
+    6          
+    7          enum//SPI通信陀螺仪类型
+    8          {
+    9              SPI_ICM42688=1,
+   10          }GyroType;
+   11          
+   12          
+   13          
+   14          //void Test_SPI_Gyro(void)
+   15          //{
+   16          //    char txt[30];
+   17          //    short aacx, aacy, aacz;    // 加速度传感器原始数据
+   18          //    short gyrox, gyroy, gyroz; // 陀螺仪原始数据
+   19          //    unsigned char res;
+   20          //    GPIO_LED_Init();        //LED初始化
+   21          //    OLED_Init();                //屏幕初始化
+   22          
+   23          //    res = SPI_Gryo_Init();
+   24          ////    Display_CLS(U16_BLACK);
+   25          //    sprintf(txt,"returnID:%2x",res);
+   26          ////    Display_showString(20, 12, txt, U16_WHITE, U16_BLACK, 16);
+   27          
+   28          ////    Display_showString(15, 0, "   LQ 42688 Test", U16_WHITE, U16_BLACK, 24);
+   29          
+   30          
+   31          //    while (1)
+   32          //    {
+   33          //        ICM_Get_Raw_data(&aacx, &aacy, &aacz, &gyrox, &gyroy, &gyroz); // 得到加速度传感器数�
+             -�
+   34          //        sprintf((char *)txt, "ax:%06d", aacx);
+   35          ////        Display_showString(0, 2, txt,U16_WHITE, U16_BLACK, 16);
+   36          
+   37          //        sprintf((char *)txt, "ay:%06d", aacy);
+   38          ////        Display_showString(0, 3, txt, U16_WHITE, U16_BLACK, 16);
+   39          //        sprintf((char *)txt, "az:%06d", aacz);
+   40          ////        Display_showString(0, 4, txt, U16_WHITE, U16_BLACK, 16);
+   41          
+   42          //        sprintf((char *)txt, "gx:%06d", gyrox);
+   43          ////        Display_showString(0, 5, txt, U16_WHITE, U16_BLACK, 16);
+   44          
+   45          //        sprintf((char *)txt, "gy:%06d", gyroy);
+   46          ////        Display_showString(0, 6, txt, U16_WHITE, U16_BLACK, 16);
+   47          
+   48          //        sprintf((char *)txt, "gz:%06d", gyroz);
+   49          ////        Display_showString(0, 7, txt, U16_WHITE, U16_BLACK, 16);
+   50          
+   51          
+   52          
+   53          //        delay_ms(5);
+   54          //    }
+   55          //}
+C251 COMPILER V5.60.0,  LQ_IMU42688                                                        18/11/25  13:12:28  PAGE 2   
+
+   56          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+   57          @函数名称：void delayms_icm(uint16 ms)
+   58          @功能说明：不精确延时
+   59          @参数说明：需要延时时间
+   60          @函数返回：无
+   61          @调用方法：delayms_icm(100);
+   62          @备    注：
+   63          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+   64          void delayms_icm(uint16 ms)
+   65          {
+   66   1          delay_ms(ms);
+   67   1      //    volatile unsigned long i = 0;
+   68   1      //    while (ms--)
+   69   1      //    {
+   70   1      //        for (i = 0; i < 30000; ++i)
+   71   1      //        {
+   72   1      //            __asm("NOP"); /* delay */
+   73   1      //        }
+   74   1      //    }
+   75   1      }
+   76          
+   77          //9轴陀螺仪地磁计的寄存器写数据
+   78          uint8_t SPI_Mag_Write_Reg(uint8_t addr, uint8_t datax)
+   79          {
+   80   1          uint32_t count = 0;
+   81   1          ICM_Write_Byte(0x17, 0x00);
+   82   1          ICM_Write_Byte(0x15, 0x38);
+   83   1          ICM_Write_Byte(0x16, addr);
+   84   1          ICM_Write_Byte(0x21, datax);
+   85   1          ICM_Write_Byte(0x14, 0x4c);
+   86   1          while((ICM_Read_Byte(0x22) & 0x80) == 0)
+   87   1          {
+   88   2              if(1000 < count++){
+   89   3                  return 1;
+   90   3              }
+   91   2              delay_us(100);
+   92   2          }
+   93   1          return 0;
+   94   1      }
+   95          
+   96          //向9轴陀螺仪地磁计的寄存器读数据
+   97          uint8_t SPI_Mag_Read_Reg(uint8_t addr)
+   98          {
+   99   1          uint16_t count = 0;
+  100   1          ICM_Write_Byte(0x17, 0x01);
+  101   1          ICM_Write_Byte(0x15, 0x39);
+  102   1          ICM_Write_Byte(0x16, addr);
+  103   1          ICM_Write_Byte(0x14, 0x4c);
+  104   1          while((ICM_Read_Byte(0x22) & 0x01) == 0)
+  105   1          {
+  106   2              if(1000 < count++){
+  107   3                  break;
+  108   3              }
+  109   2              delay_us(100);
+  110   2          }
+  111   1          return ICM_Read_Byte(0x02);
+  112   1      }
+  113          
+  114          
+  115          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+  116          @函数名称：void Test_ICM20689(void)
+  117          @功能说明：初始化 ICM20689
+  118          @参数说明：无
+  119          @函数返回：0：初始化成功   1：失败
+  120          @调用方法：ICM20689_Init();
+  121          @备    注：初始化时调用
+C251 COMPILER V5.60.0,  LQ_IMU42688                                                        18/11/25  13:12:28  PAGE 3   
+
+  122          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+  123          unsigned char SPI_Gryo_Init(void)
+  124          {
+  125   1      
+  126   1          unsigned char res,add;
+  127   1      //    QSPI_InitConfig(QSPI2_CLK_P15_3, QSPI2_MISO_P15_7, QSPI2_MOSI_P15_6, QSPI2_CS_P15_2, 4500000, 1);
+  128   1          res = ICM_Read_Byte(WHO_AM_I); // 读取ICM的ID
+  129   1          add = res;
+  130   1      
+  131   1      
+  132   1          ICM_Write_Byte(reg_bank_sel,0x00);//Set to bank 0
+*** ERROR C67 IN LINE 132 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 132 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  133   1          ICM_Write_Byte(reg_bank_sel,0x00);//Set to bank 0
+*** ERROR C67 IN LINE 133 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 133 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  134   1          ICM_Write_Byte(device_config_reg,bit_soft_reset_chip_config);//chip soft reset
+*** ERROR C67 IN LINE 134 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'device_config_reg': undefined identifier
+*** ERROR C67 IN LINE 134 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_soft_reset_chip_config': undefined identifie
+             -r
+*** WARNING C96 IN LINE 134 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  135   1          delayms_icm(100);
+  136   1      
+  137   1          ICM_Write_Byte(reg_bank_sel,0x01);//Change to bank 1
+*** ERROR C67 IN LINE 137 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 137 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  138   1          ICM_Write_Byte(intf_config4,0x02);//4 wire spi mode
+*** ERROR C67 IN LINE 138 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'intf_config4': undefined identifier
+*** WARNING C96 IN LINE 138 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  139   1          ICM_Write_Byte(reg_bank_sel,0x00);
+*** ERROR C67 IN LINE 139 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 139 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  140   1          ICM_Write_Byte(fifo_config_reg,0x40);//Stream-to-FIFO Mode
+*** ERROR C67 IN LINE 140 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'fifo_config_reg': undefined identifier
+*** WARNING C96 IN LINE 140 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  141   1      
+  142   1          res = ICM_Read_Byte(int_source0_reg);
+*** ERROR C67 IN LINE 142 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'int_source0_reg': undefined identifier
+*** WARNING C96 IN LINE 142 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Read_Byte': too few actual parameters
+  143   1          ICM_Write_Byte(int_source0_reg,0x00);
+*** ERROR C67 IN LINE 143 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'int_source0_reg': undefined identifier
+*** WARNING C96 IN LINE 143 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  144   1          ICM_Write_Byte(fifo_config2_reg,0x00);// watermark
+*** ERROR C67 IN LINE 144 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'fifo_config2_reg': undefined identifier
+*** WARNING C96 IN LINE 144 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  145   1          ICM_Write_Byte(fifo_config3_reg,0x02);// watermark
+*** ERROR C67 IN LINE 145 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'fifo_config3_reg': undefined identifier
+*** WARNING C96 IN LINE 145 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  146   1          ICM_Write_Byte(int_source0_reg, res);
+*** ERROR C67 IN LINE 146 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'int_source0_reg': undefined identifier
+*** WARNING C96 IN LINE 146 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  147   1          ICM_Write_Byte(fifo_config1_reg,0x63);// Enable the accel and gyro to the FIFO
+*** ERROR C67 IN LINE 147 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'fifo_config1_reg': undefined identifier
+*** WARNING C96 IN LINE 147 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  148   1      
+  149   1          ICM_Write_Byte(reg_bank_sel,0x00);
+*** ERROR C67 IN LINE 149 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 149 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  150   1          ICM_Write_Byte(int_config_reg,0x36);
+*** ERROR C67 IN LINE 150 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'int_config_reg': undefined identifier
+*** WARNING C96 IN LINE 150 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  151   1      
+  152   1          ICM_Write_Byte(reg_bank_sel, 0x00);
+*** ERROR C67 IN LINE 152 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 152 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  153   1          res = (ICM_Read_Byte(int_source0_reg)|bit_int_fifo_ths_int1_en);
+C251 COMPILER V5.60.0,  LQ_IMU42688                                                        18/11/25  13:12:28  PAGE 4   
+
+*** ERROR C67 IN LINE 153 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'int_source0_reg': undefined identifier
+*** ERROR C67 IN LINE 153 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_int_fifo_ths_int1_en': undefined identifier
+  154   1          ICM_Write_Byte(int_source0_reg, res);
+*** ERROR C67 IN LINE 154 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'int_source0_reg': undefined identifier
+*** WARNING C96 IN LINE 154 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  155   1      
+  156   1          ICM_Write_Byte(reg_bank_sel, 0x00);
+*** ERROR C67 IN LINE 156 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 156 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  157   1          res = ((ICM_Read_Byte(accel_config0_reg)&0x1F)|(bit_accel_ui_fs_sel_8g));//8g
+*** ERROR C67 IN LINE 157 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'accel_config0_reg': undefined identifier
+*** ERROR C67 IN LINE 157 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_accel_ui_fs_sel_8g': undefined identifier
+  158   1          ICM_Write_Byte(accel_config0_reg, res);
+*** ERROR C67 IN LINE 158 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'accel_config0_reg': undefined identifier
+*** WARNING C96 IN LINE 158 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  159   1      
+  160   1          ICM_Write_Byte(reg_bank_sel, 0x00);
+*** ERROR C67 IN LINE 160 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 160 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  161   1          res = ((ICM_Read_Byte(accel_config0_reg)&0xF0)|bit_accel_odr_50hz);
+*** ERROR C67 IN LINE 161 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'accel_config0_reg': undefined identifier
+*** ERROR C67 IN LINE 161 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_accel_odr_50hz': undefined identifier
+  162   1          ICM_Write_Byte(accel_config0_reg, res);
+*** ERROR C67 IN LINE 162 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'accel_config0_reg': undefined identifier
+*** WARNING C96 IN LINE 162 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  163   1      
+  164   1          ICM_Write_Byte(reg_bank_sel, 0x00);
+*** ERROR C67 IN LINE 164 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 164 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  165   1          res = ((ICM_Read_Byte(gyro_config0_reg)&0x1F)|(bit_gyro_ui_fs_sel_1000dps));//1000
+*** ERROR C67 IN LINE 165 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'gyro_config0_reg': undefined identifier
+*** ERROR C67 IN LINE 165 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_gyro_ui_fs_sel_1000dps': undefined identifie
+             -r
+  166   1          ICM_Write_Byte(gyro_config0_reg,res);
+*** ERROR C67 IN LINE 166 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'gyro_config0_reg': undefined identifier
+*** WARNING C96 IN LINE 166 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  167   1      
+  168   1          ICM_Write_Byte(reg_bank_sel, 0x00);
+*** ERROR C67 IN LINE 168 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 168 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  169   1          res = ((ICM_Read_Byte(gyro_config0_reg)&0xF0)|bit_gyro_odr_50hz);
+*** ERROR C67 IN LINE 169 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'gyro_config0_reg': undefined identifier
+*** ERROR C67 IN LINE 169 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_gyro_odr_50hz': undefined identifier
+  170   1          ICM_Write_Byte(gyro_config0_reg, res);
+*** ERROR C67 IN LINE 170 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'gyro_config0_reg': undefined identifier
+*** WARNING C96 IN LINE 170 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  171   1      
+  172   1          ICM_Write_Byte(reg_bank_sel, 0x00);
+*** ERROR C67 IN LINE 172 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 172 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  173   1          res = ICM_Read_Byte(pwr_mgmt0_reg)|(bit_accel_mode_ln); // Accel on in LNM
+*** ERROR C67 IN LINE 173 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'pwr_mgmt0_reg': undefined identifier
+*** ERROR C67 IN LINE 173 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_accel_mode_ln': undefined identifier
+  174   1          ICM_Write_Byte(pwr_mgmt0_reg, res);
+*** ERROR C67 IN LINE 174 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'pwr_mgmt0_reg': undefined identifier
+*** WARNING C96 IN LINE 174 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  175   1          delayms_icm(1);
+  176   1      
+  177   1          ICM_Write_Byte(reg_bank_sel, 0x00);
+*** ERROR C67 IN LINE 177 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'reg_bank_sel': undefined identifier
+*** WARNING C96 IN LINE 177 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  178   1          res = ICM_Read_Byte(pwr_mgmt0_reg)|(bit_gyro_mode_ln); // Gyro on in LNM
+*** ERROR C67 IN LINE 178 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'pwr_mgmt0_reg': undefined identifier
+*** ERROR C67 IN LINE 178 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'bit_gyro_mode_ln': undefined identifier
+  179   1          ICM_Write_Byte(pwr_mgmt0_reg, res);
+*** ERROR C67 IN LINE 179 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'pwr_mgmt0_reg': undefined identifier
+C251 COMPILER V5.60.0,  LQ_IMU42688                                                        18/11/25  13:12:28  PAGE 5   
+
+*** WARNING C96 IN LINE 179 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: 'ICM_Write_Byte': too few actual parameters
+  180   1          delayms_icm(1);
+  181   1      
+  182   1          return add;
+  183   1      }
+  184          
+  185          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+  186          @函数名称：void ICM_Set_Gyro_Fsr(u8 fsr)
+  187          @功能说明：设置陀螺仪传感器满量程范围
+  188          @参数说明：Fsr:0,±250dps;1,±500dps;2,±1000dps;3,±2000dps
+  189          @函数返回：
+  190          @调用方法：
+  191          @备    注：内部调用
+  192          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+  193          unsigned char ICM_Set_Gyro_Fsr(unsigned char fsr)
+  194          {
+  195   1          return ICM_Write_Byte(ICM_GYRO_CFG_REG, fsr << 3);
+  196   1      }
+  197          
+  198          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+  199          @函数名称：void ICM_Set_Accel_Fsr(u8 fsr)
+  200          @功能说明：设置LQ20689陀螺仪传感器满量程范围
+  201          @参数说明：fsr:0,±2g;1,±4g;2,±8g;3,±16g
+  202          @函数返回：
+  203          @调用方法：
+  204          @备    注：内部调用
+  205          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+  206          unsigned char ICM_Set_Accel_Fsr(unsigned char fsr)
+  207          {
+  208   1          return ICM_Write_Byte(ICM_ACCEL_CFG_REG, fsr << 3);
+  209   1      }
+  210          
+  211          /*LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+  212          @函数名称：void ICM_Set_LPF(u16 lpf)
+  213          @功能说明：设置LQ20689数字低通滤波器
+  214          @参数说明：lpf:数字低通滤波频率(Hz)
+  215          @函数返回：
+  216          @调用方法：
+  217          @备    注：内部调用
+  218          QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ*/
+  219          unsigned char ICM_Set_LPF(uint16 lpf)
+  220          {
+*** WARNING C57 IN LINE 220 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: parameter 1: different from declaration
+  221   1          unsigned char data = 0;
+*** ERROR C25 IN LINE 221 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '='
+  222   1          if (lpf >= 188)
+*** ERROR C25 IN LINE 222 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '>='
+  223   1              data = 1;
+*** ERROR C25 IN LINE 223 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '='
+  224   1          else if (lpf >= 98)
+*** ERROR C25 IN LINE 224 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '>='
+  225   1              data = 2;
+*** ERROR C25 IN LINE 225 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '='
+  226   1          else if (lpf >= 42)
+*** ERROR C25 IN LINE 226 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '>='
+  227   1              data = 3;
+*** ERROR C25 IN LINE 227 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '='
+  228   1          else if (lpf >= 20)
+*** ERROR C25 IN LINE 228 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '>='
+  229   1              data = 4;
+*** ERROR C25 IN LINE 229 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '='
+  230   1          else if (lpf >= 10)
+*** ERROR C25 IN LINE 230 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '>='
+  231   1              data = 5;
+*** ERROR C25 IN LINE 231 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: syntax error near '='
+*** ERROR C7 IN LINE 231 OF ..\lq_libraries\LQ_LIB\Src\LQ_IMU42688.c: compilation aborted
+C251 COMPILER V5.60.0,  LQ_IMU42688                                                        18/11/25  13:12:28  PAGE 6   
+
+
+C251 COMPILATION COMPLETE.  30 WARNING(S),  56 ERROR(S)

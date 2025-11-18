@@ -1,0 +1,240 @@
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  18/11/25  22:40:43  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE zf_device_tsl1401
+OBJECT MODULE PLACED IN .\out_file\zf_device_tsl1401.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\libraries\zf_device\zf_device_tsl1401.c LARGE NOALIAS FLOAT64 WARNIN
+                    -GLEVEL(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device
+                    -;..\..\libraries\zf_driver;..\user;..\code) DEBUG PRINT(.\out_file\zf_device_tsl1401.lst) OBJECT(.\out_file\zf_device_ts
+                    -l1401.obj) 
+
+stmt  level    source
+
+    1          /********************************************************************************************************
+             -*************
+    2          * STC32G Opensourec Library 即（STC32G 开源库）是一个基于官方 SDK 接口的第三方开源库
+    3          * Copyright (c) 2022 SEEKFREE 逐飞科技
+    4          *
+    5          * 本文件是STC 开源库的一部分
+    6          *
+    7          * STC32G 开源库 是免费软件
+    8          * 您可以根据自由软件基金会发布的 GPL（GNU General Public License，即 GNU通用公共许可证）的条款
+    9          * 即 GPL 的第3版（即 GPL3.0）或（您选择的）任何后来的版本，重新发布和/或修改它
+   10          *
+   11          * 本开源库的发布是希望它能发挥作用，但并未对其作任何的保证
+   12          * 甚至没有隐含的适销性或适合特定用途的保证
+   13          * 更多细节请参见 GPL
+   14          *
+   15          * 您应该在收到本开源库的同时收到一份 GPL 的副本
+   16          * 如果没有，请参阅<https://www.gnu.org/licenses/>
+   17          *
+   18          * 额外注明：
+   19          * 本开源库使用 GPL3.0 开源许可证协议 以上许可申明为译文版本
+   20          * 许可申明英文版在 libraries/doc 文件夹下的 GPL3_permission_statement.txt 文件中
+   21          * 许可证副本在 libraries 文件夹下 即该文件夹下的 LICENSE 文件
+   22          * 欢迎各位使用并传播本程序 但修改内容时必须保留逐飞科技的版权声明（即本声明）
+   23          *
+   24          * 文件名称          
+   25          * 公司名称          成都逐飞科技有限公司
+   26          * 版本信息          查看 libraries/doc 文件夹内 version 文件 版本说明
+   27          * 开发环境          MDK FOR C251
+   28          * 适用平台          STC32G
+   29          * 店铺链接          https://seekfree.taobao.com/
+   30          *
+   31          * 修改记录
+   32          * 日期              作者           备注
+   33          * 2024-08-01        大W            first version
+   34          *********************************************************************************************************
+             -***********/
+   35          /********************************************************************************************************
+             -*************
+   36          * 接线定义：
+   37          *                   ------------------------------------
+   38          *                   模块管脚            单片机管脚
+   39          *                   CLK                 查看 zf_device_tsl1401.h 中 TSL1401_CLK_PIN 宏定义
+   40          *                   SI                  查看 zf_device_tsl1401.h 中 TSL1401_SI_PIN 宏定义
+   41          *                   AO[x]               查看 zf_device_tsl1401.h 中 TSL1401_AO_PIN_BUFFER 宏定义
+   42          *                   VCC                 3.3V电源
+   43          *                   GND                 电源地
+   44          *                   ------------------------------------
+   45          *********************************************************************************************************
+             -***********/
+   46          
+   47          #include "zf_common_clock.h"
+   48          #include "zf_common_debug.h"
+   49          #include "zf_driver_adc.h"
+   50          #include "zf_driver_delay.h"
+   51          #include "zf_driver_gpio.h"
+   52          #include "zf_driver_pit.h"
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  18/11/25  22:40:43  PAGE 2   
+
+   53          
+   54          #include "zf_device_tsl1401.h"
+   55          
+   56          uint16 tsl1401_data[2][TSL1401_DATA_LEN];                                       // TSL1401 数据存放数组
+   57          
+   58          static uint8 tsl1401_init_state = 0;
+   59          uint8 tsl1401_finish_flag;                                                      // TSL1401 数据准备就绪标
+             -志位
+   60          uint16 calculate_dynamic_threshold(uint8 index);
+   61          //-------------------------------------------------------------------------------------------------------
+             -------------
+   62          // 函数简介     TSL1401 线阵 TSL1401 数据采集
+   63          // 参数说明     void
+   64          // 返回参数     void
+   65          // 使用示例     tsl1401_collect_pit_handler();
+   66          // 备注信息     该函数在 isr.c 中对应 TSL1401_PIT_INDEX 的中断服务函数调用
+   67          //-------------------------------------------------------------------------------------------------------
+             -------------
+   68          void tsl1401_collect_pit_handler (void)
+   69          {
+   70   1              uint8 i = 0;
+   71   1          uint16 threshold;
+   72   1              
+   73   1          if(!tsl1401_init_state)
+   74   1          {
+   75   2              return;
+   76   2          }
+   77   1      
+   78   1          TSL1401_CLK(1);
+   79   1          TSL1401_SI(0);
+   80   1          TSL1401_CLK(0);
+   81   1          TSL1401_SI(1);
+   82   1          TSL1401_CLK(1);
+   83   1          TSL1401_SI(0);
+   84   1      
+   85   1          for(i = 0; i < TSL1401_DATA_LEN; i ++)
+   86   1          {
+   87   2              TSL1401_CLK(0);
+   88   2              tsl1401_data[0][i] = adc_convert(TSL1401_AO_PIN);
+   89   2              tsl1401_data[1][i] = adc_convert(TSL1401_AO_PIN2);
+   90   2              //threshold=calculate_dynamic_threshold(0);
+   91   2              //tsl1401_binary_data_process(0,i,threshold);
+   92   2              TSL1401_CLK(1);
+   93   2          }
+   94   1          //采集完成标志位置1
+   95   1          tsl1401_finish_flag = 1;
+   96   1      }
+*** WARNING C47 IN LINE 71 OF ..\..\libraries\zf_device\zf_device_tsl1401.c: 'threshold': unreferenced local variable
+   97          
+   98          //-------------------------------------------------------------------------------------------------------
+             -------------
+   99          // 函数简介     TSL1401 线阵 CCD 图像发送至上位机查看图像
+  100          // 参数说明     uart_n          串口号
+  101          // 参数说明     index           对应接入的哪个 TSL1401 [0-1]
+  102          // 返回参数     void
+  103          // 使用示例     tsl1401_send_data(DEBUG_UART_INDEX, 1);
+  104          // 备注信息     调用该函数前请先初始化串口
+  105          //-------------------------------------------------------------------------------------------------------
+             -------------
+  106          
+  107          uint16 calculate_dynamic_threshold(uint8 index)
+  108          {
+  109   1          uint8 i;
+  110   1          uint16 max_l=0;
+  111   1          uint16 min_l=0xFFFF;
+  112   1          uint16 threshold;
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  18/11/25  22:40:43  PAGE 3   
+
+  113   1      
+  114   1          for(i=0;i<TSL1401_DATA_LEN;i++)
+  115   1          {
+  116   2              uint16 current_l=tsl1401_data[index][i];
+  117   2              if(current_l>max_l)
+  118   2              {
+  119   3                  max_l=current_l;
+  120   3              }
+  121   2              if(current_l<min_l)
+  122   2              {
+  123   3                  min_l=current_l;
+  124   3              }
+  125   2          }
+  126   1          //边缘检查
+  127   1          if(max_l>min_l+100)
+  128   1          {
+  129   2              threshold = (max_l + min_l) / 2;
+  130   2          }
+  131   1          else
+  132   1          {
+  133   2              // 如果亮度差异太小（可能视野是均匀的灰色），使用一个预设的经验值
+  134   2              // 这里的 2048 仅为示例，需要根据 ADC 分辨率调整
+  135   2              threshold = 2048; 
+  136   2          }
+  137   1      
+  138   1          return threshold;
+  139   1      }
+  140          
+  141          void tsl1401_send_data (uart_index_enum uart_n, uint8 index)
+  142          {
+  143   1          uint8 i;
+  144   1      
+  145   1          uart_write_byte(uart_n, 0x00);
+  146   1          uart_write_byte(uart_n, 0xff);
+  147   1          uart_write_byte(uart_n, 0x01);
+  148   1          uart_write_byte(uart_n, 0x00);
+  149   1      
+  150   1          for(i=0; i<TSL1401_DATA_LEN; i++)
+  151   1          {
+  152   2              uart_write_byte(uart_n, (uint8)(tsl1401_data[index][i] >> 8));                   // 发送高8位
+  153   2              uart_write_byte(uart_n, (uint8)(tsl1401_data[index][i] & 0xFF));                 // 发送高低8位
+  154   2          }
+  155   1      }
+  156          
+  157          void tsl1401_binary_data_process(uint8 *boundry[],uint8 i, uint8 threshold)
+  158          {
+  159   1              if(boundry[i]>threshold)
+*** WARNING C40 IN LINE 159 OF ..\..\libraries\zf_device\zf_device_tsl1401.c: 'unsigned char' converted to 'far' pointer
+  160   1              {
+  161   2                  boundry[i]=(uint8)128;  // 白色或反光
+  162   2              }
+  163   1              else
+  164   1              {
+  165   2                    boundry[i]=(uint8)0;  // 黑色或无反射
+  166   2              }
+  167   1      }
+  168          
+  169          
+  170          //-------------------------------------------------------------------------------------------------------
+             -------------
+  171          // 函数简介     TSL1401 线阵 TSL1401 初始化
+  172          // 参数说明     void
+  173          // 返回参数     void
+  174          // 使用示例     tsl1401_init();
+  175          // 备注信息     
+  176          //-------------------------------------------------------------------------------------------------------
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  18/11/25  22:40:43  PAGE 4   
+
+             -------------
+  177          void tsl1401_init (void)     
+  178          {
+  179   1          tsl1401_init_state = 1;
+  180   1          adc_init(TSL1401_AO_PIN, TSL1401_AD_RESOLUTION);
+  181   1          adc_init(TSL1401_AO_PIN2, TSL1401_AD_RESOLUTION);
+  182   1          gpio_init(TSL1401_CLK_PIN, GPO, GPIO_LOW, GPO_PUSH_PULL);
+  183   1          gpio_init(TSL1401_SI_PIN, GPO, GPIO_LOW, GPO_PUSH_PULL);
+  184   1      }
+  185          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       437     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =       514     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =         6     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

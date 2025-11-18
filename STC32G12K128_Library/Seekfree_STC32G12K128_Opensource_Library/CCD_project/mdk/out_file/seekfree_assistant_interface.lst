@@ -1,9 +1,9 @@
-C251 COMPILER V5.60.0,  seekfree_assistant_interface                                       15/11/25  21:23:36  PAGE 1   
+C251 COMPILER V5.60.0,  seekfree_assistant_interface                                       18/11/25  17:05:57  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE seekfree_assistant_interface
 OBJECT MODULE PLACED IN .\out_file\seekfree_assistant_interface.obj
-COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\libraries\zf_components\seekfree_assistant_interface.c LARGE NOALIAS
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\..\Libraries\zf_components\seekfree_assistant_interface.c LARGE NOALIAS
                     - FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libr
                     -aries\zf_device;..\..\libraries\zf_driver;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\seekfree_assistant_interfa
                     -ce.lst) OBJECT(.\out_file\seekfree_assistant_interface.obj) 
@@ -66,7 +66,7 @@ stmt  level    source
    49          // 函数简介     逐飞助手接收数据函数
    50          // 参数说明     *buff           需要接收的数据地址
    51          // 参数说明     length          要接收的数据最大长度
-C251 COMPILER V5.60.0,  seekfree_assistant_interface                                       15/11/25  21:23:36  PAGE 2   
+C251 COMPILER V5.60.0,  seekfree_assistant_interface                                       18/11/25  17:05:57  PAGE 2   
 
    52          // 返回参数     uint32          接收到的数据长度
    53          // 使用示例
@@ -135,7 +135,7 @@ Module Information          Static   Overlayable
   ebit size            =    ------     ------
   bitaddressable size  =    ------     ------
   ebitaddressable size =    ------     ------
-C251 COMPILER V5.60.0,  seekfree_assistant_interface                                       15/11/25  21:23:36  PAGE 3   
+C251 COMPILER V5.60.0,  seekfree_assistant_interface                                       18/11/25  17:05:57  PAGE 3   
 
   far data size        =    ------     ------
   huge data size       =    ------     ------

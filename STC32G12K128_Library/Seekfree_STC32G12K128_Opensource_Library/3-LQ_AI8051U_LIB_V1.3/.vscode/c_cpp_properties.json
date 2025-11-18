@@ -1,0 +1,91 @@
+{
+    "configurations": [
+        {
+            "name": "AI8051_32bit",
+            "intelliSenseMode": "${default}",
+            "cStandard": "c89",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "D:\\Keil_v5\\C251\\INC",
+                "LQ_APP\\Inc",
+                "LQ_APP\\Src",
+                "Driver",
+                "Driver\\Inc",
+                "User",
+                "LQ_LIB\\Inc"
+            ],
+            "defines": [
+                "AI8051U_32Bit",
+                "__C251__",
+                "__VSCODE_C251__",
+                "reentrant=",
+                "compact=",
+                "small=",
+                "large=",
+                "data=",
+                "idata=",
+                "pdata=",
+                "bdata=",
+                "edata=",
+                "xdata=",
+                "code=",
+                "bit=char",
+                "sbit=char",
+                "sfr=char",
+                "sfr16=int",
+                "sfr32=int",
+                "interrupt=",
+                "using=",
+                "far=",
+                "_at_=",
+                "_priority_=",
+                "_task_="
+            ]
+        },
+        {
+            "name": "STC32G",
+            "cStandard": "c89",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "${default}",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "D:\\Keil_v5\\C251\\INC",
+                "D:\\Keil_v5\\C251\\INC\\STC",
+                "Driver",
+                "Driver\\Inc",
+                "Driver\\Src",
+                "User",
+                "LQ_LIB\\Inc"
+            ],
+            "defines": [
+                "STC32G",
+                "__C251__",
+                "__VSCODE_C251__",
+                "reentrant=",
+                "compact=",
+                "small=",
+                "large=",
+                "data=",
+                "idata=",
+                "pdata=",
+                "bdata=",
+                "edata=",
+                "xdata=",
+                "code=",
+                "bit=char",
+                "sbit=char",
+                "sfr=char",
+                "sfr16=int",
+                "sfr32=int",
+                "interrupt=",
+                "using=",
+                "far=",
+                "_at_=",
+                "_priority_=",
+                "_task_="
+            ]
+        }
+    ],
+    "version": 4
+}

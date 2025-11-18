@@ -1,0 +1,225 @@
+C251 COMPILER V5.60.0,  main                                                               18/11/25  20:43:32  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN .\out_file\main.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\user\main.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE
+                    - INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\u
+                    -ser;..\code) DEBUG PRINT(.\out_file\main.lst) OBJECT(.\out_file\main.obj) 
+
+stmt  level    source
+
+    1          /********************************************************************************************************
+             -*************
+    2          * STC32G Opensourec Library 即（STC32G 开源库）是一个基于官方 SDK 接口的第三方开源�
+             -�
+    3          * Copyright (c) 2022 SEEKFREE 逐飞科技
+    4          *
+    5          * 本文件是STC 开源库的一部分
+    6          *
+    7          * STC32G 开源库 是免费软件
+    8          * 您可以根据自由软件基金会发布的 GPL（GNU General Public License，即 GNU通用公共许
+             -可证）的条款
+    9          * 即 GPL 的第3版（即 GPL3.0）或（您选择的）任何后来的版本，重新发布和/或修�
+             -�它
+   10          *
+   11          * 本开源库的发布是希望它能发挥作用，但并未对其作任何的保证
+   12          * 甚至没有隐含的适销性或适合特定用途的保证
+   13          * 更多细节请参见 GPL
+   14          *
+   15          * 您应该在收到本开源库的同时收到一份 GPL 的副本
+   16          * 如果没有，请参阅<https://www.gnu.org/licenses/>
+   17          *
+   18          * 额外注明：
+   19          * 本开源库使用 GPL3.0 开源许可证协议 以上许可申明为译文版本
+   20          * 许可申明英文版在 libraries/doc 文件夹下的 GPL3_permission_statement.txt 文件中
+   21          * 许可证副本在 libraries 文件夹下 即该文件夹下的 LICENSE 文件
+   22          * 欢迎各位使用并传播本程序 但修改内容时必须保留逐飞科技的版权声明（即本
+             -声明）
+   23          *
+   24          * 文件名称          
+   25          * 公司名称          成都逐飞科技有限公司
+   26          * 版本信息          查看 libraries/doc 文件夹内 version 文件 版本说明
+   27          * 开发环境          MDK FOR C251
+   28          * 适用平台          STC32G
+   29          * 店铺链接          https://seekfree.taobao.com/
+   30          *
+   31          * 修改记录
+   32          * 日期              作者           备注
+   33          * 2024-08-01        大W            first version
+   34          *********************************************************************************************************
+             -***********/
+   35          
+   36          #include "zf_common_headfile.h"
+   37          
+   38          #pragma warning disable = 177
+   39          
+   40          // *************************** 例程硬件连接说明 ***************************
+   41          // 接入红孩儿 CCD 模块
+   42          //      模块管脚            单片机管脚
+   43          //      CLK                 查看 SEEKFREE_TSL1401.h 中 CCD_CLK_PIN 宏定义
+   44          //      SI                  查看 SEEKFREE_TSL1401.h 中 CCD_SI_PIN 宏定义
+   45          //      AO[x]               查看 SEEKFREE_TSL1401.h 中 AD_CHANNEL_CH 宏定义
+   46          //      GND                 核心板电源地 GND
+   47          //      3V3                 核心板 3V3 电源
+   48          
+   49          // *************************** 例程使用步骤说明 ***************************
+   50          // 1.根据硬件连接说明连接好模块，使用电源供电(下载器供电会导致模块电压不
+             -足)
+C251 COMPILER V5.60.0,  main                                                               18/11/25  20:43:32  PAGE 2   
+
+   51          //
+   52          // 2.下载例程到单片机中，打开逐飞串口助手。
+   53          //
+   54          // 3.在逐飞串口助手中，选择图像传输
+   55          //
+   56          // 4.选择下载器对应的串口号，波特率(默认115200)，点击连接
+   57          //
+   58          // 5.可以在逐飞助手的图像传输界面看到对应波形
+   59          
+   60          // *************************** 例程测试说明 ***************************
+   61          // 1.本例程会通过 Debug 串口输出测试信息 请务必接好调试串口以便获取测试信�
+             -�
+   62          //
+   63          // 2.连接好模块和核心板后（尽量使用配套主板测试以避免供电不足的问题） 烧
+             -录本例程 按下复位后程序开始运行
+   64          //
+   65          
+   66          
+   67          #define PIT_CH                          (TIM1_PIT )                             // 使用的周期中断�
+             -��号 如果修改 需要同步对应修改周期中断编号与 isr.c 中的调用
+   68          //#define PIT_PRIORITY                    (TIM1_IRQn)                           TIM1的中断优先级默
+             -认最低，不可修改，具体看手册。
+   69          
+   70          
+   71          
+   72          uint16 i, j;
+   73          
+   74          uint8 y1_boundary[128];
+   75          uint8 y2_boundary[128];
+   76          uint8 y3_boundary[128];
+   77          
+   78          
+   79          ////-----------------------------------------------------------------------------------------------------
+             ---------------
+   80          //// 函数简介     滴答客发送函数
+   81          //// 参数说明     *buff           需要发送的数据地址
+   82          //// 参数说明     length          需要发送的长度
+   83          //// 返回参数     uint32          剩余未发送数据长度
+   84          //// 使用示例
+   85          ////-----------------------------------------------------------------------------------------------------
+             ---------------
+   86          //uint32 seekfree_assistant_transfer   (const uint8 *buff, uint32 length)
+   87          //{
+   88          //      uart_write_buffer(DEBUG_UART_INDEX, buff, (uint16)length);
+   89          //      return 0;
+   90          //}
+   91          
+   92          void pit_handler (void);
+   93          
+   94          void main()
+   95          {
+   96   1          clock_init(SYSTEM_CLOCK_30M);
+   97   1              debug_init();
+   98   1              // 初始化CCD
+   99   1          tsl1401_init();
+  100   1              
+  101   1              // 设置定时器1中断回调函数
+  102   1              tim1_irq_handler = pit_handler;
+  103   1              
+  104   1          pit_ms_init(PIT_CH, 10);                                                   // 初始化 PIT 为周期
+             -中断 100ms 周期
+  105   1              
+  106   1      
+  107   1              seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);
+  108   1              
+  109   1          seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, NULL, 128, 256);
+C251 COMPILER V5.60.0,  main                                                               18/11/25  20:43:32  PAGE 3   
+
+  110   1          // 设置一个边线用于显示CCD波形
+  111   1          seekfree_assistant_camera_boundary_config(Y_BOUNDARY, 128, NULL, NULL ,NULL, y1_boundary, y2_boundary
+             -, y3_boundary);
+  112   1          // 边线3用于显示中线
+  113   1          memset(y3_boundary, 0x80, sizeof(y3_boundary));
+  114   1              
+  115   1          while(1)
+  116   1              {
+  117   2                      if(tsl1401_finish_flag)
+  118   2              {
+  119   3                  tsl1401_finish_flag = 0;
+  120   3                              
+  121   3      //                      tsl1401_send_data(DEBUG_UART_INDEX, 0);
+  122   3      //                      tsl1401_send_data(DEBUG_UART_INDEX, 1);
+  123   3                              
+  124   3                  for(j = 0; j < 128; j++)
+  125   3                  {
+  126   4                      // 获取CCD数据，并按分辨率进行压缩
+  127   4                      switch(TSL1401_AD_RESOLUTION)
+  128   4                      {
+  129   5                          case ADC_8BIT:
+  130   5                          {
+  131   6                              y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 2);
+  132   6                              y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 2);
+  133   6                              break;
+  134   6                          }
+  135   5                          case ADC_10BIT:
+  136   5                          {
+  137   6                              y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 8);
+  138   6                              y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 8);
+  139   6                              break;
+  140   6                          }
+  141   5                          case ADC_12BIT:
+  142   5                          {
+  143   6                              y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 32);
+  144   6                              y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 32);
+  145   6                              break;
+  146   6                          }
+  147   5                      }
+  148   4                  }
+  149   3                  // 发送图像
+  150   3                  seekfree_assistant_camera_send();
+  151   3              
+  152   3              }       
+  153   2          }
+  154   1      }
+  155          
+  156          
+  157          //-------------------------------------------------------------------------------------------------------
+             -------------
+  158          // 函数简介     PIT 的周期中断处理函数 这个函数将在 PIT 对应的定时器中断调用
+             - 详见 isr.c
+  159          // 参数说明     void
+  160          // 返回参数     void
+  161          // 使用示例     pit_handler();
+  162          //-------------------------------------------------------------------------------------------------------
+             -------------
+  163          void pit_handler (void)
+  164          {       
+  165   1              tsl1401_collect_pit_handler();
+  166   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       365     ------
+  ecode size           =    ------     ------
+C251 COMPILER V5.60.0,  main                                                               18/11/25  20:43:32  PAGE 4   
+
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =       388     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =         2     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
