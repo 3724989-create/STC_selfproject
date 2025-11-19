@@ -774,6 +774,11 @@
               <FileType>1</FileType>
               <FilePath>..\code\my_servo.c</FilePath>
             </File>
+            <File>
+              <FileName>self_LCD.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\self_LCD.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

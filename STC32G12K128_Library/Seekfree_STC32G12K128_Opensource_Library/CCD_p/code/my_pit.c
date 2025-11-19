@@ -11,7 +11,7 @@ void self_pit_init(void)
 {
     gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);  		// 初始化 LED1 输出 默认低电平 推挽输出模式
 	
-    pit_ms_init(PIT_CH, 1);                          	// 初始化 PIT_CH0 为周期中断 1000ms 周期
+    pit_ms_init(PIT_CH, 10);                          	// 初始化 PIT_CH0 为周期中断 1000ms 周期
 		
     interrupt_set_priority(PIT_PRIORITY, 0);            	// 设置 PIT1 对周期中断的中断优先级为 0，0为最低优先级
     

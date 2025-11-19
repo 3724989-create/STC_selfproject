@@ -42,6 +42,7 @@
 ".\out_file\my_uart.obj",
 ".\out_file\my_pit.obj",
 ".\out_file\my_servo.obj",
+".\out_file\self_LCD.obj",
 ".\out_file\isr.obj",
 ".\out_file\main.obj",
 ".\out_file\IIC.obj" 

@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  main                                                               18/11/25  22:42:53  PAGE 1   
+C251 COMPILER V5.60.0,  main                                                               18/11/25  22:48:03  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE main
@@ -66,7 +66,7 @@ stmt  level    source
    49          // *************************** 例程使用步骤说明 ***************************
    50          // 1.根据硬件连接说明连接好模块，使用电源供电(下载器供电会导致模块电压不
              -足)
-C251 COMPILER V5.60.0,  main                                                               18/11/25  22:42:53  PAGE 2   
+C251 COMPILER V5.60.0,  main                                                               18/11/25  22:48:03  PAGE 2   
 
    51          //
    52          // 2.下载例程到单片机中，打开逐飞串口助手。
@@ -134,7 +134,7 @@ stmt  level    source
   107   1              
   108   1          
   109   1              seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);          //初始化UART串口
-C251 COMPILER V5.60.0,  main                                                               18/11/25  22:42:53  PAGE 3   
+C251 COMPILER V5.60.0,  main                                                               18/11/25  22:48:03  PAGE 3   
 
   110   1              
   111   1          seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, NULL, 128, 256);
@@ -184,11 +184,11 @@ stmt  level    source
   154   6                           }
   155   5                       }
   156   4                      
-  157   4                      
+  157   4                      printf("%d\r\n",y1_boundary[j]);
   158   4                   }
   159   3      
   160   3                   // 发送图像
-  161   3                  seekfree_assistant_camera_send();
+  161   3                  //seekfree_assistant_camera_send();
   162   3              
   163   3              }       
   164   2          }
@@ -202,7 +202,7 @@ stmt  level    source
   170          // 参数说明     void
   171          // 返回参数     void
   172          // 使用示例     pit_handler();
-C251 COMPILER V5.60.0,  main                                                               18/11/25  22:42:53  PAGE 4   
+C251 COMPILER V5.60.0,  main                                                               18/11/25  22:48:03  PAGE 4   
 
   173          //-------------------------------------------------------------------------------------------------------
              -------------
@@ -215,7 +215,7 @@ stmt  level    source
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       375     ------
+  code size            =       401     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
@@ -230,7 +230,7 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =         2     ------
+  hconst size          =         7     ------
 End of Module Information.
 
 

@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  15/11/25  21:23:35  PAGE 1   
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  19/11/25  20:35:24  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE zf_device_tsl1401
@@ -66,7 +66,7 @@ stmt  level    source
    50          #include "zf_driver_delay.h"
    51          #include "zf_driver_gpio.h"
    52          #include "zf_driver_pit.h"
-C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  15/11/25  21:23:35  PAGE 2   
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  19/11/25  20:35:24  PAGE 2   
 
    53          
    54          #include "zf_device_tsl1401.h"
@@ -76,7 +76,7 @@ stmt  level    source
    58          static uint8 tsl1401_init_state = 0;
    59          uint8 tsl1401_finish_flag;                                                      // TSL1401 数据准备就绪标
              -志位
-   60          
+   60          uint16 calculate_dynamic_threshold(uint8 index);
    61          //-------------------------------------------------------------------------------------------------------
              -------------
    62          // 函数简介     TSL1401 线阵 TSL1401 数据采集
@@ -89,81 +89,136 @@ stmt  level    source
    68          void tsl1401_collect_pit_handler (void)
    69          {
    70   1              uint8 i = 0;
-   71   1              
-   72   1          if(!tsl1401_init_state)
-   73   1          {
-   74   2              return;
-   75   2          }
-   76   1      
-   77   1          TSL1401_CLK(1);
-   78   1          TSL1401_SI(0);
-   79   1          TSL1401_CLK(0);
-   80   1          TSL1401_SI(1);
-   81   1          TSL1401_CLK(1);
-   82   1          TSL1401_SI(0);
-   83   1      
-   84   1          for(i = 0; i < TSL1401_DATA_LEN; i ++)
-   85   1          {
-   86   2              TSL1401_CLK(0);
-   87   2              tsl1401_data[0][i] = adc_convert(TSL1401_AO_PIN);
-   88   2              tsl1401_data[1][i] = adc_convert(TSL1401_AO_PIN2);
-   89   2              TSL1401_CLK(1);
-   90   2          }
-   91   1          //采集完成标志位置1
-   92   1          tsl1401_finish_flag = 1;
-   93   1      }
-   94          
-   95          //-------------------------------------------------------------------------------------------------------
+   71   1          uint16 threshold;
+   72   1              
+   73   1          if(!tsl1401_init_state)
+   74   1          {
+   75   2              return;
+   76   2          }
+   77   1      
+   78   1          TSL1401_CLK(1);
+   79   1          TSL1401_SI(0);
+   80   1          TSL1401_CLK(0);
+   81   1          TSL1401_SI(1);
+   82   1          TSL1401_CLK(1);
+   83   1          TSL1401_SI(0);
+   84   1      
+   85   1          for(i = 0; i < TSL1401_DATA_LEN; i ++)
+   86   1          {
+   87   2              TSL1401_CLK(0);
+   88   2              tsl1401_data[0][i] = adc_convert(TSL1401_AO_PIN);
+   89   2              tsl1401_data[1][i] = adc_convert(TSL1401_AO_PIN2);
+   90   2              //threshold=calculate_dynamic_threshold(0);
+   91   2              //tsl1401_binary_data_process(0,i,threshold);
+   92   2              TSL1401_CLK(1);
+   93   2          }
+   94   1          //采集完成标志位置1
+   95   1          tsl1401_finish_flag = 1;
+   96   1      }
+*** WARNING C47 IN LINE 71 OF ..\..\libraries\zf_device\zf_device_tsl1401.c: 'threshold': unreferenced local variable
+   97          
+   98          //-------------------------------------------------------------------------------------------------------
              -------------
-   96          // 函数简介     TSL1401 线阵 CCD 图像发送至上位机查看图像
-   97          // 参数说明     uart_n          串口号
-   98          // 参数说明     index           对应接入的哪个 TSL1401 [0-1]
-   99          // 返回参数     void
-  100          // 使用示例     tsl1401_send_data(DEBUG_UART_INDEX, 1);
-  101          // 备注信息     调用该函数前请先初始化串口
-  102          //-------------------------------------------------------------------------------------------------------
+   99          // 函数简介     TSL1401 线阵 CCD 图像发送至上位机查看图像
+  100          // 参数说明     uart_n          串口号
+  101          // 参数说明     index           对应接入的哪个 TSL1401 [0-1]
+  102          // 返回参数     void
+  103          // 使用示例     tsl1401_send_data(DEBUG_UART_INDEX, 1);
+  104          // 备注信息     调用该函数前请先初始化串口
+  105          //-------------------------------------------------------------------------------------------------------
              -------------
-  103          void tsl1401_send_data (uart_index_enum uart_n, uint8 index)
-  104          {
-  105   1          uint8 i;
-  106   1      
-  107   1          uart_write_byte(uart_n, 0x00);
-  108   1          uart_write_byte(uart_n, 0xff);
-  109   1          uart_write_byte(uart_n, 0x01);
-  110   1          uart_write_byte(uart_n, 0x00);
-  111   1      
-  112   1          for(i=0; i<TSL1401_DATA_LEN; i++)
-  113   1          {
-C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  15/11/25  21:23:35  PAGE 3   
+  106          
+  107          uint16 calculate_dynamic_threshold(uint8 index)
+  108          {
+  109   1          uint8 i;
+  110   1          uint16 max_l=0;
+  111   1          uint16 min_l=0xFFFF;
+  112   1          uint16 threshold;
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  19/11/25  20:35:24  PAGE 3   
 
-  114   2              uart_write_byte(uart_n, (uint8)(tsl1401_data[index][i] >> 8));                   // 发送高8位
-  115   2              uart_write_byte(uart_n, (uint8)(tsl1401_data[index][i] & 0xFF));                 // 发送高低8位
-  116   2          }
-  117   1      }
-  118          
-  119          //-------------------------------------------------------------------------------------------------------
+  113   1      
+  114   1          for(i=0;i<TSL1401_DATA_LEN;i++)
+  115   1          {
+  116   2              uint16 current_l=tsl1401_data[index][i];
+  117   2              if(current_l>max_l)
+  118   2              {
+  119   3                  max_l=current_l;
+  120   3              }
+  121   2              if(current_l<min_l)
+  122   2              {
+  123   3                  min_l=current_l;
+  124   3              }
+  125   2          }
+  126   1          //边缘检查
+  127   1          if(max_l>min_l+100)
+  128   1          {
+  129   2              threshold = (max_l + min_l) / 2;
+  130   2          }
+  131   1          else
+  132   1          {
+  133   2              // 如果亮度差异太小（可能视野是均匀的灰色），使用一个预设的经验值
+  134   2              // 这里的 2048 仅为示例，需要根据 ADC 分辨率调整
+  135   2              threshold = 2048; 
+  136   2          }
+  137   1      
+  138   1          return threshold;
+  139   1      }
+  140          
+  141          void tsl1401_send_data (uart_index_enum uart_n, uint8 index)
+  142          {
+  143   1          uint8 i;
+  144   1      
+  145   1          uart_write_byte(uart_n, 0x00);
+  146   1          uart_write_byte(uart_n, 0xff);
+  147   1          uart_write_byte(uart_n, 0x01);
+  148   1          uart_write_byte(uart_n, 0x00);
+  149   1      
+  150   1          for(i=0; i<TSL1401_DATA_LEN; i++)
+  151   1          {
+  152   2              uart_write_byte(uart_n, (uint8)(tsl1401_data[index][i] >> 8));                   // 发送高8位
+  153   2              uart_write_byte(uart_n, (uint8)(tsl1401_data[index][i] & 0xFF));                 // 发送高低8位
+  154   2          }
+  155   1      }
+  156          
+  157          void tsl1401_binary_data_process(uint8 *boundry[],uint8 i, uint8 threshold)
+  158          {
+  159   1              if(boundry[i]>threshold)
+*** WARNING C40 IN LINE 159 OF ..\..\libraries\zf_device\zf_device_tsl1401.c: 'unsigned char' converted to 'far' pointer
+  160   1              {
+  161   2                  boundry[i]=(uint8)128;  // 白色或反光
+  162   2              }
+  163   1              else
+  164   1              {
+  165   2                    boundry[i]=(uint8)0;  // 黑色或无反射
+  166   2              }
+  167   1      }
+  168          
+  169          
+  170          //-------------------------------------------------------------------------------------------------------
              -------------
-  120          // 函数简介     TSL1401 线阵 TSL1401 初始化
-  121          // 参数说明     void
-  122          // 返回参数     void
-  123          // 使用示例     tsl1401_init();
-  124          // 备注信息     
-  125          //-------------------------------------------------------------------------------------------------------
+  171          // 函数简介     TSL1401 线阵 TSL1401 初始化
+  172          // 参数说明     void
+  173          // 返回参数     void
+  174          // 使用示例     tsl1401_init();
+  175          // 备注信息     
+  176          //-------------------------------------------------------------------------------------------------------
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  19/11/25  20:35:24  PAGE 4   
+
              -------------
-  126          void tsl1401_init (void)     
-  127          {
-  128   1          tsl1401_init_state = 1;
-  129   1          adc_init(TSL1401_AO_PIN, TSL1401_AD_RESOLUTION);
-  130   1          adc_init(TSL1401_AO_PIN2, TSL1401_AD_RESOLUTION);
-  131   1          gpio_init(TSL1401_CLK_PIN, GPO, GPIO_LOW, GPO_PUSH_PULL);
-  132   1          gpio_init(TSL1401_SI_PIN, GPO, GPIO_LOW, GPO_PUSH_PULL);
-  133   1      }
-  134          
+  177          void tsl1401_init (void)     
+  178          {
+  179   1          tsl1401_init_state = 1;
+  180   1          adc_init(TSL1401_AO_PIN, TSL1401_AD_RESOLUTION);
+  181   1          adc_init(TSL1401_AO_PIN2, TSL1401_AD_RESOLUTION);
+  182   1          gpio_init(TSL1401_CLK_PIN, GPO, GPIO_LOW, GPO_PUSH_PULL);
+  183   1          gpio_init(TSL1401_SI_PIN, GPO, GPIO_LOW, GPO_PUSH_PULL);
+  184   1      }
+  185          
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       319     ------
+  code size            =       437     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
@@ -182,4 +237,4 @@ Module Information          Static   Overlayable
 End of Module Information.
 
 
-C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C251 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

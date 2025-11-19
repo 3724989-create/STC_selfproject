@@ -1,1 +1,0 @@
-"..\..\Libraries\zf_driver\zf_driver_delay.c" LARGE NOALIAS FLOAT64 WARNINGLEVEL (3) OPTIMIZE (SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\zf_driver_delay.lst) OBJECT(.\out_file\zf_driver_delay.obj)

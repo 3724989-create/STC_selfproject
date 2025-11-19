@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  my_pit                                                             18/11/25  17:09:54  PAGE 1   
+C251 COMPILER V5.60.0,  my_pit                                                             19/11/25  22:11:16  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE my_pit
@@ -23,7 +23,7 @@ stmt  level    source
    12   1          gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);              // 初始化 LED1 输出 默认低电平 推挽输�
              -��模式
    13   1              
-   14   1          pit_ms_init(PIT_CH, 1);                             // 初始化 PIT_CH0 为周期中断 1000ms 周期
+   14   1          pit_ms_init(PIT_CH, 10);                            // 初始化 PIT_CH0 为周期中断 1000ms 周期
    15   1                      
    16   1          interrupt_set_priority(PIT_PRIORITY, 0);                    // 设置 PIT1 对周期中断的中断优先级
              -为 0，0为最低优先级
@@ -64,10 +64,10 @@ stmt  level    source
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       133     ------
+  code size            =       140     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
-C251 COMPILER V5.60.0,  my_pit                                                             18/11/25  17:09:54  PAGE 2   
+C251 COMPILER V5.60.0,  my_pit                                                             19/11/25  22:11:16  PAGE 2   
 
   idata size           =    ------     ------
   pdata size           =    ------     ------

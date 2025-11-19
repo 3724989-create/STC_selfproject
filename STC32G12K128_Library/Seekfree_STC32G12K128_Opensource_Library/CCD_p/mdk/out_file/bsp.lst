@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  bsp                                                                18/11/25  17:09:53  PAGE 1   
+C251 COMPILER V5.60.0,  bsp                                                                19/11/25  22:33:07  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE bsp
@@ -23,61 +23,65 @@ stmt  level    source
    12          
    13          static scheduler_task_t scheduler_task[]={
    14            {led_process,1,0},
-   15            {self_UART_process,10,0},
-   16            {Servo_test_Process,10,0},
-   17          };
-   18          
-   19          //初始化
-   20          void scheduler_Init(void)
-   21          {
-   22   1          task_num=sizeof(scheduler_task)/sizeof(scheduler_task_t);
-   23   1      }
-   24          
-   25          void all_init(void)
-   26          {
-   27   1          //底层初始化
-   28   1          clock_init(SYSTEM_CLOCK_30M);
-   29   1              debug_init();
-   30   1          scheduler_Init();
-   31   1          //用户初始化
-   32   1          self_pit_init();
-   33   1          self_UART_init();
-   34   1          IIC_intit();
-   35   1          Servo_init();
-   36   1      }
-   37          
-   38          
-   39          //执行任务表
-   40             //hal_tick函数不更新容易卡
+   15            {self_UART_process,1,0},
+   16          //  {Servo_test_Process,1,0},
+   17            //{Self_LCD_Progress,10,0}
+   18            };  //1表示10ms
+   19          
+   20          //初始化
+   21          void scheduler_Init(void)
+   22          {
+   23   1          task_num=sizeof(scheduler_task)/sizeof(scheduler_task_t);
+   24   1      }
+   25          
+   26          void all_init(void)
+   27          {
+   28   1          //底层初始化
+   29   1          clock_init(SYSTEM_CLOCK_30M);
+   30   1              debug_init();
+   31   1          //gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);
+   32   1          //scheduler_Init();
+   33   1          LCD_gpio_Init();
+   34   1          //用户初始化
+   35   1          self_pit_init();
+   36   1          self_UART_init();
+   37   1          //IIC_intit();
+   38   1          Servo_init();
+   39   1          
+   40   1      }
    41          
-   42          void scheduler_run(void)
-   43          {
-   44   1          int i;
-   45   1          for(i=0;i<task_num;i++)
-   46   1          {
-   47   2            uint32 Now_Time=pit_read();
-   48   2              
-   49   2              if(Now_Time>=scheduler_task[i].rate_ms+scheduler_task[i].last_run)
-   50   2              {
-   51   3                  scheduler_task[i].last_run=Now_Time;
-   52   3                  //更新最后时间
-   53   3                  scheduler_task[i].task_func();
-   54   3                  //执行相应代码
-   55   3              }
-   56   2          }
-   57   1      }
-C251 COMPILER V5.60.0,  bsp                                                                18/11/25  17:09:53  PAGE 2   
+   42          
+   43          //执行任务表
+   44             //hal_tick函数不更新容易卡
+   45          
+   46          void scheduler_run(void)
+   47          {
+   48   1          int i;
+   49   1          for(i=0;i<task_num;i++)
+   50   1          {
+   51   2            uint32 Now_Time=pit_read();
+   52   2              
+   53   2              if(Now_Time>=scheduler_task[i].rate_ms+scheduler_task[i].last_run)
+   54   2              {
+   55   3                  scheduler_task[i].last_run=Now_Time;
+   56   3                  //更新最后时间
+   57   3                  scheduler_task[i].task_func();
+C251 COMPILER V5.60.0,  bsp                                                                19/11/25  22:33:07  PAGE 2   
 
+   58   3                  //执行相应代码
+   59   3              }
+   60   2          }
+   61   1      }
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       164     ------
+  code size            =       161     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
   pdata size           =    ------     ------
-  xdata size           =        31          4
+  xdata size           =        21          4
   xdata-const size     =    ------     ------
   edata size           =    ------     ------
   bit size             =    ------     ------
@@ -87,7 +91,7 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =        41     ------
+  hconst size          =        31     ------
 End of Module Information.
 
 

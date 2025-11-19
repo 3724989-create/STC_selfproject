@@ -12,9 +12,10 @@ typedef struct scheduler
 
 static scheduler_task_t scheduler_task[]={
   {led_process,1,0},
-  {self_UART_process,10,0},
-  {Servo_test_Process,10,0},
-};
+  {self_UART_process,1,0},
+//  {Servo_test_Process,1,0},
+  //{Self_LCD_Progress,10,0}
+  };  //1表示10ms
 
 //初始化
 void scheduler_Init(void)
@@ -27,12 +28,15 @@ void all_init(void)
     //底层初始化
     clock_init(SYSTEM_CLOCK_30M);
 	debug_init();
-    scheduler_Init();
+    //gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);
+    //scheduler_Init();
+    LCD_gpio_Init();
     //用户初始化
     self_pit_init();
     self_UART_init();
-    IIC_intit();
+    //IIC_intit();
     Servo_init();
+    
 }
 
 

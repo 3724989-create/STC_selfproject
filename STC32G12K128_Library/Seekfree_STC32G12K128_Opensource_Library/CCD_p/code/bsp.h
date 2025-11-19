@@ -6,8 +6,9 @@
 
 #define LED1                    (IO_P46)
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "intrins.h"
 
 #include "zf_common_headfile.h"
@@ -16,6 +17,7 @@
 #include "my_uart.h"
 #include "IIC.h"
 #include "my_servo.h"
+#include "self_LCD.h"
 
 typedef 	unsigned char	u8;
 typedef 	unsigned int	u16;

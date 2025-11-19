@@ -154,11 +154,11 @@ void main()
                      }
                  }
                 
-                
+                printf("%d\r\n",y1_boundary[j]);
              }
 
              // 发送图像
-            seekfree_assistant_camera_send();
+            //seekfree_assistant_camera_send();
 	
         }	
     }

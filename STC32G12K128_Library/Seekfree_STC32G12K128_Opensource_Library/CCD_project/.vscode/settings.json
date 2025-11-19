@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "stdbool.h": "c",
-        "bsp.h": "c",
-        "stdio.h": "c",
-        "my_pit.h": "c"
-    }
-}

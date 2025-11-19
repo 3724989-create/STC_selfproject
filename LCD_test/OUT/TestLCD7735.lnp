@@ -1,0 +1,6 @@
+".\OUT\Main.obj",
+".\OUT\LCD_7735.obj" 
+TO ".\OUT\TestLCD7735" 
+PRINT(".\OUT\TestLCD7735.map") CASE 
+CLASSES (EDATA (0x0-0xFFF), 
+HDATA (0x0-0xFFF)) 
