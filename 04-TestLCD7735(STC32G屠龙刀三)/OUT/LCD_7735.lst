@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 1   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE LCD_7735
@@ -66,7 +66,7 @@ stmt  level    source
    56            0xF81F,   //25亮紫
    57            0xFFF0,   //26浅黄
    58            0x0700,   //27翠绿 0000 0111 0000 0000
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 2   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 2   
 
    59            0xC7FF,   //28亮青 1100 0111 1111 1111
    60            0x841F,   //29青灰
@@ -134,7 +134,7 @@ stmt  level    source
   122          //========================================================
   123          // 写数据令基本函数 16位数 2字节
   124          //========================================================
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 3   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 3   
 
   125          void LCD_WR_DATA(u16 Data)
   126          {
@@ -202,7 +202,7 @@ stmt  level    source
   187   1        LCD_WR_CMD(0x2A); LCD_WR_DAT(0); LCD_WR_DAT(X); LCD_WR_DAT((unsigned char)(X+W-1)); LCD_WR_DAT((unsigne
              -d char)(X+W-1));
   188   1        LCD_WR_CMD(0x2B); LCD_WR_DAT(0); LCD_WR_DAT(Y); LCD_WR_DAT((unsigned char)(Y+H-1)); LCD_WR_DAT((unsigne
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 4   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 4   
 
              -d char)(Y+H-1));
   189   1        LCD_WR_CMD(0x2C);
@@ -270,7 +270,7 @@ stmt  level    source
   247   2          else     LCD_LineV(X1,Y2,Y1-Y2+1,Color); return;
   248   2        }
   249   1        if(X1>X2){ i=X1;X1=X2;X2=i;i=Y1;Y1=Y2;Y2=i; }      /* 交换坐标 */
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 5   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 5   
 
   250   1        if(Y1==Y2){ LCD_LineH(X1,Y1,X2-X1,Color);return; }     /* 画水平线 */
   251   1        r=(float)(Y2-Y1)/(float)(X2-X1);                   /* 计算斜率 */
@@ -338,7 +338,7 @@ stmt  level    source
              -char Len)
   304          { /* 行Y(0-479) 列X(0-319) */
   305   1        unsigned char i,buf,A[3],n;
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 6   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 6   
 
   306   1        unsigned int j,l;
   307   1        A[1]=0;A[2]=0;
@@ -406,7 +406,7 @@ stmt  level    source
   365   2          { /* 写24行 */
   366   3            ZM=ASC24[C-32][i*2];           /* 取字模码1 */
   367   3            ZM=ZM*256+ASC24[C-32][i*2+1];  /* 取字模码2 */
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 7   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 7   
 
   368   3            LCD_MoveTo(X+Lw,Y+i);              /* 定位左上角 */
   369   3            for(n=0;n<12;n++)
@@ -474,7 +474,7 @@ stmt  level    source
   429          ** 在单色LCD液晶显示屏显示24点阵中西文混合字符串函数  (小字库字模取自ROM)
   430          ** 调用参数: X列Y行坐标, * str串指针, Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
   431          =====================================================================================================*/
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 8   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 8   
 
   432          void LCD_H24(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor)
   433          {  /* X(0-127) Y(0-159) */
@@ -542,7 +542,7 @@ stmt  level    source
   495   1      }
   496          
   497          //=== END ===============================================================================================
-C251 COMPILER V5.60.0,  LCD_7735                                                           19/11/25  19:17:26  PAGE 9   
+C251 COMPILER V5.60.0,  LCD_7735                                                           20/11/25  13:09:27  PAGE 9   
 
 
 

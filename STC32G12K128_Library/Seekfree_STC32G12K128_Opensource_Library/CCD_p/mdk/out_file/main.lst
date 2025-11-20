@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  main                                                               19/11/25  22:35:41  PAGE 1   
+C251 COMPILER V5.60.0,  main                                                               20/11/25  12:59:27  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE main
@@ -18,14 +18,14 @@ stmt  level    source
     7   1        while(1)
     8   1        {  
     9   2           Self_LCD_Progress(); //对应的色号不同应该
-   10   2           led_process();
+   10   2           //led_process();
    11   2        }
    12   1      }
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =        47     ------
+  code size            =        44     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------

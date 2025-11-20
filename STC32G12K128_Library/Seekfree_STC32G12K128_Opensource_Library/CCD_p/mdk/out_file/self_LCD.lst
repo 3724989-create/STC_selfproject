@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 1   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_LCD
@@ -66,7 +66,7 @@ stmt  level    source
    55            0xFFF0,   //26浅黄
    56            0x0700,   //27翠绿 0000 0111 0000 0000
    57            0xC7FF,   //28亮青 1100 0111 1111 1111
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 2   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 2   
 
    58            0x841F,   //29青灰
    59            0xF810,   //30殷红
@@ -134,7 +134,7 @@ stmt  level    source
   121          // 写数据令基本函数 16位数 2字节
   122          //========================================================
   123          void LCD_WR_DATA(u16 Data)
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 3   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 3   
 
   124          {
   125   1        CS=0;
@@ -202,7 +202,7 @@ stmt  level    source
              -d char)(X+W-1));
   186   1        LCD_WR_CMD(0x2B); LCD_WR_DAT(0); LCD_WR_DAT(Y); LCD_WR_DAT((unsigned char)(Y+H-1)); LCD_WR_DAT((unsigne
              -d char)(Y+H-1));
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 4   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 4   
 
   187   1        LCD_WR_CMD(0x2C);
   188   1      }
@@ -270,7 +270,7 @@ stmt  level    source
   246   2        }
   247   1        if(X1>X2){ i=X1;X1=X2;X2=i;i=Y1;Y1=Y2;Y2=i; }      /* 交换坐标 */
   248   1        if(Y1==Y2){ LCD_LineH(X1,Y1,X2-X1,Color);return; }     /* 画水平线 */
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 5   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 5   
 
   249   1        r=(float)(Y2-Y1)/(float)(X2-X1);                   /* 计算斜率 */
   250   1        if(r>=-1&&r<=1)                                    /* 与水平夹角<=45度 */
@@ -338,7 +338,7 @@ stmt  level    source
              -========*/
   301          void LCD_A12(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor,unsigned 
              -char Len)
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 6   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 6   
 
   302          { /* 行Y(0-479) 列X(0-319) */
   303   1        unsigned char i,buf,A[3],n;
@@ -406,7 +406,7 @@ stmt  level    source
   359   1        L=Len;                          //strlen(str);
   360   1        for(j=0;j<L;j++)
   361   1        { C=str[j];                     /* 逐个显示字符串 */
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 7   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 7   
 
   362   2          for(i=0;i<24;i++)
   363   2          { /* 写24行 */
@@ -474,7 +474,7 @@ stmt  level    source
   420   5                zm = zm << 1; 
   421   5              } /* 水平8点显示完毕 */
   422   4            }  /* 一个8*16点阵西文字符显示完毕 */
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 8   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 8   
 
   423   3          }   /* else_if */
   424   2        }   // 循环显示str 
@@ -542,7 +542,7 @@ stmt  level    source
   482          //========================================================
   483          void LCD_BMP(unsigned char X,unsigned char Y,unsigned char W,unsigned char H,unsigned char * pic)
   484          {       u16 i;
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 9   
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 9   
 
   485   1        u8 h,l;
   486   1              LCD_SetBox(X,Y,W,H);         //设置显示窗口
@@ -611,7 +611,7 @@ Module Information          Static   Overlayable
   ebitaddressable size =    ------     ------
   far data size        =    ------     ------
   huge data size       =    ------     ------
-C251 COMPILER V5.60.0,  self_LCD                                                           19/11/25  22:35:40  PAGE 10  
+C251 COMPILER V5.60.0,  self_LCD                                                           20/11/25  12:56:40  PAGE 10  
 
   const size           =    ------     ------
   hconst size          =      8430     ------

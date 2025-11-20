@@ -86,7 +86,7 @@ void tsl1401_collect_pit_handler (void)
     {
         TSL1401_CLK(0);
         tsl1401_data[0][i] = adc_convert(TSL1401_AO_PIN);
-        tsl1401_data[1][i] = adc_convert(TSL1401_AO_PIN2);
+        //tsl1401_data[1][i] = adc_convert(TSL1401_AO_PIN2);
         //threshold=calculate_dynamic_threshold(0);
         //tsl1401_binary_data_process(0,i,threshold);
         TSL1401_CLK(1);
