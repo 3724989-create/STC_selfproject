@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  main                                                               14/11/25  20:46:28  PAGE 1   
+C251 COMPILER V5.60.0,  main                                                               24/11/25  18:38:55  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE main
@@ -66,7 +66,7 @@ stmt  level    source
    49          //
    50          // 2.如果使用主板测试 在断电情况下 将核心板插入主板 蓝牙转串口模块插入主�
              -��蓝牙模块接口
-C251 COMPILER V5.60.0,  main                                                               14/11/25  20:46:28  PAGE 2   
+C251 COMPILER V5.60.0,  main                                                               24/11/25  18:38:55  PAGE 2   
 
    51          //
    52          // 3.如果使用核心板和模块测试 在断电情况下 将核心板与蓝牙模块连接
@@ -85,7 +85,7 @@ stmt  level    source
    63          // **************************** 代码区域 ****************************
    64          #define LED1                    (IO_P34 )
    65          
-   66          uint8 data_buffer[32];
+   66          uint8 data_buffer[46];
    67          uint8 data_len;
    68          uint8 count = 0;
    69                          
@@ -134,7 +134,7 @@ stmt  level    source
   102   3                  ble6a20_send_string(".\r\n");
   103   3                  gpio_toggle_level(LED1);
   104   3              }
-C251 COMPILER V5.60.0,  main                                                               14/11/25  20:46:28  PAGE 3   
+C251 COMPILER V5.60.0,  main                                                               24/11/25  18:38:55  PAGE 3   
 
   105   2              system_delay_ms(100);
   106   2              // 此处编写需要循环执行的代码
@@ -166,7 +166,7 @@ Module Information          Static   Overlayable
   data size            =    ------     ------
   idata size           =    ------     ------
   pdata size           =    ------     ------
-  xdata size           =        34     ------
+  xdata size           =        48     ------
   xdata-const size     =    ------     ------
   edata size           =    ------     ------
   bit size             =    ------     ------

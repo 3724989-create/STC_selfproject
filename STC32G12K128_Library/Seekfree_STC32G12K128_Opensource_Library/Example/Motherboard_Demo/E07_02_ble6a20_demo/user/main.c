@@ -63,7 +63,7 @@
 // **************************** 代码区域 ****************************
 #define LED1                    (IO_P34 )
 
-uint8 data_buffer[32];
+uint8 data_buffer[46];
 uint8 data_len;
 uint8 count = 0;
 		
