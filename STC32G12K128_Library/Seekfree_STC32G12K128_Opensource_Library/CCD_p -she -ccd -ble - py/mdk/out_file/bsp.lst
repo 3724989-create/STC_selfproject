@@ -1,0 +1,125 @@
+C251 COMPILER V5.60.0,  bsp                                                                25/11/25  21:19:11  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE bsp
+OBJECT MODULE PLACED IN .\out_file\bsp.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\bsp.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROWSE 
+                    -INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\us
+                    -er;..\code;..\Hardware) DEBUG PRINT(.\out_file\bsp.lst) OBJECT(.\out_file\bsp.obj) 
+
+stmt  level    source
+
+    1          #include "bsp.h"
+    2          
+    3          
+    4          uint8 task_num=0;
+    5          
+    6          //全局任务调度标志位
+    7           bit lcd_refresh_flag =0;   //LCD刷新标志位
+    8           bit ccd_data_ready_flag=0; //CCD数据采集标志位
+    9          
+   10          typedef struct scheduler
+   11          {
+   12              void(*task_func)(void);
+   13              uint32 rate_ms;
+   14              uint32 last_run;
+   15          }scheduler_task_t;
+   16          
+   17          static scheduler_task_t scheduler_task[]={
+   18            // {led_process,100,0},
+   19             {Servo_test_Process,10,0},
+   20             //{self_ble_process,10,0}
+   21            };  //1表示10ms
+   22          
+   23          //初始化
+   24          void scheduler_Init(void)
+   25          {
+   26   1          task_num=sizeof(scheduler_task)/sizeof(scheduler_task_t);
+   27   1      }
+   28          
+   29          void all_init(void)
+   30          {
+   31   1          //底层初始化
+   32   1          clock_init(SYSTEM_CLOCK_30M);
+   33   1              debug_init();
+   34   1          //gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);
+   35   1          scheduler_Init();   //任务调度器记得先初始化
+   36   1          LCD_gpio_Init();
+   37   1          //用户初始化
+   38   1          self_pit_init();
+   39   1          self_UART_init();
+   40   1          //IIC_intit();
+   41   1          Servo_init();
+   42   1          CCD_init();
+   43   1              while(ble6a20_init())                                                       // 判断是否通过
+             -初始化
+   44   1          {
+   45   2              gpio_toggle_level(LED1);                                                // 翻转 LED 引脚输�
+             -�电平 控制 LED 亮灭
+   46   2              system_delay_ms(100);                                                   // 短延时快速闪灯�
+             -��示异常
+   47   2      
+   48   2              printf("ble6a20 init error.\r\n");
+   49   2              printf("restart ble6a20 init.\r\n");
+   50   2          }
+   51   1          ble6a20_send_byte('\r');
+   52   1          ble6a20_send_byte('\n');
+   53   1          ble6a20_send_string("SEEKFREE BLE6A20 DEMO.\r\n");                    // 初始化正常 输出测试
+             -信息
+C251 COMPILER V5.60.0,  bsp                                                                25/11/25  21:19:11  PAGE 2   
+
+   54   1      }
+   55          
+   56          
+   57          //CPU微延时函数
+   58          void delay_cpu_cycle(u8 cycles)
+   59          {
+   60   1          while (cycles--);   //占用CPU周期实现微小延时
+   61   1          
+   62   1      }
+   63          
+   64          
+   65          
+   66          //执行任务表
+   67             //hal_tick函数不更新容易卡
+   68          
+   69          void scheduler_run(void)    //只执行轻量级任务
+   70          {
+   71   1          int i;
+   72   1          for(i=0;i<task_num;i++)
+   73   1          {
+   74   2            uint32 Now_Time=pit_read();
+   75   2              
+   76   2              if(Now_Time>=scheduler_task[i].rate_ms+scheduler_task[i].last_run)
+   77   2              {
+   78   3                  scheduler_task[i].last_run=Now_Time;
+   79   3                  //更新最后时间
+   80   3                  scheduler_task[i].task_func();
+   81   3                  //执行相应代码
+   82   3              }
+   83   2          }
+   84   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       246     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =        11          4
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =         2     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        92     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

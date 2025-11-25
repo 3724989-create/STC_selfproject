@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_CCD                                                           24/11/25  22:04:40  PAGE 1   
+C251 COMPILER V5.60.0,  self_CCD                                                           25/11/25  11:54:28  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_CCD
@@ -19,7 +19,7 @@ stmt  level    source
     8          {
     9   1          tsl1401_init();
    10   1      
-   11   1          seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);          //初始化UART串口
+   11   1          seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_BLE6A20);          //初始化蓝牙串口
    12   1              
    13   1          seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, NULL, 128, 256);
    14   1          // 设置一个边线用于显示CCD波形
@@ -51,59 +51,64 @@ stmt  level    source
    39   1           // 此时 y1_boundary 已经准备好供 LCD 绘制
    40   1      }
    41          
-   42          //void CCD_process(void)
-   43          //{
-   44          //    uint8 i,j;
-   45          //              if(tsl1401_finish_flag)
-   46          //        {
-   47          //            tsl1401_finish_flag = 0;
-   48          //            
-   49          //              //tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
-   50          //        
-   51          //            //tsl1401_send_data(DEBUG_UART_INDEX, 1);
-   52          //                      
-   53          //             for(j = 0; j < 128; j++)
-   54          //             {
-   55          //                 //threshold=calculate_dynamic_threshold(0);
-   56          //                 //tsl1401_binary_data_process(&tsl1401_data[0],j,threshold);
-C251 COMPILER V5.60.0,  self_CCD                                                           24/11/25  22:04:40  PAGE 2   
+   42          void CCD_process(void)
+   43          {
+   44   1          uint8 i,j;
+   45   1                      if(tsl1401_finish_flag)
+   46   1              {
+   47   2                  tsl1401_finish_flag = 0;
+   48   2                  
+   49   2                      //tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
+   50   2              
+   51   2                  //tsl1401_send_data(DEBUG_UART_INDEX, 1);
+   52   2                              
+   53   2                   for(j = 0; j < 128; j++)
+   54   2                   {
+   55   3                       //threshold=calculate_dynamic_threshold(0);
+   56   3                       //tsl1401_binary_data_process(&tsl1401_data[0],j,threshold);
+C251 COMPILER V5.60.0,  self_CCD                                                           25/11/25  11:54:28  PAGE 2   
 
-   57          //                 // 获取CCD数据，并按分辨率进行压缩
-   58          //                 switch(TSL1401_AD_RESOLUTION)   //初始ADC_8BIT
-   59          //                 {
-   60          //                     case ADC_8BIT:
-   61          //                     {
-   62          //                         y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 2);
-   63          //                         y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 2);
-   64          //                         break;
-   65          //                     }
-   66          //                     case ADC_10BIT:
-   67          //                     {
-   68          //                         y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 8);
-   69          //                         y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 8);
-   70          //                         break;
-   71          //                     }
-   72          //                     case ADC_12BIT:
-   73          //                    {
-   74          //                         y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 32);
-   75          //                         y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 32);
-   76          //                         
-   77          //                         break;
-   78          //                     }
-   79          //                 }
-   80          //                
-   81          //                //printf("%d\r\n",y1_boundary[j]);
-   82          //             }
-   83          //            // 发送图像
-   84          //        }
-   85          //    }
+   57   3                       // 获取CCD数据，并按分辨率进行压缩
+   58   3                       switch(TSL1401_AD_RESOLUTION)   //初始ADC_8BIT
+   59   3                       {
+   60   4                           case ADC_8BIT:
+   61   4                           {
+   62   5                               y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 2);
+   63   5                               y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 2);
+   64   5                               break;
+   65   5                           }
+   66   4                           case ADC_10BIT:
+   67   4                           {
+   68   5                               y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 8);
+   69   5                               y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 8);
+   70   5                               break;
+   71   5                           }
+   72   4                           case ADC_12BIT:
+   73   4                          {
+   74   5                               y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 32);
+   75   5                               y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 32);
+   76   5                               
+   77   5                               break;
+   78   5                           }
+   79   4                       }
+   80   3                      
+   81   3                      
+   82   3                   }
+   83   2                  // 发送图像
+   84   2                    //seekfree_assistant_camera_send();
+   85   2                   printf("%d\r\n",y1_boundary[j]);
+   86   2              }
+   87   1          }
+*** WARNING C47 IN LINE 44 OF ..\code\self_CCD.c: 'i': unreferenced local variable
 *** WARNING C183 IN LINE 28 OF ..\code\self_CCD.c: dead assignment eliminated
 *** WARNING C183 IN LINE 29 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C177 IN LINE 64 OF ..\code\self_CCD.c: unreachable code
+*** WARNING C177 IN LINE 70 OF ..\code\self_CCD.c: unreachable code
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       188     ------
+  code size            =       330     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
@@ -118,8 +123,8 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =    ------     ------
+  hconst size          =         5     ------
 End of Module Information.
 
 
-C251 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)
+C251 COMPILATION COMPLETE.  5 WARNING(S),  0 ERROR(S)

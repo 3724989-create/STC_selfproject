@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 1   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_LCD
@@ -66,7 +66,7 @@ stmt  level    source
    55            0xFFF0,   //26浅黄
    56            0x0700,   //27翠绿 0000 0111 0000 0000
    57            0xC7FF,   //28亮青 1100 0111 1111 1111
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 2   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 2   
 
    58            0x841F,   //29青灰
    59            0xF810,   //30殷红
@@ -134,7 +134,7 @@ stmt  level    source
   121   1      }
   122          //========================================================
   123          // 写数据令基本函数 16位数 2字节
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 3   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 3   
 
   124          //========================================================
   125          void LCD_WR_DATA(u16 Data)
@@ -202,7 +202,7 @@ stmt  level    source
   186          { 
   187   1        LCD_WR_CMD(0x2A); LCD_WR_DAT(0); LCD_WR_DAT(X); LCD_WR_DAT((unsigned char)(X+W-1)); LCD_WR_DAT((unsigne
              -d char)(X+W-1));
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 4   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 4   
 
   188   1        LCD_WR_CMD(0x2B); LCD_WR_DAT(0); LCD_WR_DAT(Y); LCD_WR_DAT((unsigned char)(Y+H-1)); LCD_WR_DAT((unsigne
              -d char)(Y+H-1));
@@ -270,7 +270,7 @@ stmt  level    source
   246   1        { if(Y1==Y2){ LCD_Point(X1,Y1,Color); return;          /* 画点 */  }
   247   2          if(Y1<Y2)LCD_LineV(X1,Y1,Y2-Y1+1,Color);
   248   2          else     LCD_LineV(X1,Y2,Y1-Y2+1,Color); return;
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 5   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 5   
 
   249   2        }
   250   1        if(X1>X2){ i=X1;X1=X2;X2=i;i=Y1;Y1=Y2;Y2=i; }      /* 交换坐标 */
@@ -338,7 +338,7 @@ stmt  level    source
   302          ** 参数: X列Y行坐标, * str串指针, Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
              -,Len指定长度
   303          =========================================================================================================
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 6   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 6   
 
              -========*/
   304          void LCD_A12(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor,unsigned 
@@ -406,7 +406,7 @@ stmt  level    source
   359          {  /* X(0-319) Y(0-479) */
   360   1        unsigned char n,C;
   361   1        unsigned int i,j,L,Lw=0,ZM;
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 7   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 7   
 
   362   1        L=Len;                          //strlen(str);
   363   1        for(j=0;j<L;j++)
@@ -474,7 +474,7 @@ stmt  level    source
   423          //        LCD_MoveTo(X+i*12,Y+j);          /* 定位左上角 */
   424          //        for(n=0;n<12;n++)
   425          //        { if((ZM&0x8000)==0x8000)LCD_WR_DATA(COLOR[Fcolor]);/* 字模点为1显示前景色 */
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 8   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 8   
 
   426          //          else                                              /* 字模点为0显示原底色或背景色
              - */
@@ -542,7 +542,7 @@ stmt  level    source
   486   1          {
   487   2              if(ccd_data[x]<FIXED_THRESHOLD)
   488   2              {
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 9   
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 9   
 
   489   3                  color_index=WHITE_COLOR;
   490   3              }
@@ -610,7 +610,7 @@ stmt  level    source
   552   2          else
   553   2          {
   554   3            LCD_Point(x,y_new_mopped,WAVE_COLOR);
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 10  
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 10  
 
   555   3          }
   556   2          y_prev_mapped=y_new_mopped;
@@ -618,152 +618,45 @@ stmt  level    source
   558   1      
   559   1      }
   560          
-  561          void LCD_DrawChar_8x12(unsigned int Xpos,unsigned int Ypos,unsigned char Ascii,unsigned char Fcolor,unsig
-             -ned char Bcolor)
+  561          void LCD_PrintfLine(unsigned int Line,const char *format,...)
   562          {
-  563   1        unsigned char i,buf,n;
-  564   1        unsigned int j;
-  565   1        unsigned char font_index;
-  566   1      
-  567   1        //检查字符是否在有效范围内
-  568   1        if(Ascii<32||Ascii>126)
-  569   1        {
-  570   2          Ascii=32;   //使用空格代替无效字符
-  571   2        }
-  572   1      
-  573   1        //减去32得到字模数组的索引
-  574   1        
-  575   1        font_index=Ascii-32;
-  576   1      
-  577   1        for(j=0;j<12;j++)
-  578   1        {
-  579   2          //从0到12循环表示行高
-  580   2      
-  581   2          //从字模数组中取出当前行的8bit字模数据
-  582   2          //假设ASC12[font_index][j]存储了字模
-  583   2          buf=ASC12[j][font_index];
-  584   2          //决定当前行8个像素点的亮灭
-  585   2      
-  586   2          // 设置当前像素行的起始地址 (Xpos, Ypos + j)
-  587   2          // 每次循环 j 递增 1，即向下移动一行。
-  588   2          LCD_MoveTo(Xpos,Ypos+j);
-  589   2      
-  590   2          //绘制当前行的8个像素
-  591   2          for(n=0;n<8;n++)
-  592   2          {
-  593   3            //表示当前行八个像素
-  594   3            if((buf&0x80)==0x80)//位检查，检查最高位，最高位是1表示前景色，是0表示背景
-             -色
-  595   3            {
-  596   4              //字模点为1，显示前景色
-  597   4              LCD_WR_DATA(COLOR[Fcolor]); //LCDmoveto(位置)->lcd_wr_data(颜色)
-  598   4            }
-  599   3            else
-  600   3            {
-  601   4              //字模点为0
-  602   4              if(Bcolor=80)
-*** WARNING C137 IN LINE 602 OF ..\code\self_LCD.c: constant in condition expression
-  603   4              {
-  604   5                // 透明显示模式：跳过写入数据，只移动地址（LCD_WR_DATA 在此被省略，
-  605   5                          //                      如果 LCD_MoveTo 也会自动设置写地址，这里可能�
-             -��要调整逻辑）
-  606   5                          //                      在您的原代码中，这里其实是重复调用了 LCD_Mo
-             -veTo 来更新地址，这是低效的。
-  607   5                          //                      **标准做法是：对于透明背景，我们不调用 LCD_
-             -WR_DATA，让硬件自动递增地址。**
-  608   5                          //                      这里简化为：不写数据。
-  609   5                          //                      **注意：这要求您的 LCD 硬件在不写入数据时，
-             -地址会自增。**
-  610   5                          //                      
-  611   5                          //                      根据原代码，为了保持透明模式下的地址移动�
-             -��我们必须执行一次地址移动操作。
-  612   5                          //                      然而，在连续写入模式下，每次 LCD_WR_DATA 后地
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 11  
-
-             -址会自动增加 1。
-  613   5                          //                      因此，最简洁的透明模式是：什么也不做，让�
-             -��址保持不变（但字符串显示时需要跳过此字符的宽度）。
-  614   5                          //                      
-  615   5                          //                      **基于您的原代码逻辑，我们必须手动移动到�
-             -�一个像素位置。**
-  616   5                LCD_MoveTo(Xpos + n + 1, Ypos + j); //跳入下一个像素的写入地址
-  617   5              }
-  618   4              else
-  619   4              {
-  620   5                //正常显示模式：显示背景色
-  621   5                LCD_WR_DATA(COLOR[Bcolor]);
-  622   5              }
-  623   4            }
-  624   3            buf = buf << 1;
-  625   3          }
-  626   2      
-  627   2        }
-  628   1      
-  629   1      }
-*** WARNING C47 IN LINE 563 OF ..\code\self_LCD.c: 'i': unreferenced local variable
-  630          
-  631          void LCD_DisplayStringline_8x12(unsigned int Line,u8 *ptr)
-  632          {
-  633   1        u32 i=0;
-  634   1        // 1. 根据 8x12 字体高度 (12 像素) 计算垂直起始位置 (Xpos)
-  635   1        // 假设 Line 是行号 (0, 1, 2...)
-  636   1        unsigned int Xpos=(unsigned char)Line*12;
-  637   1      
-  638   1        //设置水平其实位置
-  639   1        unsigned int Ypos=8;
-  640   1      
-  641   1        //限制最多字符数15个字符
-  642   1        const u8 MAX_CHARS=15;
-  643   1      
-  644   1        //获取颜色参数（基于您对 LCD_DrawChar_8x12 的要求）
-  645   1        unsigned char FrontColor=BLACK;
-  646   1        unsigned char BackColor=BLUE;
-  647   1      
-  648   1        while ((*ptr!=0)&&(i<MAX_CHARS))
-  649   1        {
-  650   2          LCD_DrawChar_8x12(Xpos,Ypos,*ptr,FrontColor,BackColor);
-  651   2      
-  652   2          //更新水平起始位置
-  653   2          Ypos+=8;  //字符宽度8像素
-  654   2          
-  655   2          ptr++;
-  656   2          i++;
-  657   2        }
-  658   1      
-  659   1      }
-  660          
-  661          void LCD_PrintfLine(unsigned int Line,const char *format,...)
-  662          {
-  663   1        //缓冲取储存格式化后的字符串
-  664   1        char String[16];
-  665   1        va_list arg;
-  666   1      
-  667   1        //设置不定变量
-  668   1        va_start(arg,format);
-  669   1        // 2. 绑定不定变量并格式化字符串
-  670   1          // vsnprintf 是更安全的版本，如果您的库支持，建议使用：
-  671   1          // vsnprintf(String, sizeof(String), format, arg);
-  672   1          // 这里使用 vsprintf，它在嵌入式环境中更常见：
-  673   1         vsprintf(String,format,arg);
-  674   1        //结束不定量定义
-C251 COMPILER V5.60.0,  self_LCD                                                           24/11/25  22:07:27  PAGE 12  
-
-  675   1        va_end(arg);
-  676   1      
-  677   1        //  强制转换 char* 为 u8* 以匹配 LCD_DisplayStringLine 的参数类型
-  678   1        LCD_DisplayStringline_8x12(Line, (u8*)String);
-  679   1      
-  680   1      }
-  681          
-  682          void Self_LCD_Progress(void)
-  683          {
-  684   1          LCD_Display_CCD_Binary(y1_boundary,Width,120);
-  685   1      }
-  686          
-  687          
-  688          
-  689          
-  690          //=== END ===============================================================================================
+  563   1         unsigned int Y_Start = Line * 12; // 假设每行高 12   
+  564   1          // 水平起始位置 (X 坐标)
+  565   1         unsigned int X_Start = 8;
+  566   1        //缓冲取储存格式化后的字符串
+  567   1        char String[16];
+  568   1        unsigned char i;  
+  569   1        const u8 MAX_CHARS=15;
+  570   1        va_list arg;
+  571   1        //设置不定变量
+  572   1        va_start(arg,format);
+  573   1        // 2. 绑定不定变量并格式化字符串
+  574   1        // vsnprintf 是更安全的版本，如果您的库支持，建议使用：
+  575   1        // vsnprintf(String, sizeof(String), format, arg);
+  576   1        // 这里使用 vsprintf，它在嵌入式环境中更常见：
+  577   1         vsprintf(String,format,arg);
+  578   1        //结束不定量定义
+  579   1        va_end(arg);
+  580   1        i=sizeof(String);
+  581   1        if(i>MAX_CHARS)
+  582   1            i=MAX_CHARS;
+  583   1        //  强制转换 char* 为 u8* 以匹配 LCD_DisplayStringLine 的参数类型
+  584   1        LCD_A12(X_Start, Y_Start, (char*)String, 0xA484, WHITE, i);
+*** WARNING C209 IN LINE 584 OF ..\code\self_LCD.c: 'constant': integral size mismatch
+*** WARNING C209 IN LINE 584 OF ..\code\self_LCD.c: 'constant': integral size mismatch
+  585   1      
+  586   1      }
+  587          
+  588          void Self_LCD_Progress(void)
+  589          {
+  590   1          //LCD_Display_CCD_Binary(y1_boundary,Width,120);
+  591   1          LCD_PrintfLine(1,"the number is %d",2);
+  592   1      }
+  593          
+  594          
+  595          
+  596          
+  597          //=== END ===============================================================================================
 *** WARNING C183 IN LINE 85 OF ..\code\self_LCD.c: dead assignment eliminated
 *** WARNING C183 IN LINE 85 OF ..\code\self_LCD.c: dead assignment eliminated
 *** WARNING C183 IN LINE 454 OF ..\code\self_LCD.c: dead assignment eliminated
@@ -776,21 +669,22 @@ stmt  level    source
 *** WARNING C183 IN LINE 510 OF ..\code\self_LCD.c: dead assignment eliminated
 *** WARNING C183 IN LINE 514 OF ..\code\self_LCD.c: dead assignment eliminated
 *** WARNING C183 IN LINE 515 OF ..\code\self_LCD.c: dead assignment eliminated
-*** WARNING C177 IN LINE 621 OF ..\code\self_LCD.c: unreachable code
-*** WARNING C183 IN LINE 602 OF ..\code\self_LCD.c: dead assignment eliminated
-*** WARNING C183 IN LINE 642 OF ..\code\self_LCD.c: dead assignment eliminated
-*** WARNING C183 IN LINE 645 OF ..\code\self_LCD.c: dead assignment eliminated
-*** WARNING C183 IN LINE 646 OF ..\code\self_LCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 565 OF ..\code\self_LCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 569 OF ..\code\self_LCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 580 OF ..\code\self_LCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 582 OF ..\code\self_LCD.c: dead assignment eliminated
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =     36940     ------
+  code size            =     36648     ------
   ecode size           =    ------     ------
+C251 COMPILER V5.60.0,  self_LCD                                                           25/11/25  11:50:56  PAGE 11  
+
   data size            =    ------     ------
   idata size           =    ------     ------
   pdata size           =    ------     ------
-  xdata size           =    ------        193
+  xdata size           =    ------        179
   xdata-const size     =    ------     ------
   edata size           =    ------     ------
   bit size             =    ------     ------
@@ -800,8 +694,8 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =      8064     ------
+  hconst size          =      8081     ------
 End of Module Information.
 
 
-C251 COMPILATION COMPLETE.  21 WARNING(S),  0 ERROR(S)
+C251 COMPILATION COMPLETE.  20 WARNING(S),  0 ERROR(S)

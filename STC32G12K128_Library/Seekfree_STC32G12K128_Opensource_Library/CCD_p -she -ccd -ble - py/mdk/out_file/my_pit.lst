@@ -1,0 +1,113 @@
+C251 COMPILER V5.60.0,  my_pit                                                             25/11/25  21:19:12  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE my_pit
+OBJECT MODULE PLACED IN .\out_file\my_pit.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\my_pit.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BROW
+                    -SE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..
+                    -\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\my_pit.lst) OBJECT(.\out_file\my_pit.obj) 
+
+stmt  level    source
+
+    1          #include "my_pit.h"
+    2          
+    3          
+    4          static volatile uint32 systick_count=0;
+    5          
+    6          uint8 pit_state = 0;
+    7          
+    8          void pit_handler ();
+    9          
+   10          void self_pit_init(void)
+   11          {
+   12   1          gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);              // 初始化 LED1 输出 默认低电平 推挽输�
+             -��模式
+   13   1              
+   14   1          pit_ms_init(PIT_CH, 1);                             // 初始化 PIT_CH0 为周期中断 1000ms 周期
+   15   1                      
+   16   1          interrupt_set_priority(PIT_PRIORITY, 0);                    // 设置 PIT1 对周期中断的中断优先级
+             -为 0，0为最低优先级
+   17   1          
+   18   1              tim0_irq_handler = pit_handler;                                                 // 设置定时器0周期中断回调函数     
+   19   1      }
+   20          
+   21          void pit_process(void)
+   22          {
+   23   1              if(pit_state)
+   24   1              {
+   25   2                  gpio_toggle_level(LED1);
+   26   2                  pit_state = 0;                                                      // 清空周期中断触�
+             -��标志位
+   27   2              }
+   28   1                      
+   29   1      }
+   30          
+   31          void led_process(void)
+   32          {
+   33   1          //实现非阻塞的500ms切换
+   34   1          static u32 last_toggle_time=0;
+   35   1          const u32 toggle_rate_ms=500;
+   36   1      
+   37   1          u32 current_time=pit_read();
+   38   1          if(current_time-last_toggle_time>=toggle_rate_ms)
+   39   1          {
+   40   2              gpio_toggle_level(LED1);//切换颜色状态
+   41   2              last_toggle_time=current_time;
+   42   2          }
+   43   1      }
+   44          
+   45          //读取时间常量
+   46          uint32 pit_read(void)
+   47          {
+   48   1          return      systick_count;
+   49   1      }
+   50          
+   51          void pit_handler (void)
+   52          {
+   53   1          static u8 lcd_count=0;
+   54   1          static u8 ccd_count=0;
+C251 COMPILER V5.60.0,  my_pit                                                             25/11/25  21:19:12  PAGE 2   
+
+   55   1      
+   56   1          //pit_state = 1;                                                              // 周期中断触发 �
+             -��志位置位
+   57   1          systick_count++;
+   58   1          //50ms计数器
+   59   1         
+   60   1          if(++lcd_count>=10)
+   61   1          {
+   62   2              lcd_refresh_flag=1;//设置标志位
+   63   2              lcd_count=0;
+   64   2          }
+   65   1          
+   66   1          if(++ccd_count>=10)
+   67   1          {
+   68   2               tsl1401_collect_pit_handler();
+   69   2               ccd_count=0;
+   70   2          }
+   71   1      }
+*** WARNING C183 IN LINE 35 OF ..\code\my_pit.c: dead assignment eliminated
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       195     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =        11     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        36     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

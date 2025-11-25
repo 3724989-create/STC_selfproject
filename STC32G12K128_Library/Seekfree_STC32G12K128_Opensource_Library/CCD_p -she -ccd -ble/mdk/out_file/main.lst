@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  main                                                               24/11/25  22:07:48  PAGE 1   
+C251 COMPILER V5.60.0,  main                                                               25/11/25  11:53:11  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE main
@@ -14,30 +14,33 @@ stmt  level    source
     3          
     4          void main()
     5          {
-    6   1          LCD_PrintfLine(1,"the number is %d",2);
+    6   1         
     7   1          all_init();
     8   1        while(1)
     9   1        {  
-   10   2            scheduler_run();
-   11   2            
-   12   2            if (lcd_refresh_flag)
-   13   2            {
-   14   3                lcd_refresh_flag = 0;
-   15   3                Self_LCD_Progress(); 
-   16   3            }
-   17   2      
-   18   2            if (tsl1401_finish_flag)
-   19   2            {
-   20   3                tsl1401_finish_flag = 0;
-   21   3                ccd_process_data(); 
-   22   3            }
-   23   2        }
-   24   1      }
+   10   2             
+   11   2            scheduler_run();
+   12   2            CCD_process();
+   13   2            
+   14   2            if (lcd_refresh_flag)
+   15   2            {
+   16   3                lcd_refresh_flag = 0;
+   17   3                Self_LCD_Progress(); 
+   18   3            }
+   19   2      
+   20   2      //      if (tsl1401_finish_flag)
+   21   2      //      {
+   22   2      //          tsl1401_finish_flag = 0;
+   23   2      //          ccd_process_data(); 
+   24   2      //      }
+   25   2            //self_ble_process();
+   26   2        }
+   27   1      }
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =        91     ------
+  code size            =        55     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
@@ -52,7 +55,7 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =        19     ------
+  hconst size          =         2     ------
 End of Module Information.
 
 

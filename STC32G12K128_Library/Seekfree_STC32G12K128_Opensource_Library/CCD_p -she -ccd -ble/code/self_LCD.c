@@ -558,130 +558,37 @@ void LCD_Draw_CCD_Waveform(u8* ccd_data,u8 len,u8 y_start)
 
 }
 
-void LCD_DrawChar_8x12(unsigned int Xpos,unsigned int Ypos,unsigned char Ascii,unsigned char Fcolor,unsigned char Bcolor)
-{
-  unsigned char i,buf,n;
-  unsigned int j;
-  unsigned char font_index;
-
-  //检查字符是否在有效范围内
-  if(Ascii<32||Ascii>126)
-  {
-    Ascii=32;   //使用空格代替无效字符
-  }
-
-  //减去32得到字模数组的索引
-  
-  font_index=Ascii-32;
-
-  for(j=0;j<12;j++)
-  {
-    //从0到12循环表示行高
-
-    //从字模数组中取出当前行的8bit字模数据
-    //假设ASC12[font_index][j]存储了字模
-    buf=ASC12[j][font_index];
-    //决定当前行8个像素点的亮灭
-
-    // 设置当前像素行的起始地址 (Xpos, Ypos + j)
-    // 每次循环 j 递增 1，即向下移动一行。
-    LCD_MoveTo(Xpos,Ypos+j);
-
-    //绘制当前行的8个像素
-    for(n=0;n<8;n++)
-    {
-      //表示当前行八个像素
-      if((buf&0x80)==0x80)//位检查，检查最高位，最高位是1表示前景色，是0表示背景色
-      {
-        //字模点为1，显示前景色
-        LCD_WR_DATA(COLOR[Fcolor]); //LCDmoveto(位置)->lcd_wr_data(颜色)
-      }
-      else
-      {
-        //字模点为0
-        if(Bcolor=80)
-        {
-          // 透明显示模式：跳过写入数据，只移动地址（LCD_WR_DATA 在此被省略，
-                    //                      如果 LCD_MoveTo 也会自动设置写地址，这里可能需要调整逻辑）
-                    //                      在您的原代码中，这里其实是重复调用了 LCD_MoveTo 来更新地址，这是低效的。
-                    //                      **标准做法是：对于透明背景，我们不调用 LCD_WR_DATA，让硬件自动递增地址。**
-                    //                      这里简化为：不写数据。
-                    //                      **注意：这要求您的 LCD 硬件在不写入数据时，地址会自增。**
-                    //                      
-                    //                      根据原代码，为了保持透明模式下的地址移动，我们必须执行一次地址移动操作。
-                    //                      然而，在连续写入模式下，每次 LCD_WR_DATA 后地址会自动增加 1。
-                    //                      因此，最简洁的透明模式是：什么也不做，让地址保持不变（但字符串显示时需要跳过此字符的宽度）。
-                    //                      
-                    //                      **基于您的原代码逻辑，我们必须手动移动到下一个像素位置。**
-          LCD_MoveTo(Xpos + n + 1, Ypos + j); //跳入下一个像素的写入地址
-        }
-        else
-        {
-          //正常显示模式：显示背景色
-          LCD_WR_DATA(COLOR[Bcolor]);
-        }
-      }
-      buf = buf << 1;
-    }
-
-  }
-
-}
-
-void LCD_DisplayStringline_8x12(unsigned int Line,u8 *ptr)
-{
-  u32 i=0;
-  // 1. 根据 8x12 字体高度 (12 像素) 计算垂直起始位置 (Xpos)
-  // 假设 Line 是行号 (0, 1, 2...)
-  unsigned int Xpos=(unsigned char)Line*12;
-
-  //设置水平其实位置
-  unsigned int Ypos=8;
-
-  //限制最多字符数15个字符
-  const u8 MAX_CHARS=15;
-
-  //获取颜色参数（基于您对 LCD_DrawChar_8x12 的要求）
-  unsigned char FrontColor=BLACK;
-  unsigned char BackColor=BLUE;
-
-  while ((*ptr!=0)&&(i<MAX_CHARS))
-  {
-    LCD_DrawChar_8x12(Xpos,Ypos,*ptr,FrontColor,BackColor);
-
-    //更新水平起始位置
-    Ypos+=8;  //字符宽度8像素
-    
-    ptr++;
-    i++;
-  }
-
-}
-
 void LCD_PrintfLine(unsigned int Line,const char *format,...)
 {
+   unsigned int Y_Start = Line * 12; // 假设每行高 12   
+    // 水平起始位置 (X 坐标)
+   unsigned int X_Start = 8;
   //缓冲取储存格式化后的字符串
   char String[16];
+  unsigned char i;  
+  const u8 MAX_CHARS=15;
   va_list arg;
-
   //设置不定变量
   va_start(arg,format);
   // 2. 绑定不定变量并格式化字符串
-    // vsnprintf 是更安全的版本，如果您的库支持，建议使用：
-    // vsnprintf(String, sizeof(String), format, arg);
-    // 这里使用 vsprintf，它在嵌入式环境中更常见：
+  // vsnprintf 是更安全的版本，如果您的库支持，建议使用：
+  // vsnprintf(String, sizeof(String), format, arg);
+  // 这里使用 vsprintf，它在嵌入式环境中更常见：
    vsprintf(String,format,arg);
   //结束不定量定义
   va_end(arg);
-
+  i=sizeof(String);
+  if(i>MAX_CHARS)
+      i=MAX_CHARS;
   //  强制转换 char* 为 u8* 以匹配 LCD_DisplayStringLine 的参数类型
-  LCD_DisplayStringline_8x12(Line, (u8*)String);
+  LCD_A12(X_Start, Y_Start, (char*)String, 0xA484, WHITE, i);
 
 }
 
 void Self_LCD_Progress(void)
 {
-    LCD_Display_CCD_Binary(y1_boundary,Width,120);
+    //LCD_Display_CCD_Binary(y1_boundary,Width,120);
+    LCD_PrintfLine(1,"the number is %d",3);
 }
 
 
