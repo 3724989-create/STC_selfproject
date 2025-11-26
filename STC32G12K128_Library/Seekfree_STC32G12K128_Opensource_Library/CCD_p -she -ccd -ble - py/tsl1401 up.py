@@ -116,7 +116,17 @@ def process_data(new_data):
             new_pixels = np.frombuffer(data_body, dtype=np.uint8)
 
             if len(new_pixels) == CCD_PIXEL_COUNT:
-                pixel_values[:] = new_pixels[:]  # 更新全局数组
+                # 1. 定义映射值
+                BACKGROUND_Y = 150  # 对应 0 (背景)
+                FOREGROUND_Y = 50  # 对应 1 (赛道)
+                if np.max(new_pixels) > 1 and np.max(new_pixels) <= 255:
+                    # 接收到的已经是映射后的数据 (50/150 或原始波形)
+                    pixel_values[:] = new_pixels[:]
+                else:
+                    # 接收到的是纯粹的 0 或 1 二值化数据，需要映射：
+                    # 映射逻辑：将所有等于 1 的像素点设置为 50，其余设置为 150
+                    mapped_pixels = np.where(new_pixels == 1, FOREGROUND_Y, BACKGROUND_Y)
+                    pixel_values[:] = mapped_pixels[:]  # 更新全局数组
                 # print(f"帧解析成功! Checksum: {hex(received_checksum)}")
             else:
                 print("错误: 像素数量不匹配。")

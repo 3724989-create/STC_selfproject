@@ -1,0 +1,104 @@
+C251 COMPILER V5.60.0,  slef_button                                                        26/11/25  22:26:23  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE slef_button
+OBJECT MODULE PLACED IN .\out_file\slef_button.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\slef_button.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE)
+                    - BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driv
+                    -er;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\slef_button.lst) OBJECT(.\out_file\slef_button.obj) 
+
+stmt  level    source
+
+    1          #include "self_button.h"
+    2          
+    3          #define KEY1_PIN    IO_P51
+    4          #define KEY2_PIN    IO_P53
+    5          #define KEY3_PIN    IO_P52
+    6          
+    7          // 开关状态变量
+    8          uint8 key1_status = 1;
+    9          uint8 key2_status = 1;
+   10          uint8 key3_status = 1;
+   11          
+   12          // 上一次开关状态变量
+   13          uint8 key1_last_status;
+   14          uint8 key2_last_status;
+   15          uint8 key3_last_status;
+   16          
+   17          // 开关标志位
+   18          uint8 key1_flag;
+   19          uint8 key2_flag;
+   20          uint8 key3_flag;
+   21          
+   22          uint8 key_value_test=0;
+   23          
+   24          void self_key_init(void)
+   25          {
+   26   1              gpio_init(KEY1_PIN, GPI, 1, GPI_PULL_UP);
+   27   1              gpio_init(KEY2_PIN, GPI, 1, GPI_PULL_UP);
+   28   1              gpio_init(KEY3_PIN, GPI, 1, GPI_PULL_UP); 
+   29   1      }
+   30          
+   31          void key_value_process(void)
+   32          {
+   33   1                      // 读取当前按键状态
+   34   1              key1_status = gpio_get_level(KEY1_PIN);
+   35   1              key2_status = gpio_get_level(KEY2_PIN);
+   36   1              key3_status = gpio_get_level(KEY3_PIN); 
+   37   1      
+   38   1              //检测到按键按下之后  并放开置位标志位
+   39   1              if(key1_status && !key1_last_status)    key1_flag = 1;
+   40   1              if(key2_status && !key2_last_status)    key2_flag = 1;
+   41   1              if(key3_status && !key3_last_status)    key3_flag = 1;
+   42   1      
+   43   1              if(key1_flag)   
+   44   1              {
+   45   2                   system_delay_ms(10);
+   46   2                  key1_flag = 0;//使用按键之后，应该清除标志位
+   47   2                  key_value_test=1;
+   48   2                  //test1++;
+   49   2              }
+   50   1              
+   51   1              if(key2_flag)   
+   52   1              {
+   53   2                  system_delay_ms(10);
+   54   2                  key2_flag = 0;//使用按键之后，应该清除标志位
+   55   2                  key_value_test=2;
+   56   2                  //test2++;
+   57   2              }
+C251 COMPILER V5.60.0,  slef_button                                                        26/11/25  22:26:23  PAGE 2   
+
+   58   1              
+   59   1              if(key3_flag)   
+   60   1              {
+   61   2                  system_delay_ms(10);
+   62   2                  key3_flag = 0;//使用按键之后，应该清除标志位
+   63   2                  key_value_test=3;
+   64   2                  //test3++;
+   65   2              }
+   66   1              
+   67   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       205     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =        10     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        24     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

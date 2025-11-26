@@ -9,7 +9,7 @@ void main()
   {  
        
       //CCD_process();
-      
+      key_value_process();
       if (lcd_refresh_flag)
       {
           lcd_refresh_flag = 0;

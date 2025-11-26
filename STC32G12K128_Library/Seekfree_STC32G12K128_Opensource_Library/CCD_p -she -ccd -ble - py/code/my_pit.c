@@ -9,7 +9,7 @@ void pit_handler ();
 
 void self_pit_init(void)
 {
-    gpio_init(LED1, GPO, GPIO_LOW, GPO_PUSH_PULL);  		// 初始化 LED1 输出 默认低电平 推挽输出模式
+    gpio_init(LED1, GPO, GPIO_HIGH, GPO_PUSH_PULL);  		// 初始化 LED1 输出 默认低电平 推挽输出模式
 	
     pit_ms_init(PIT_CH, 1);                          	// 初始化 PIT_CH0 为周期中断 1000ms 周期
 		

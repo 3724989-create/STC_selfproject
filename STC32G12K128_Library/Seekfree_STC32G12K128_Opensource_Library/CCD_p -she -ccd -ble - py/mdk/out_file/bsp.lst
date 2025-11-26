@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  bsp                                                                26/11/25  17:03:33  PAGE 1   
+C251 COMPILER V5.60.0,  bsp                                                                26/11/25  22:15:19  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE bsp
@@ -53,59 +53,60 @@ stmt  level    source
    42   1          //IIC_intit();
    43   1          Servo_init();
    44   1          CCD_init();
-   45   1              while(ble6a20_init())                                                       // 判断是否通过
-             -初始化
-   46   1          {
-   47   2              gpio_toggle_level(LED1);                                                // 翻转 LED 引脚输�
+   45   1          self_key_init();
+   46   1          while(ble6a20_init())                                                       // 判断是否通过初�
+             -��化
+   47   1          {
+   48   2              gpio_toggle_level(LED1);                                                // 翻转 LED 引脚输�
              -�电平 控制 LED 亮灭
-   48   2              system_delay_ms(100);                                                   // 短延时快速闪灯�
+   49   2              system_delay_ms(100);                                                   // 短延时快速闪灯�
              -��示异常
-   49   2      
-   50   2              printf("ble6a20 init error.\r\n");
-   51   2              printf("restart ble6a20 init.\r\n");
-   52   2          }
-   53   1          ble6a20_send_byte('\r');
-   54   1          ble6a20_send_byte('\n');
-C251 COMPILER V5.60.0,  bsp                                                                26/11/25  17:03:33  PAGE 2   
+   50   2      
+   51   2              printf("ble6a20 init error.\r\n");
+   52   2              printf("restart ble6a20 init.\r\n");
+   53   2          }
+   54   1          ble6a20_send_byte('\r');
+C251 COMPILER V5.60.0,  bsp                                                                26/11/25  22:15:19  PAGE 2   
 
-   55   1          ble6a20_send_string("SEEKFREE BLE6A20 DEMO.\r\n");                    // 初始化正常 输出测试
+   55   1          ble6a20_send_byte('\n');
+   56   1          ble6a20_send_string("SEEKFREE BLE6A20 DEMO.\r\n");                    // 初始化正常 输出测试
              -信息
-   56   1      }
-   57          
+   57   1      }
    58          
-   59          //CPU微延时函数
-   60          void delay_cpu_cycle(u8 cycles)
-   61          {
-   62   1          while (cycles--);   //占用CPU周期实现微小延时
-   63   1          
-   64   1      }
-   65          
+   59          
+   60          //CPU微延时函数
+   61          void delay_cpu_cycle(u8 cycles)
+   62          {
+   63   1          while (cycles--);   //占用CPU周期实现微小延时
+   64   1          
+   65   1      }
    66          
    67          
-   68          //执行任务表
-   69             //hal_tick函数不更新容易卡
-   70          
-   71          void scheduler_run(void)    //只执行轻量级任务
-   72          {
-   73   1          int i;
-   74   1          for(i=0;i<task_num;i++)
-   75   1          {
-   76   2            uint32 Now_Time=pit_read();
-   77   2              
-   78   2              if(Now_Time>=scheduler_task[i].rate_ms+scheduler_task[i].last_run)
-   79   2              {
-   80   3                  scheduler_task[i].last_run=Now_Time;
-   81   3                  //更新最后时间
-   82   3                  scheduler_task[i].task_func();
-   83   3                  //执行相应代码
-   84   3              }
-   85   2          }
-   86   1      }
+   68          
+   69          //执行任务表
+   70             //hal_tick函数不更新容易卡
+   71          
+   72          void scheduler_run(void)    //只执行轻量级任务
+   73          {
+   74   1          int i;
+   75   1          for(i=0;i<task_num;i++)
+   76   1          {
+   77   2            uint32 Now_Time=pit_read();
+   78   2              
+   79   2              if(Now_Time>=scheduler_task[i].rate_ms+scheduler_task[i].last_run)
+   80   2              {
+   81   3                  scheduler_task[i].last_run=Now_Time;
+   82   3                  //更新最后时间
+   83   3                  scheduler_task[i].task_func();
+   84   3                  //执行相应代码
+   85   3              }
+   86   2          }
+   87   1      }
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       246     ------
+  code size            =       249     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------

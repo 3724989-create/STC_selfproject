@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  18:13:01  PAGE 1   
+C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  22:15:20  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_CCD
@@ -20,8 +20,8 @@ stmt  level    source
     9          
    10          void CCD_init(void)
    11          {
-   12   1          gpio_init(LED2, GPO, GPIO_LOW, GPO_PUSH_PULL);              // 初始化 LED2 输出 默认低电平 推挽输�
-             -��模式
+   12   1          gpio_init(LED2, GPO, GPIO_HIGH, GPO_PUSH_PULL);             // 初始化 LED2 输出 默认低电平 推挽输
+             -出模式
    13   1          tsl1401_init();
    14   1          seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_BLE6A20);          //初始化蓝牙串口
    15   1              
@@ -66,7 +66,7 @@ stmt  level    source
    53   2               // 压缩逻辑: 128 - (ADC_VALUE / 32)
    54   2               // 实现：高亮度 (高 ADC 值) 对应低压缩值 (接近 0)
    55   2               // ADC 值 4095 -> 128 - 128 = 0
-C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  18:13:01  PAGE 2   
+C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  22:15:20  PAGE 2   
 
    56   2               // ADC 值 0 -> 128 - 0 = 128
    57   2               y1_boundary[j]=(u8)(MAX_NOMPRESSED_VALUE-tsl1401_data[0][j] / COMPRESSION_DIVER);
@@ -78,50 +78,69 @@ stmt  level    source
    63          {
    64   1          uint8 i,j;
    65   1          uint16 threshold;
-   66   1                  
-   67   1                      //tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
-   68   1              
-   69   1                  //tsl1401_send_data(DEBUG_UART_INDEX, 1);
-   70   1                              threshold=calculate_threshold(tsl1401_data[0],128)+650;
-*** WARNING C98 IN LINE 70 OF ..\code\self_CCD.c: parameter 1: pointer to different objects
-   71   1                   for(j = 0; j < 128; j++)
-   72   1                   {
-   73   2                       if (tsl1401_data[0][j] >=threshold)
-   74   2                      {
-   75   3                          // 假设高 ADC 值代表亮区（背景）
-   76   3                          y1_boundary[j] = 150; 
-   77   3                      }
-   78   2      //                else if(tsl1401_data[0][j] ==threshold)
-   79   2      //                {
-   80   2      //                    // 低 ADC 值代表暗区（赛道）
-   81   2      //                    y1_boundary[j] = 100; 
-   82   2      //                }
+   66   1          uint8 temp_data[TSl140_LEN];
+   67   1          uint8 pre_dat;
+   68   1          uint8 now_dat;
+   69   1          uint8 pass_dat;
+   70   1                  
+   71   1                      //tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
+   72   1              
+   73   1                  //tsl1401_send_data(DEBUG_UART_INDEX, 1);
+   74   1                              threshold=calculate_threshold(tsl1401_data[0],TSl140_LEN)+TSl140Dyn;
+*** WARNING C98 IN LINE 74 OF ..\code\self_CCD.c: parameter 1: pointer to different objects
+   75   1                   for(j = 0; j < 128; j++)
+   76   1                   {
+   77   2                       if (tsl1401_data[0][j] >=threshold)
+   78   2                      {
+   79   3                          // 假设高 ADC 值代表亮区（背景）
+   80   3                          y1_boundary[j] = 1; 
+   81   3                      }
+   82   2      
    83   2                      else
    84   2                      {
-   85   3                          y1_boundary[j] = 50;
+   85   3                          y1_boundary[j] = 0;
    86   3                      }
    87   2                  }
-   88   1                           
-   89   1                  // 发送图像
-   90   1                    //seekfree_assistant_camera_send();
-   91   1                    ble_send_ccd_frame();
-   92   1                  //self_ble_CCD_process();
-   93   1      }
-*** WARNING C47 IN LINE 64 OF ..\code\self_CCD.c: 'i': unreferenced local variable
-   94          
-   95          
-   96              void ccd_handler (void)
-   97              {
-   98   1              tsl1401_finish_flag = 1;
-   99   1       
-  100   1          }
+   88   1                         
+   89   1                  for(i=1;i<TSl140_LEN-1;i++) //去掉头尾避免越界
+   90   1                  {
+   91   2                      pre_dat= y1_boundary[i-1];
+   92   2                      now_dat=y1_boundary[i];
+   93   2                      pass_dat=y1_boundary[i+1];
+   94   2                      //消除独立的点
+   95   2                      if(pre_dat==1&&now_dat==0&&pass_dat==1)
+   96   2                      {
+   97   3                          y1_boundary[i] = 1;     
+   98   3                      }
+   99   2                      if(pre_dat==0&&now_dat==1&&pass_dat==0)
+  100   2                      {
+  101   3                          y1_boundary[i] = 0;     
+  102   3                      }
+  103   2                  }
+  104   1      
+  105   1      
+  106   1                  // 发送图像
+  107   1                    //seekfree_assistant_camera_send();
+  108   1                    ble_send_ccd_frame();
+  109   1                  //self_ble_CCD_process();
+  110   1      }
+*** WARNING C47 IN LINE 66 OF ..\code\self_CCD.c: 'temp_data': unreferenced local variable
+  111          
+  112          
+  113              void ccd_handler (void)
+  114              {
+  115   1              tsl1401_finish_flag = 1;
+  116   1       
+  117   1          }
 *** WARNING C183 IN LINE 48 OF ..\code\self_CCD.c: dead assignment eliminated
 *** WARNING C183 IN LINE 49 OF ..\code\self_CCD.c: dead assignment eliminated
+C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  22:15:20  PAGE 3   
+
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       376     ------
+  code size            =       471     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
@@ -135,8 +154,6 @@ Module Information          Static   Overlayable
   ebitaddressable size =    ------     ------
   far data size        =    ------     ------
   huge data size       =    ------     ------
-C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  18:13:01  PAGE 3   
-
   const size           =    ------     ------
   hconst size          =         7     ------
 End of Module Information.

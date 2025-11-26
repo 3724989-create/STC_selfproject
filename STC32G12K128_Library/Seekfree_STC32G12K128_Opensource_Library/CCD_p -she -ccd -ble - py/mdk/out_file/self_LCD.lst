@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 1   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_LCD
@@ -66,7 +66,7 @@ stmt  level    source
    55            0xFFF0,   //26浅黄
    56            0x0700,   //27翠绿 0000 0111 0000 0000
    57            0xC7FF,   //28亮青 1100 0111 1111 1111
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 2   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 2   
 
    58            0x841F,   //29青灰
    59            0xF810,   //30殷红
@@ -134,7 +134,7 @@ stmt  level    source
   121   1      }
   122          //========================================================
   123          // 写数据令基本函数 16位数 2字节
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 3   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 3   
 
   124          //========================================================
   125          void LCD_WR_DATA(u16 Data)
@@ -202,7 +202,7 @@ stmt  level    source
   186          { 
   187   1        LCD_WR_CMD(0x2A); LCD_WR_DAT(0); LCD_WR_DAT(X); LCD_WR_DAT((unsigned char)(X+W-1)); LCD_WR_DAT((unsigne
              -d char)(X+W-1));
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 4   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 4   
 
   188   1        LCD_WR_CMD(0x2B); LCD_WR_DAT(0); LCD_WR_DAT(Y); LCD_WR_DAT((unsigned char)(Y+H-1)); LCD_WR_DAT((unsigne
              -d char)(Y+H-1));
@@ -270,7 +270,7 @@ stmt  level    source
   246   1        { if(Y1==Y2){ LCD_Point(X1,Y1,Color); return;          /* 画点 */  }
   247   2          if(Y1<Y2)LCD_LineV(X1,Y1,Y2-Y1+1,Color);
   248   2          else     LCD_LineV(X1,Y2,Y1-Y2+1,Color); return;
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 5   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 5   
 
   249   2        }
   250   1        if(X1>X2){ i=X1;X1=X2;X2=i;i=Y1;Y1=Y2;Y2=i; }      /* 交换坐标 */
@@ -338,7 +338,7 @@ stmt  level    source
   302          ** 参数: X列Y行坐标, * str串指针, Fcolor字前景色,Bcolor字背景色,约定:色号80为透明
              -,Len指定长度
   303          =========================================================================================================
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 6   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 6   
 
              -========*/
   304          void LCD_A12(unsigned int X,unsigned int Y, char *str,unsigned char Fcolor,unsigned char Bcolor,unsigned 
@@ -406,7 +406,7 @@ stmt  level    source
   359          {  /* X(0-319) Y(0-479) */
   360   1        unsigned char n,C;
   361   1        unsigned int i,j,L,Lw=0,ZM;
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 7   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 7   
 
   362   1        L=Len;                          //strlen(str);
   363   1        for(j=0;j<L;j++)
@@ -474,7 +474,7 @@ stmt  level    source
   423          //        LCD_MoveTo(X+i*12,Y+j);          /* 定位左上角 */
   424          //        for(n=0;n<12;n++)
   425          //        { if((ZM&0x8000)==0x8000)LCD_WR_DATA(COLOR[Fcolor]);/* 字模点为1显示前景色 */
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 8   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 8   
 
   426          //          else                                              /* 字模点为0显示原底色或背景色
              - */
@@ -542,7 +542,7 @@ stmt  level    source
   486   1          {
   487   2              if(ccd_data[x]<FIXED_THRESHOLD)
   488   2              {
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 9   
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 9   
 
   489   3                  color_index=WHITE_COLOR;
   490   3              }
@@ -610,7 +610,7 @@ stmt  level    source
   552   2          else
   553   2          {
   554   3            LCD_Point(x,y_new_mopped,WAVE_COLOR);
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 10  
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 10  
 
   555   3          }
   556   2          y_prev_mapped=y_new_mopped;
@@ -650,7 +650,7 @@ stmt  level    source
   588          void Self_LCD_Progress(void)
   589          {
   590   1          //LCD_Display_CCD_Binary(y1_boundary,Width,120);
-  591   1          LCD_PrintfLine(1,"the number is %d",5);
+  591   1          LCD_PrintfLine(1,"the number is %d",key_value_test);
   592   1      }
   593          
   594          
@@ -677,9 +677,9 @@ stmt  level    source
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =     36648     ------
+  code size            =     36650     ------
   ecode size           =    ------     ------
-C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  17:03:34  PAGE 11  
+C251 COMPILER V5.60.0,  self_LCD                                                           26/11/25  22:26:23  PAGE 11  
 
   data size            =    ------     ------
   idata size           =    ------     ------

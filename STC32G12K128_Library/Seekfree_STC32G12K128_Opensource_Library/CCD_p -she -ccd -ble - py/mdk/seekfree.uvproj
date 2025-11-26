@@ -714,6 +714,11 @@
               <FileType>1</FileType>
               <FilePath>..\code\self_ble.c</FilePath>
             </File>
+            <File>
+              <FileName>slef_button.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\code\slef_button.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -9,7 +9,7 @@ void ccd_handler (void);
 
 void CCD_init(void)
 {
-    gpio_init(LED2, GPO, GPIO_LOW, GPO_PUSH_PULL);  		// 初始化 LED2 输出 默认低电平 推挽输出模式
+    gpio_init(LED2, GPO, GPIO_HIGH, GPO_PUSH_PULL);  		// 初始化 LED2 输出 默认低电平 推挽输出模式
     tsl1401_init();
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_BLE6A20);          //初始化蓝牙串口
 	
@@ -63,29 +63,46 @@ void CCD_process(void)
 {
     uint8 i,j;
     uint16 threshold;
+    uint8 temp_data[TSl140_LEN];
+    uint8 pre_dat;
+    uint8 now_dat;
+    uint8 pass_dat;
             
 		//tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
         
             //tsl1401_send_data(DEBUG_UART_INDEX, 1);
-			threshold=calculate_threshold(tsl1401_data[0],128)+650;
+			threshold=calculate_threshold(tsl1401_data[0],TSl140_LEN)+TSl140Dyn;
              for(j = 0; j < 128; j++)
              {
                  if (tsl1401_data[0][j] >=threshold)
                 {
                     // 假设高 ADC 值代表亮区（背景）
-                    y1_boundary[j] = 150; 
+                    y1_boundary[j] = 1; 
                 }
-//                else if(tsl1401_data[0][j] ==threshold)
-//                {
-//                    // 低 ADC 值代表暗区（赛道）
-//                    y1_boundary[j] = 100; 
-//                }
+
                 else
                 {
-                    y1_boundary[j] = 50;
+                    y1_boundary[j] = 0;
                 }
             }
-                     
+                   
+            for(i=1;i<TSl140_LEN-1;i++) //去掉头尾避免越界
+            {
+                pre_dat= y1_boundary[i-1];
+                now_dat=y1_boundary[i];
+                pass_dat=y1_boundary[i+1];
+                //消除独立的点
+                if(pre_dat==1&&now_dat==0&&pass_dat==1)
+                {
+                    y1_boundary[i] = 1;     
+                }
+                if(pre_dat==0&&now_dat==1&&pass_dat==0)
+                {
+                    y1_boundary[i] = 0;     
+                }
+            }
+
+
             // 发送图像
               //seekfree_assistant_camera_send();
               ble_send_ccd_frame();

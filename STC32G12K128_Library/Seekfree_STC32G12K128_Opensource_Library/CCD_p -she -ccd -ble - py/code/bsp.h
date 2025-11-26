@@ -25,6 +25,7 @@
 #include "self_CCD.h"
 #include "self_menu.h"
 #include "self_ble.h"
+#include "self_button.h"
 
 typedef 	unsigned char	u8;
 typedef 	unsigned int	u16;
@@ -39,6 +40,10 @@ extern bit ccd_data_ready_flag; //CCD数据采集标志位
 #define DIS_BLACK   0x10
 #define DIS_        0x11
 
+#define TSl140Dyn 650   //表示ds1401动态参数 
+#define TSl140_up 150  //表示ds1401动态参数 
+#define TSl140_down 50  //表示ds1401动态参数 
+#define TSl140_LEN 128  //表示ds1401动态参数 
 
 void delay_cpu_cycle(u8 cycles);
 void all_init(void);

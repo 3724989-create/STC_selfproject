@@ -42,7 +42,8 @@ void all_init(void)
     //IIC_intit();
     Servo_init();
     CCD_init();
-        while(ble6a20_init())                                                       // 判断是否通过初始化
+    self_key_init();
+    while(ble6a20_init())                                                       // 判断是否通过初始化
     {
         gpio_toggle_level(LED1);                                                // 翻转 LED 引脚输出电平 控制 LED 亮灭
         system_delay_ms(100);                                                   // 短延时快速闪灯表示异常

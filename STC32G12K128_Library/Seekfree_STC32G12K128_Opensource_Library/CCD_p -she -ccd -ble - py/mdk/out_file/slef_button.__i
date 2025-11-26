@@ -1,0 +1,1 @@
+"..\code\slef_button.c" LARGE NOALIAS FLOAT64 WARNINGLEVEL (3) OPTIMIZE (SIZE) BROWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\slef_button.lst) OBJECT(.\out_file\slef_button.obj)
