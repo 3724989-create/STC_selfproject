@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  slef_button                                                        26/11/25  22:26:23  PAGE 1   
+C251 COMPILER V5.60.0,  slef_button                                                        26/11/25  22:32:23  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE slef_button
@@ -55,7 +55,7 @@ stmt  level    source
    44   1              {
    45   2                   system_delay_ms(10);
    46   2                  key1_flag = 0;//使用按键之后，应该清除标志位
-   47   2                  key_value_test=1;
+   47   2                  key_value_test++;
    48   2                  //test1++;
    49   2              }
    50   1              
@@ -63,17 +63,17 @@ stmt  level    source
    52   1              {
    53   2                  system_delay_ms(10);
    54   2                  key2_flag = 0;//使用按键之后，应该清除标志位
-   55   2                  key_value_test=2;
+   55   2                  key_value_test++;
    56   2                  //test2++;
    57   2              }
-C251 COMPILER V5.60.0,  slef_button                                                        26/11/25  22:26:23  PAGE 2   
+C251 COMPILER V5.60.0,  slef_button                                                        26/11/25  22:32:23  PAGE 2   
 
    58   1              
    59   1              if(key3_flag)   
    60   1              {
    61   2                  system_delay_ms(10);
    62   2                  key3_flag = 0;//使用按键之后，应该清除标志位
-   63   2                  key_value_test=3;
+   63   2                  key_value_test++;
    64   2                  //test3++;
    65   2              }
    66   1              

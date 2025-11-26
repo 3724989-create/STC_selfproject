@@ -44,7 +44,7 @@ void key_value_process(void)
         {
              system_delay_ms(10);
             key1_flag = 0;//使用按键之后，应该清除标志位
-            key_value_test=1;
+            key_value_test++;
             //test1++;
         }
         
@@ -52,7 +52,7 @@ void key_value_process(void)
         {
             system_delay_ms(10);
             key2_flag = 0;//使用按键之后，应该清除标志位
-            key_value_test=2;
+            key_value_test++;
             //test2++;
         }
         
@@ -60,7 +60,7 @@ void key_value_process(void)
         {
             system_delay_ms(10);
             key3_flag = 0;//使用按键之后，应该清除标志位
-            key_value_test=3;
+            key_value_test++;
             //test3++;
         }
         

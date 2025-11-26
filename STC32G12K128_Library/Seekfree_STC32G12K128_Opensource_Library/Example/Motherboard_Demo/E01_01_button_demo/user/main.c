@@ -136,7 +136,7 @@ void main()
         if(key1_status && !key1_last_status)    key1_flag = 1;
         if(key2_status && !key2_last_status)    key2_flag = 1;
         if(key3_status && !key3_last_status)    key3_flag = 1;
-        if(key4_status && !key4_last_status)    key4_flag = 1;
+        if(key4_status && !key4_last_status)    key4_flag = 1; 
         
         //标志位置位之后，可以使用标志位执行自己想要做的事件
         if(key1_flag)   
