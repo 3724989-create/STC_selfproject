@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_CCD                                                           25/11/25  21:19:12  PAGE 1   
+C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  18:13:01  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_CCD
@@ -14,107 +14,119 @@ stmt  level    source
     3          uint8 y1_boundary[128];
     4          uint8 y2_boundary[128];
     5          uint8 y3_boundary[128];
-    6          
-    7          void CCD_init(void)
-    8          {
-    9   1          tsl1401_init();
-   10   1      
-   11   1          seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_BLE6A20);          //初始化蓝牙串口
-   12   1              
-   13   1          seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, NULL, 128, 256);
-   14   1          // 设置一个边线用于显示CCD波形
-   15   1          seekfree_assistant_camera_boundary_config(Y_BOUNDARY, 128, NULL, NULL ,NULL, y1_boundary, y2_boundary
+    6          uint16 Tsl_the=0;
+    7          
+    8          void ccd_handler (void);
+    9          
+   10          void CCD_init(void)
+   11          {
+   12   1          gpio_init(LED2, GPO, GPIO_LOW, GPO_PUSH_PULL);              // 初始化 LED2 输出 默认低电平 推挽输�
+             -��模式
+   13   1          tsl1401_init();
+   14   1          seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_BLE6A20);          //初始化蓝牙串口
+   15   1              
+   16   1          seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, NULL, 128, 256);
+   17   1          // 设置一个边线用于显示CCD波形
+   18   1          seekfree_assistant_camera_boundary_config(Y_BOUNDARY, 128, NULL, NULL ,NULL, y1_boundary, y2_boundary
              -, y3_boundary);
-   16   1          // 边线3用于显示中线
-   17   1          memset(y3_boundary, 0x80, sizeof(y3_boundary));   //黄色的那根是中线
-   18   1      }
-   19          
-   20          void ccd_process_data(void)
-   21          {
-   22   1          // 检查是否有数据采集完成 (此检查冗余，因为外部已检查 tsl1401_finish_flag)
-   23   1          // if (!tsl1401_finish_flag) return; 
-   24   1          
-   25   1          // TSL1401_AD_RESOLUTION 被定义为 ADC_12BIT (0-4095)
-   26   1          // 压缩系数为 4096 / 128 = 32
-   27   1          u8 j;
-   28   1          const u16 COMPRESSION_DIVER=32;
-   29   1          const u8 MAX_NOMPRESSED_VALUE=128;
-   30   1      
-   31   1          for( j=0;j<128;j++)
-   32   1          {
-   33   2               // 压缩逻辑: 128 - (ADC_VALUE / 32)
-   34   2               // 实现：高亮度 (高 ADC 值) 对应低压缩值 (接近 0)
-   35   2               // ADC 值 4095 -> 128 - 128 = 0
-   36   2               // ADC 值 0 -> 128 - 0 = 128
-   37   2               y1_boundary[j]=(u8)(MAX_NOMPRESSED_VALUE-tsl1401_data[0][j] / COMPRESSION_DIVER);
-   38   2          }
-   39   1           // 此时 y1_boundary 已经准备好供 LCD 绘制
-   40   1      }
-   41          
-   42          void CCD_process(void)
-   43          {
-   44   1          uint8 i,j;
-   45   1                      if(tsl1401_finish_flag)
-   46   1              {
-   47   2                  tsl1401_finish_flag = 0;
-   48   2                  
-   49   2                      //tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
-   50   2              
-   51   2                  //tsl1401_send_data(DEBUG_UART_INDEX, 1);
-   52   2                              
-   53   2                   for(j = 0; j < 128; j++)
-   54   2                   {
-   55   3                       //threshold=calculate_dynamic_threshold(0);
-   56   3                       //tsl1401_binary_data_process(&tsl1401_data[0],j,threshold);
-C251 COMPILER V5.60.0,  self_CCD                                                           25/11/25  21:19:12  PAGE 2   
+   19   1          // 边线3用于显示中线
+   20   1          memset(y3_boundary, 0x80, sizeof(y3_boundary));   //黄色的那根是中线
+   21   1      
+   22   1          pit_ms_init(CCD_CH, 10);
+   23   1          interrupt_set_priority(CCD_PRIORITY, 0);
+   24   1          tim1_irq_handler = ccd_handler;
+   25   1      }
+   26          
+   27          uint16 calculate_threshold(const uint8 *dat, uint8 count)
+   28          {
+   29   1          uint32 sum=0;
+   30   1          uint8 i;
+   31   1          uint16 result;
+   32   1          for(i=0;i<count;i++)
+   33   1          {
+   34   2             sum += *(dat + i);
+   35   2          }
+   36   1          result=(uint16)(sum / count);
+   37   1          return result;
+   38   1      }
+   39          
+   40          void ccd_process_data(void)
+   41          {
+   42   1          // 检查是否有数据采集完成 (此检查冗余，因为外部已检查 tsl1401_finish_flag)
+   43   1          // if (!tsl1401_finish_flag) return; 
+   44   1          
+   45   1          // TSL1401_AD_RESOLUTION 被定义为 ADC_12BIT (0-4095)
+   46   1          // 压缩系数为 4096 / 128 = 32
+   47   1          u8 j;
+   48   1          const u16 COMPRESSION_DIVER=32;
+   49   1          const u8 MAX_NOMPRESSED_VALUE=128;
+   50   1      
+   51   1          for( j=0;j<128;j++)
+   52   1          {
+   53   2               // 压缩逻辑: 128 - (ADC_VALUE / 32)
+   54   2               // 实现：高亮度 (高 ADC 值) 对应低压缩值 (接近 0)
+   55   2               // ADC 值 4095 -> 128 - 128 = 0
+C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  18:13:01  PAGE 2   
 
-   57   3                       // 获取CCD数据，并按分辨率进行压缩
-   58   3                       switch(TSL1401_AD_RESOLUTION)   //初始ADC_8BIT
-   59   3                       {
-   60   4                           case ADC_8BIT:
-   61   4                           {
-   62   5                               y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 2);
-   63   5                               y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 2);
-   64   5                               break;
-   65   5                           }
-   66   4                           case ADC_10BIT:
-   67   4                           {
-   68   5                               y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 8);
-   69   5                               y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 8);
-   70   5                               break;
-   71   5                           }
-   72   4                           case ADC_12BIT:
-   73   4                          {
-   74   5                               y1_boundary[j] = (uint8)(128 - tsl1401_data[0][j] / 32);
-   75   5                               y2_boundary[j] = (uint8)(256 - tsl1401_data[1][j] / 32);
-   76   5                               
-   77   5                               break;
-   78   5                           }
-   79   4                       }
-   80   3                      
-   81   3                      
-   82   3                   }
-   83   2                  // 发送图像
-   84   2                    //seekfree_assistant_camera_send();
-   85   2                    ble_send_ccd_frame();
-   86   2                  //self_ble_CCD_process();
-   87   2              }
-   88   1          }
-*** WARNING C47 IN LINE 44 OF ..\code\self_CCD.c: 'i': unreferenced local variable
-*** WARNING C183 IN LINE 28 OF ..\code\self_CCD.c: dead assignment eliminated
-*** WARNING C183 IN LINE 29 OF ..\code\self_CCD.c: dead assignment eliminated
-*** WARNING C177 IN LINE 64 OF ..\code\self_CCD.c: unreachable code
-*** WARNING C177 IN LINE 70 OF ..\code\self_CCD.c: unreachable code
+   56   2               // ADC 值 0 -> 128 - 0 = 128
+   57   2               y1_boundary[j]=(u8)(MAX_NOMPRESSED_VALUE-tsl1401_data[0][j] / COMPRESSION_DIVER);
+   58   2          }
+   59   1           // 此时 y1_boundary 已经准备好供 LCD 绘制
+   60   1      }
+   61          
+   62          void CCD_process(void)
+   63          {
+   64   1          uint8 i,j;
+   65   1          uint16 threshold;
+   66   1                  
+   67   1                      //tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
+   68   1              
+   69   1                  //tsl1401_send_data(DEBUG_UART_INDEX, 1);
+   70   1                              threshold=calculate_threshold(tsl1401_data[0],128)+650;
+*** WARNING C98 IN LINE 70 OF ..\code\self_CCD.c: parameter 1: pointer to different objects
+   71   1                   for(j = 0; j < 128; j++)
+   72   1                   {
+   73   2                       if (tsl1401_data[0][j] >=threshold)
+   74   2                      {
+   75   3                          // 假设高 ADC 值代表亮区（背景）
+   76   3                          y1_boundary[j] = 150; 
+   77   3                      }
+   78   2      //                else if(tsl1401_data[0][j] ==threshold)
+   79   2      //                {
+   80   2      //                    // 低 ADC 值代表暗区（赛道）
+   81   2      //                    y1_boundary[j] = 100; 
+   82   2      //                }
+   83   2                      else
+   84   2                      {
+   85   3                          y1_boundary[j] = 50;
+   86   3                      }
+   87   2                  }
+   88   1                           
+   89   1                  // 发送图像
+   90   1                    //seekfree_assistant_camera_send();
+   91   1                    ble_send_ccd_frame();
+   92   1                  //self_ble_CCD_process();
+   93   1      }
+*** WARNING C47 IN LINE 64 OF ..\code\self_CCD.c: 'i': unreferenced local variable
+   94          
+   95          
+   96              void ccd_handler (void)
+   97              {
+   98   1              tsl1401_finish_flag = 1;
+   99   1       
+  100   1          }
+*** WARNING C183 IN LINE 48 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 49 OF ..\code\self_CCD.c: dead assignment eliminated
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       298     ------
+  code size            =       376     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
   pdata size           =    ------     ------
-  xdata size           =       384     ------
+  xdata size           =       386     ------
   xdata-const size     =    ------     ------
   edata size           =    ------     ------
   bit size             =    ------     ------
@@ -123,9 +135,11 @@ Module Information          Static   Overlayable
   ebitaddressable size =    ------     ------
   far data size        =    ------     ------
   huge data size       =    ------     ------
+C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  18:13:01  PAGE 3   
+
   const size           =    ------     ------
-  hconst size          =    ------     ------
+  hconst size          =         7     ------
 End of Module Information.
 
 
-C251 COMPILATION COMPLETE.  5 WARNING(S),  0 ERROR(S)
+C251 COMPILATION COMPLETE.  4 WARNING(S),  0 ERROR(S)

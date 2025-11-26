@@ -1,10 +1,15 @@
 import serial
 import time
+import matplotlib.font_manager as fm
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from collections import deque
+font_name = "SimHei" # 或者 'Microsoft YaHei'
 
+# 步骤 2: 设置字体属性
+plt.rcParams['font.sans-serif'] = [font_name, 'Arial'] # 允许 Matplotlib 查找这些字体
+plt.rcParams['axes.unicode_minus'] = False # 解决负号显示问题
 # --- 1. 配置常量 (与发送端保持一致) ---
 COM_PORT = 'COM9'  # <<< 请修改为您的实际串口号！
 BAUD_RATE = 115200  # <<< 请根据您的模块设置！
@@ -29,6 +34,7 @@ try:
 except serial.SerialException as e:
     print(f"无法打开串口 {COM_PORT}: {e}")
     exit()
+
 
 # 配置 Matplotlib 实时绘图
 plt.style.use('dark_background')

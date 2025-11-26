@@ -13,7 +13,7 @@ void self_pit_init(void)
 	
     pit_ms_init(PIT_CH, 1);                          	// 初始化 PIT_CH0 为周期中断 1000ms 周期
 		
-    interrupt_set_priority(PIT_PRIORITY, 0);            	// 设置 PIT1 对周期中断的中断优先级为 0，0为最低优先级
+    interrupt_set_priority(PIT_PRIORITY, 1);            	// 设置 PIT1 对周期中断的中断优先级为 0，0为最低优先级
     
 	tim0_irq_handler = pit_handler;							// 设置定时器0周期中断回调函数	
 }
@@ -51,7 +51,6 @@ uint32 pit_read(void)
 void pit_handler (void)
 {
     static u8 lcd_count=0;
-    static u8 ccd_count=0;
 
     //pit_state = 1;                                                              // 周期中断触发 标志位置位
     systick_count++;
@@ -63,9 +62,4 @@ void pit_handler (void)
         lcd_count=0;
     }
     
-    if(++ccd_count>=10)
-    {
-         tsl1401_collect_pit_handler();
-         ccd_count=0;
-    }
 }

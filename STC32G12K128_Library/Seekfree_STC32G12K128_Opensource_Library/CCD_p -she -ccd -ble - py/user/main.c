@@ -8,7 +8,7 @@ void main()
   while(1)
   {  
        
-      CCD_process();
+      //CCD_process();
       
       if (lcd_refresh_flag)
       {
@@ -16,10 +16,11 @@ void main()
           Self_LCD_Progress(); 
       }
 
-//      if (tsl1401_finish_flag)
-//      {
-//          tsl1401_finish_flag = 0;
-//          ccd_process_data(); 
-//      }
+      if (tsl1401_finish_flag)
+      {
+          tsl1401_finish_flag = 0;
+          tsl1401_collect_pit_handler();
+          CCD_process();
+      }
   }
 }

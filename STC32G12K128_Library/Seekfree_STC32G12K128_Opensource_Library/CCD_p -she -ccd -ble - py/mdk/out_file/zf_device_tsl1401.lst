@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  25/11/25  12:52:18  PAGE 1   
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  26/11/25  16:38:14  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE zf_device_tsl1401
@@ -66,7 +66,7 @@ stmt  level    source
    50          #include "zf_driver_delay.h"
    51          #include "zf_driver_gpio.h"
    52          #include "zf_driver_pit.h"
-C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  25/11/25  12:52:18  PAGE 2   
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  26/11/25  16:38:14  PAGE 2   
 
    53          
    54          #include "zf_device_tsl1401.h"
@@ -113,7 +113,7 @@ stmt  level    source
    92   2              TSL1401_CLK(1);
    93   2          }
    94   1          //采集完成标志位置1
-   95   1          tsl1401_finish_flag = 1;
+   95   1          //tsl1401_finish_flag = 1;
    96   1      }
 *** WARNING C47 IN LINE 71 OF ..\..\libraries\zf_device\zf_device_tsl1401.c: 'threshold': unreferenced local variable
    97          
@@ -134,7 +134,7 @@ stmt  level    source
   110   1          uint16 max_l=0;
   111   1          uint16 min_l=0xFFFF;
   112   1          uint16 threshold;
-C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  25/11/25  12:52:18  PAGE 3   
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  26/11/25  16:38:14  PAGE 3   
 
   113   1      
   114   1          for(i=0;i<TSL1401_DATA_LEN;i++)
@@ -202,7 +202,7 @@ stmt  level    source
   174          // 使用示例     tsl1401_init();
   175          // 备注信息     
   176          //-------------------------------------------------------------------------------------------------------
-C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  25/11/25  12:52:18  PAGE 4   
+C251 COMPILER V5.60.0,  zf_device_tsl1401                                                  26/11/25  16:38:14  PAGE 4   
 
              -------------
   177          void tsl1401_init (void)     
@@ -218,7 +218,7 @@ stmt  level    source
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       407     ------
+  code size            =       401     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------

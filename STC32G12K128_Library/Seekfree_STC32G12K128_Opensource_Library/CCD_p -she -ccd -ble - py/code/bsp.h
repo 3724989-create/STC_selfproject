@@ -3,8 +3,11 @@
 
 #define PIT_CH                  (TIM0_PIT )                	// 使用的周期中断编号 如果修改 需要同步对应修改周期中断编号与 isr.c 中的调用
 #define PIT_PRIORITY            (TIMER0_IRQn)              	// 对应周期中断的中断编号
+#define CCD_CH                  (TIM1_PIT)
+#define CCD_PRIORITY            (TIMER1_IRQn)
 
 #define LED1                    (IO_P46)
+#define LED2                    (IO_P45)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +38,7 @@ extern bit ccd_data_ready_flag; //CCD数据采集标志位
 #define DIS_DOT     0x20
 #define DIS_BLACK   0x10
 #define DIS_        0x11
+
 
 void delay_cpu_cycle(u8 cycles);
 void all_init(void);
