@@ -6,7 +6,7 @@
 uint8 task_num=0;
 
 //全局任务调度标志位
- bit lcd_refresh_flag =0;   //LCD刷新标志位
+ bit lcd_refresh_flag =0;   //LCD刷新标志位 
  bit ccd_data_ready_flag=0; //CCD数据采集标志位
 
 typedef struct scheduler

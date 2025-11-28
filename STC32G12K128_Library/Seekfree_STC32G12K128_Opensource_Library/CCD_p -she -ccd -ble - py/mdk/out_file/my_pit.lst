@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  my_pit                                                             26/11/25  22:15:19  PAGE 1   
+C251 COMPILER V5.60.0,  my_pit                                                             28/11/25  20:37:39  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE my_pit
@@ -65,32 +65,41 @@ stmt  level    source
    51          void pit_handler (void)
    52          {
    53   1          static u8 lcd_count=0;
-   54   1      
-C251 COMPILER V5.60.0,  my_pit                                                             26/11/25  22:15:19  PAGE 2   
+   54   1          static u8 key_count=0;
+C251 COMPILER V5.60.0,  my_pit                                                             28/11/25  20:37:39  PAGE 2   
 
-   55   1          //pit_state = 1;                                                              // 周期中断触发 �
+   55   1      
+   56   1          //pit_state = 1;                                                              // 周期中断触发 �
              -��志位置位
-   56   1          systick_count++;
-   57   1          //50ms计数器
-   58   1         
-   59   1          if(++lcd_count>=10)
-   60   1          {
-   61   2              lcd_refresh_flag=1;//设置标志位
-   62   2              lcd_count=0;
-   63   2          }
-   64   1          
-   65   1      }
+   57   1          systick_count++;
+   58   1          //50ms计数器
+   59   1         
+   60   1          if(++lcd_count>=10)
+   61   1          {
+   62   2              lcd_refresh_flag=1;//设置标志位
+   63   2              lcd_count=0;
+   64   2          }
+   65   1      
+   66   1          if(++key_count>=10)
+   67   1          {
+   68   2              
+   69   2              key_value_process();
+   70   2             
+   71   2              key_count=0;
+   72   2          }
+   73   1          
+   74   1      }
 *** WARNING C183 IN LINE 35 OF ..\code\my_pit.c: dead assignment eliminated
 
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =       178     ------
+  code size            =       197     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------
   pdata size           =    ------     ------
-  xdata size           =        10     ------
+  xdata size           =        11     ------
   xdata-const size     =    ------     ------
   edata size           =    ------     ------
   bit size             =    ------     ------
@@ -100,7 +109,7 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-  hconst size          =        30     ------
+  hconst size          =        36     ------
 End of Module Information.
 
 

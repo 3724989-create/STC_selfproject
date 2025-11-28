@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_ble                                                           26/11/25  22:15:20  PAGE 1   
+C251 COMPILER V5.60.0,  self_ble                                                           28/11/25  20:26:04  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_ble
@@ -66,7 +66,7 @@ stmt  level    source
    50           * @brief 计算数据体的校验和（简单累加和的低8位）
    51           * * @param data 要计算校验和的数据指针
    52           * @param len  数据长度
-C251 COMPILER V5.60.0,  self_ble                                                           26/11/25  22:15:20  PAGE 2   
+C251 COMPILER V5.60.0,  self_ble                                                           28/11/25  20:26:04  PAGE 2   
 
    53           * @return uint8_t 校验和
    54           */
@@ -135,7 +135,7 @@ Module Information          Static   Overlayable
 ------------------------------------------------
   code size            =       307     ------
   ecode size           =    ------     ------
-C251 COMPILER V5.60.0,  self_ble                                                           26/11/25  22:15:20  PAGE 3   
+C251 COMPILER V5.60.0,  self_ble                                                           28/11/25  20:26:04  PAGE 3   
 
   data size            =    ------     ------
   idata size           =    ------     ------

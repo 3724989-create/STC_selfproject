@@ -51,6 +51,7 @@ uint32 pit_read(void)
 void pit_handler (void)
 {
     static u8 lcd_count=0;
+    static u8 key_count=0;
 
     //pit_state = 1;                                                              // 周期中断触发 标志位置位
     systick_count++;
@@ -60,6 +61,14 @@ void pit_handler (void)
     {
         lcd_refresh_flag=1;//设置标志位
         lcd_count=0;
+    }
+
+    if(++key_count>=10)
+    {
+        
+        key_value_process();
+       
+        key_count=0;
     }
     
 }

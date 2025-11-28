@@ -564,7 +564,7 @@ void LCD_PrintfLine(unsigned int Line,const char *format,...)
     // 水平起始位置 (X 坐标)
    unsigned int X_Start = 8;
   //缓冲取储存格式化后的字符串
-  char String[16];
+  char String[16]={0};
   unsigned char i;  
   const u8 MAX_CHARS=15;
   va_list arg;
@@ -574,7 +574,7 @@ void LCD_PrintfLine(unsigned int Line,const char *format,...)
   // vsnprintf 是更安全的版本，如果您的库支持，建议使用：
   // vsnprintf(String, sizeof(String), format, arg);
   // 这里使用 vsprintf，它在嵌入式环境中更常见：
-   vsprintf(String,format,arg);
+  vsprintf(String,format,arg);
   //结束不定量定义
   va_end(arg);
   i=sizeof(String);
@@ -588,7 +588,8 @@ void LCD_PrintfLine(unsigned int Line,const char *format,...)
 void Self_LCD_Progress(void)
 {
     //LCD_Display_CCD_Binary(y1_boundary,Width,120);
-    LCD_PrintfLine(1,"the number is %d",key_value_test);
+    LCD_PrintfLine(1,"the number");
+    LCD_PrintfLine(2, "Key: %d", key_value_test); 
 }
 
 

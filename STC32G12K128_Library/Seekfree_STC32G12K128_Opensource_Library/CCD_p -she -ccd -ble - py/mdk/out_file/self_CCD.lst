@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  22:15:20  PAGE 1   
+C251 COMPILER V5.60.0,  self_CCD                                                           28/11/25  20:26:04  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE self_CCD
@@ -66,7 +66,7 @@ stmt  level    source
    53   2               // 压缩逻辑: 128 - (ADC_VALUE / 32)
    54   2               // 实现：高亮度 (高 ADC 值) 对应低压缩值 (接近 0)
    55   2               // ADC 值 4095 -> 128 - 128 = 0
-C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  22:15:20  PAGE 2   
+C251 COMPILER V5.60.0,  self_CCD                                                           28/11/25  20:26:04  PAGE 2   
 
    56   2               // ADC 值 0 -> 128 - 0 = 128
    57   2               y1_boundary[j]=(u8)(MAX_NOMPRESSED_VALUE-tsl1401_data[0][j] / COMPRESSION_DIVER);
@@ -134,7 +134,7 @@ stmt  level    source
   117   1          }
 *** WARNING C183 IN LINE 48 OF ..\code\self_CCD.c: dead assignment eliminated
 *** WARNING C183 IN LINE 49 OF ..\code\self_CCD.c: dead assignment eliminated
-C251 COMPILER V5.60.0,  self_CCD                                                           26/11/25  22:15:20  PAGE 3   
+C251 COMPILER V5.60.0,  self_CCD                                                           28/11/25  20:26:04  PAGE 3   
 
 
 
