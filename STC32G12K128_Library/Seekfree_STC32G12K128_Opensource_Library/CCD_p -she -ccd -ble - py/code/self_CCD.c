@@ -5,6 +5,8 @@ uint8 y2_boundary[128];
 uint8 y3_boundary[128];
 uint16 Tsl_the=0;
 
+bit CCD_flag=0;
+
 void ccd_handler (void);
 
 void CCD_init(void)
@@ -110,8 +112,25 @@ void CCD_process(void)
 }
 
 
-    void ccd_handler (void)
+void ccd_handler (void)
+{
+    tsl1401_finish_flag = 1;
+}
+
+void Menu_CCD_process()
+{
+    CCD_flag=!CCD_flag;
+}
+
+void CCD_main_process()
+{
+    if(CCD_flag)
     {
-        tsl1401_finish_flag = 1;
- 
+      if (tsl1401_finish_flag)
+      {
+          tsl1401_finish_flag = 0;
+          tsl1401_collect_pit_handler();
+          CCD_process();
+      }
     }
+}

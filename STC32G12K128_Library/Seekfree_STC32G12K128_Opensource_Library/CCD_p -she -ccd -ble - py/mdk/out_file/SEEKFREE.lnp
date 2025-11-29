@@ -39,6 +39,7 @@
 ".\out_file\self_CCD.obj",
 ".\out_file\self_ble.obj",
 ".\out_file\slef_button.obj",
+".\out_file\self_menu.obj",
 ".\out_file\isr.obj",
 ".\out_file\main.obj",
 ".\out_file\IIC.obj" 

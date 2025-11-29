@@ -35,5 +35,7 @@ extern key_t keys[KEY_COUNT];
 void self_key_init(void);
 void key_value_process(void);
 void check_key_event(void); // 用于在主循环中处理按键事件
+void LED1_process();
+void LED2_process();
 
 #endif // DEBUG

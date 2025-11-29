@@ -1,6 +1,5 @@
 #include "bsp.h"
 
-
 //对实时要求高的函数放在ISR(中断)，对实时性要求低的函数放在主循环中
 
 uint8 task_num=0;
@@ -43,6 +42,8 @@ void all_init(void)
     Servo_init();
     CCD_init();
     self_key_init();
+    Menu_Init();
+    Sub_Menu_Link_Init();
     while(ble6a20_init())                                                       // 判断是否通过初始化
     {
         gpio_toggle_level(LED1);                                                // 翻转 LED 引脚输出电平 控制 LED 亮灭

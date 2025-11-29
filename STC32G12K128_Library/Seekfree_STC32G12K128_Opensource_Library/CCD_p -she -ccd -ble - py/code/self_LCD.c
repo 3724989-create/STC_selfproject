@@ -587,9 +587,7 @@ void LCD_PrintfLine(unsigned int Line,const char *format,...)
 
 void Self_LCD_Progress(void)
 {
-    //LCD_Display_CCD_Binary(y1_boundary,Width,120);
-    LCD_PrintfLine(1,"the number");
-    LCD_PrintfLine(2, "Key: %d", key_value_test); 
+  Menu_Display();
 }
 
 

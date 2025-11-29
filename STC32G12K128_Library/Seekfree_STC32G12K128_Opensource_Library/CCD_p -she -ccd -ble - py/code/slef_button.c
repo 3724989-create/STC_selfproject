@@ -89,18 +89,18 @@ void check_key_event(void)
             switch (key_id) {
                 case 1: 
                     // KEY1 的操作
-                    gpio_toggle_level(LED1);
+                    Menu_Move_Next();
                     // 仅 KEY1 影响 LED1
                     break;
                 case 2:
                     // KEY2 的操作
-                    gpio_toggle_level(LED2);
+                    Menu_Move_Prev();
                     break;
                 case 3:
-                    gpio_toggle_level(LED1);
+                    Menu_Select_Action();
                     break;
                 case 4:
-                    gpio_toggle_level(LED2);
+                    //gpio_toggle_level(LED2);
                     break;
             }
             
@@ -111,4 +111,16 @@ void check_key_event(void)
             // break;
         }
     }
+}
+
+void LED1_process()
+{
+    gpio_toggle_level(LED1);
+    
+}
+
+void LED2_process()
+{
+    gpio_toggle_level(LED2);
+    
 }
