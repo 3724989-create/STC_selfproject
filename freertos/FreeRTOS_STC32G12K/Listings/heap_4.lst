@@ -1,0 +1,598 @@
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE heap_4
+OBJECT MODULE PLACED IN .\Objects\heap_4.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE FreeRTOS\portable\MemMang\heap_4.c XSMALL INTR2 FUNCTIONS(REENTRANT) BROWS
+                    -E INCDIR(.\FreeRTOS\include;.\library;.\FreeRTOS\portable\STC32G12K128) DEBUG PRINT(.\Listings\heap_4.lst) OBJECT(.\Obje
+                    -cts\heap_4.obj) 
+
+stmt  level    source
+
+    1          /*
+    2           * FreeRTOS Kernel V10.5.1
+    3           * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+    4           *
+    5           * SPDX-License-Identifier: MIT
+    6           *
+    7           * Permission is hereby granted, free of charge, to any person obtaining a copy of
+    8           * this software and associated documentation files (the "Software"), to deal in
+    9           * the Software without restriction, including without limitation the rights to
+   10           * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   11           * the Software, and to permit persons to whom the Software is furnished to do so,
+   12           * subject to the following conditions:
+   13           *
+   14           * The above copyright notice and this permission notice shall be included in all
+   15           * copies or substantial portions of the Software.
+   16           *
+   17           * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   18           * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+   19           * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+   20           * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+   21           * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+   22           * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   23           *
+   24           * https://www.FreeRTOS.org
+   25           * https://github.com/FreeRTOS
+   26           *
+   27           */
+   28          
+   29          /*
+   30           * A sample implementation of pvPortMalloc() and vPortFree() that combines
+   31           * (coalescences) adjacent memory blocks as they are freed, and in so doing
+   32           * limits memory fragmentation.
+   33           *
+   34           * See heap_1.c, heap_2.c and heap_3.c for alternative implementations, and the
+   35           * memory management pages of https://www.FreeRTOS.org for more information.
+   36           */
+   37          #include <stdlib.h>
+   38          #include <string.h>
+   39          
+   40          /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
+   41           * all the API functions to use the MPU wrappers.  That should only be done when
+   42           * task.h is included from an application file. */
+   43          #define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+   44          
+   45          #include "FreeRTOS.h"
+   46          #include "task.h"
+   47          
+   48          #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+   49          
+   50          #if ( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
+                   #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
+               #endif
+   53          
+   54          #ifndef configHEAP_CLEAR_MEMORY_ON_FREE
+   55              #define configHEAP_CLEAR_MEMORY_ON_FREE    0
+   56          #endif
+   57          
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 2   
+
+   58          /* Block sizes must not get too small. */
+   59          #define heapMINIMUM_BLOCK_SIZE    ( ( size_t ) ( xHeapStructSize << 1 ) )
+   60          
+   61          /* Assumes 8bit bytes! */
+   62          #define heapBITS_PER_BYTE         ( ( size_t ) 8 )
+   63          
+   64          /* Max value that fits in a size_t type. */
+   65          #define heapSIZE_MAX              ( ~( ( size_t ) 0 ) )
+   66          
+   67          /* Check if multiplying a and b will result in overflow. */
+   68          #define heapMULTIPLY_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( heapSIZE_MAX / ( a ) ) ) )
+   69          
+   70          /* Check if adding a and b will result in overflow. */
+   71          #define heapADD_WILL_OVERFLOW( a, b )         ( ( a ) > ( heapSIZE_MAX - ( b ) ) )
+   72          
+   73          /* MSB of the xBlockSize member of an BlockLink_t structure is used to track
+   74           * the allocation status of a block.  When MSB of the xBlockSize member of
+   75           * an BlockLink_t structure is set then the block belongs to the application.
+   76           * When the bit is free the block is still part of the free heap space. */
+   77          #define heapBLOCK_ALLOCATED_BITMASK    ( ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) -
+             - 1 ) )
+   78          #define heapBLOCK_SIZE_IS_VALID( xBlockSize )    ( ( ( xBlockSize ) & heapBLOCK_ALLOCATED_BITMASK ) == 0 
+             -)
+   79          #define heapBLOCK_IS_ALLOCATED( pxBlock )        ( ( ( pxBlock->xBlockSize ) & heapBLOCK_ALLOCATED_BITMAS
+             -K ) != 0 )
+   80          #define heapALLOCATE_BLOCK( pxBlock )            ( ( pxBlock->xBlockSize ) |= heapBLOCK_ALLOCATED_BITMASK
+             - )
+   81          #define heapFREE_BLOCK( pxBlock )                ( ( pxBlock->xBlockSize ) &= ~heapBLOCK_ALLOCATED_BITMAS
+             -K )
+   82          
+   83          /*-----------------------------------------------------------*/
+   84          
+   85          /* Allocate the memory for the heap. */
+   86          #if ( configAPPLICATION_ALLOCATED_HEAP == 1 )
+               
+               /* The application writer has already defined the array used for the RTOS
+               * heap - probably so it can be placed in a special segment or address. */
+                   extern uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+               #else
+   92              PRIVILEGED_DATA static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+   93          #endif /* configAPPLICATION_ALLOCATED_HEAP */
+   94          
+   95          /* Define the linked list structure.  This is used to link free blocks in order
+   96           * of their memory address. */
+   97          typedef struct A_BLOCK_LINK
+   98          {
+   99              struct A_BLOCK_LINK * pxNextFreeBlock; /*<< The next free block in the list. */
+  100              size_t xBlockSize;                     /*<< The size of the free block. */
+  101          } BlockLink_t;
+  102          
+  103          /*-----------------------------------------------------------*/
+  104          
+  105          /*
+  106           * Inserts a block of memory that is being freed into the correct position in
+  107           * the list of free memory blocks.  The block being freed will be merged with
+  108           * the block in front it and/or the block behind it if the memory blocks are
+  109           * adjacent to each other.
+  110           */
+  111          static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) PRIVILEGED_FUNCTION;
+  112          
+  113          /*
+  114           * Called automatically to setup the required heap structures the first time
+  115           * pvPortMalloc() is called.
+  116           */
+  117          static void prvHeapInit( void ) PRIVILEGED_FUNCTION;
+  118          
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 3   
+
+  119          /*-----------------------------------------------------------*/
+  120          
+  121          /* The size of the structure placed at the beginning of each allocated memory
+  122           * block must by correctly byte aligned. */
+  123          static const size_t xHeapStructSize = ( sizeof( BlockLink_t ) + ( ( size_t ) ( portBYTE_ALIGNMENT - 1 ) )
+             - ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
+  124          
+  125          /* Create a couple of list links to mark the start and end of the list. */
+  126          PRIVILEGED_DATA static BlockLink_t xStart;
+  127          PRIVILEGED_DATA static BlockLink_t * pxEnd = NULL;
+  128          
+  129          /* Keeps track of the number of calls to allocate and free memory as well as the
+  130           * number of free bytes remaining, but says nothing about fragmentation. */
+  131          PRIVILEGED_DATA static size_t xFreeBytesRemaining = 0U;
+  132          PRIVILEGED_DATA static size_t xMinimumEverFreeBytesRemaining = 0U;
+  133          PRIVILEGED_DATA static size_t xNumberOfSuccessfulAllocations = 0;
+  134          PRIVILEGED_DATA static size_t xNumberOfSuccessfulFrees = 0;
+  135          
+  136          /*-----------------------------------------------------------*/
+  137          
+  138          void * pvPortMalloc( size_t xWantedSize )
+  139          {
+  140   1          BlockLink_t * pxBlock;
+  141   1          BlockLink_t * pxPreviousBlock;
+  142   1          BlockLink_t * pxNewBlockLink;
+  143   1          void * pvReturn = NULL;
+  144   1          size_t xAdditionalRequiredSize;
+  145   1      
+  146   1          vTaskSuspendAll();
+  147   1          {
+  148   2              /* If this is the first call to malloc then the heap will require
+  149   2               * initialisation to setup the list of free blocks. */
+  150   2              if( pxEnd == NULL )
+  151   2              {
+  152   3                  prvHeapInit();
+  153   3              }
+  154   2              else
+  155   2              {
+  156   3                  mtCOVERAGE_TEST_MARKER();
+  157   3              }
+  158   2      
+  159   2              if( xWantedSize > 0 )
+  160   2              {
+  161   3                  /* The wanted size must be increased so it can contain a BlockLink_t
+  162   3                   * structure in addition to the requested amount of bytes. Some
+  163   3                   * additional increment may also be needed for alignment. */
+  164   3                  xAdditionalRequiredSize = xHeapStructSize + portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALI
+             -GNMENT_MASK );
+  165   3      
+  166   3                  if( heapADD_WILL_OVERFLOW( xWantedSize, xAdditionalRequiredSize ) == 0 )
+  167   3                  {
+  168   4                      xWantedSize += xAdditionalRequiredSize;
+  169   4                  }
+  170   3                  else
+  171   3                  {
+  172   4                      xWantedSize = 0;
+  173   4                  }
+  174   3              }
+  175   2              else
+  176   2              {
+  177   3                  mtCOVERAGE_TEST_MARKER();
+  178   3              }
+  179   2      
+  180   2              /* Check the block size we are trying to allocate is not so large that the
+  181   2               * top bit is set.  The top bit of the block size member of the BlockLink_t
+  182   2               * structure is used to determine who owns the block - the application or
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 4   
+
+  183   2               * the kernel, so it must be free. */
+  184   2              if( heapBLOCK_SIZE_IS_VALID( xWantedSize ) != 0 )
+  185   2              {
+  186   3                  if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining ) )
+  187   3                  {
+  188   4                      /* Traverse the list from the start (lowest address) block until
+  189   4                       * one of adequate size is found. */
+  190   4                      pxPreviousBlock = &xStart;
+  191   4                      pxBlock = xStart.pxNextFreeBlock;
+  192   4      
+  193   4                      while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock != NULL ) )
+  194   4                      {
+  195   5                          pxPreviousBlock = pxBlock;
+  196   5                          pxBlock = pxBlock->pxNextFreeBlock;
+  197   5                      }
+  198   4      
+  199   4                      /* If the end marker was reached then a block of adequate size
+  200   4                       * was not found. */
+  201   4                      if( pxBlock != pxEnd )
+  202   4                      {
+  203   5                          /* Return the memory space pointed to - jumping over the
+  204   5                           * BlockLink_t structure at its start. */
+  205   5                          pvReturn = ( void * ) ( ( ( uint8_t * ) pxPreviousBlock->pxNextFreeBlock ) + xHeapStr
+             -uctSize );
+  206   5      
+  207   5                          /* This block is being returned for use so must be taken out
+  208   5                           * of the list of free blocks. */
+  209   5                          pxPreviousBlock->pxNextFreeBlock = pxBlock->pxNextFreeBlock;
+  210   5      
+  211   5                          /* If the block is larger than required it can be split into
+  212   5                           * two. */
+  213   5                          if( ( pxBlock->xBlockSize - xWantedSize ) > heapMINIMUM_BLOCK_SIZE )
+  214   5                          {
+  215   6                              /* This block is to be split into two.  Create a new
+  216   6                               * block following the number of bytes requested. The void
+  217   6                               * cast is used to prevent byte alignment warnings from the
+  218   6                               * compiler. */
+  219   6                              pxNewBlockLink = ( void * ) ( ( ( uint8_t * ) pxBlock ) + xWantedSize );
+  220   6                              configASSERT( ( ( ( size_t ) pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+  221   6      
+  222   6                              /* Calculate the sizes of two blocks split from the
+  223   6                               * single block. */
+  224   6                              pxNewBlockLink->xBlockSize = pxBlock->xBlockSize - xWantedSize;
+  225   6                              pxBlock->xBlockSize = xWantedSize;
+  226   6      
+  227   6                              /* Insert the new block into the list of free blocks. */
+  228   6                              prvInsertBlockIntoFreeList( pxNewBlockLink );
+  229   6                          }
+  230   5                          else
+  231   5                          {
+  232   6                              mtCOVERAGE_TEST_MARKER();
+  233   6                          }
+  234   5      
+  235   5                          xFreeBytesRemaining -= pxBlock->xBlockSize;
+  236   5      
+  237   5                          if( xFreeBytesRemaining < xMinimumEverFreeBytesRemaining )
+  238   5                          {
+  239   6                              xMinimumEverFreeBytesRemaining = xFreeBytesRemaining;
+  240   6                          }
+  241   5                          else
+  242   5                          {
+  243   6                              mtCOVERAGE_TEST_MARKER();
+  244   6                          }
+  245   5      
+  246   5                          /* The block is being returned - it is allocated and owned
+  247   5                           * by the application and has no "next" block. */
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 5   
+
+  248   5                          heapALLOCATE_BLOCK( pxBlock );
+  249   5                          pxBlock->pxNextFreeBlock = NULL;
+  250   5                          xNumberOfSuccessfulAllocations++;
+  251   5                      }
+  252   4                      else
+  253   4                      {
+  254   5                          mtCOVERAGE_TEST_MARKER();
+  255   5                      }
+  256   4                  }
+  257   3                  else
+  258   3                  {
+  259   4                      mtCOVERAGE_TEST_MARKER();
+  260   4                  }
+  261   3              }
+  262   2              else
+  263   2              {
+  264   3                  mtCOVERAGE_TEST_MARKER();
+  265   3              }
+  266   2      
+  267   2              traceMALLOC( pvReturn, xWantedSize );
+  268   2          }
+  269   1          ( void ) xTaskResumeAll();
+  270   1      
+  271   1          #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+                   {
+                       if( pvReturn == NULL )
+                       {
+                           vApplicationMallocFailedHook();
+                       }
+                       else
+                       {
+                           mtCOVERAGE_TEST_MARKER();
+                       }
+                   }
+                   #endif /* if ( configUSE_MALLOC_FAILED_HOOK == 1 ) */
+  283   1      
+  284   1          configASSERT( ( ( ( size_t ) pvReturn ) & ( size_t ) portBYTE_ALIGNMENT_MASK ) == 0 );
+  285   1          return pvReturn;
+  286   1      }
+  287          /*-----------------------------------------------------------*/
+  288          
+  289          void vPortFree( void * pv )
+  290          {
+  291   1          uint8_t * puc = ( uint8_t * ) pv;
+  292   1          BlockLink_t * pxLink;
+  293   1      
+  294   1          if( pv != NULL )
+  295   1          {
+  296   2              /* The memory being freed will have an BlockLink_t structure immediately
+  297   2               * before it. */
+  298   2              puc -= xHeapStructSize;
+  299   2      
+  300   2              /* This casting is to keep the compiler from issuing warnings. */
+  301   2              pxLink = ( void * ) puc;
+  302   2      
+  303   2              configASSERT( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 );
+  304   2              configASSERT( pxLink->pxNextFreeBlock == NULL );
+  305   2      
+  306   2              if( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 )
+  307   2              {
+  308   3                  if( pxLink->pxNextFreeBlock == NULL )
+  309   3                  {
+  310   4                      /* The block is being returned to the heap - it is no longer
+  311   4                       * allocated. */
+  312   4                      heapFREE_BLOCK( pxLink );
+  313   4                      #if ( configHEAP_CLEAR_MEMORY_ON_FREE == 1 )
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 6   
+
+                               {
+                                   ( void ) memset( puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize );
+                               }
+                               #endif
+  318   4      
+  319   4                      vTaskSuspendAll();
+  320   4                      {
+  321   5                          /* Add this block to the list of free blocks. */
+  322   5                          xFreeBytesRemaining += pxLink->xBlockSize;
+  323   5                          traceFREE( pv, pxLink->xBlockSize );
+  324   5                          prvInsertBlockIntoFreeList( ( ( BlockLink_t * ) pxLink ) );
+  325   5                          xNumberOfSuccessfulFrees++;
+  326   5                      }
+  327   4                      ( void ) xTaskResumeAll();
+  328   4                  }
+  329   3                  else
+  330   3                  {
+  331   4                      mtCOVERAGE_TEST_MARKER();
+  332   4                  }
+  333   3              }
+  334   2              else
+  335   2              {
+  336   3                  mtCOVERAGE_TEST_MARKER();
+  337   3              }
+  338   2          }
+  339   1      }
+  340          /*-----------------------------------------------------------*/
+  341          
+  342          size_t xPortGetFreeHeapSize( void )
+  343          {
+  344   1          return xFreeBytesRemaining;
+  345   1      }
+  346          /*-----------------------------------------------------------*/
+  347          
+  348          size_t xPortGetMinimumEverFreeHeapSize( void )
+  349          {
+  350   1          return xMinimumEverFreeBytesRemaining;
+  351   1      }
+  352          /*-----------------------------------------------------------*/
+  353          
+  354          void vPortInitialiseBlocks( void )
+  355          {
+  356   1          /* This just exists to keep the linker quiet. */
+  357   1      }
+  358          /*-----------------------------------------------------------*/
+  359          
+  360          void * pvPortCalloc( size_t xNum,
+  361                               size_t xSize )
+  362          {
+  363   1          void * pv = NULL;
+  364   1      
+  365   1          if( heapMULTIPLY_WILL_OVERFLOW( xNum, xSize ) == 0 )
+  366   1          {
+  367   2              pv = pvPortMalloc( xNum * xSize );
+  368   2      
+  369   2              if( pv != NULL )
+  370   2              {
+  371   3                  ( void ) memset( pv, 0, xNum * xSize );
+  372   3              }
+  373   2          }
+  374   1      
+  375   1          return pv;
+  376   1      }
+  377          /*-----------------------------------------------------------*/
+  378          
+  379          static void prvHeapInit( void ) /* PRIVILEGED_FUNCTION */
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 7   
+
+  380          {
+  381   1          BlockLink_t * pxFirstFreeBlock;
+  382   1          uint8_t * pucAlignedHeap;
+  383   1          portPOINTER_SIZE_TYPE uxAddress;
+  384   1          size_t xTotalHeapSize = configTOTAL_HEAP_SIZE;
+  385   1      
+  386   1          /* Ensure the heap starts on a correctly aligned boundary. */
+  387   1          uxAddress = ( portPOINTER_SIZE_TYPE ) ucHeap;
+  388   1      
+  389   1          if( ( uxAddress & portBYTE_ALIGNMENT_MASK ) != 0 )
+  390   1          {
+  391   2              uxAddress += ( portBYTE_ALIGNMENT - 1 );
+  392   2              uxAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
+  393   2              xTotalHeapSize -= uxAddress - ( portPOINTER_SIZE_TYPE ) ucHeap;
+  394   2          }
+  395   1      
+  396   1          pucAlignedHeap = ( uint8_t * ) uxAddress;
+  397   1      
+  398   1          /* xStart is used to hold a pointer to the first item in the list of free
+  399   1           * blocks.  The void cast is used to prevent compiler warnings. */
+  400   1          xStart.pxNextFreeBlock = ( void * ) pucAlignedHeap;
+  401   1          xStart.xBlockSize = ( size_t ) 0;
+  402   1      
+  403   1          /* pxEnd is used to mark the end of the list of free blocks and is inserted
+  404   1           * at the end of the heap space. */
+  405   1          uxAddress = ( ( portPOINTER_SIZE_TYPE ) pucAlignedHeap ) + xTotalHeapSize;
+  406   1          uxAddress -= xHeapStructSize;
+  407   1          uxAddress &= ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK );
+  408   1          pxEnd = ( BlockLink_t * ) uxAddress;
+  409   1          pxEnd->xBlockSize = 0;
+  410   1          pxEnd->pxNextFreeBlock = NULL;
+  411   1      
+  412   1          /* To start with there is a single free block that is sized to take up the
+  413   1           * entire heap space, minus the space taken by pxEnd. */
+  414   1          pxFirstFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
+  415   1          pxFirstFreeBlock->xBlockSize = ( size_t ) ( uxAddress - ( portPOINTER_SIZE_TYPE ) pxFirstFreeBlock );
+  416   1          pxFirstFreeBlock->pxNextFreeBlock = pxEnd;
+  417   1      
+  418   1          /* Only one block exists - and it covers the entire usable heap space. */
+  419   1          xMinimumEverFreeBytesRemaining = pxFirstFreeBlock->xBlockSize;
+  420   1          xFreeBytesRemaining = pxFirstFreeBlock->xBlockSize;
+  421   1      }
+  422          /*-----------------------------------------------------------*/
+  423          
+  424          static void prvInsertBlockIntoFreeList( BlockLink_t * pxBlockToInsert ) /* PRIVILEGED_FUNCTION */
+  425          {
+  426   1          BlockLink_t * pxIterator;
+  427   1          uint8_t * puc;
+  428   1      
+  429   1          /* Iterate through the list until a block is found that has a higher address
+  430   1           * than the block being inserted. */
+  431   1          for( pxIterator = &xStart; pxIterator->pxNextFreeBlock < pxBlockToInsert; pxIterator = pxIterator->px
+             -NextFreeBlock )
+  432   1          {
+  433   2              /* Nothing to do here, just iterate to the right position. */
+  434   2          }
+  435   1      
+  436   1          /* Do the block being inserted, and the block it is being inserted after
+  437   1           * make a contiguous block of memory? */
+  438   1          puc = ( uint8_t * ) pxIterator;
+  439   1      
+  440   1          if( ( puc + pxIterator->xBlockSize ) == ( uint8_t * ) pxBlockToInsert )
+  441   1          {
+  442   2              pxIterator->xBlockSize += pxBlockToInsert->xBlockSize;
+  443   2              pxBlockToInsert = pxIterator;
+  444   2          }
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 8   
+
+  445   1          else
+  446   1          {
+  447   2              mtCOVERAGE_TEST_MARKER();
+  448   2          }
+  449   1      
+  450   1          /* Do the block being inserted, and the block it is being inserted before
+  451   1           * make a contiguous block of memory? */
+  452   1          puc = ( uint8_t * ) pxBlockToInsert;
+  453   1      
+  454   1          if( ( puc + pxBlockToInsert->xBlockSize ) == ( uint8_t * ) pxIterator->pxNextFreeBlock )
+  455   1          {
+  456   2              if( pxIterator->pxNextFreeBlock != pxEnd )
+  457   2              {
+  458   3                  /* Form one big block from the two blocks. */
+  459   3                  pxBlockToInsert->xBlockSize += pxIterator->pxNextFreeBlock->xBlockSize;
+  460   3                  pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock->pxNextFreeBlock;
+  461   3              }
+  462   2              else
+  463   2              {
+  464   3                  pxBlockToInsert->pxNextFreeBlock = pxEnd;
+  465   3              }
+  466   2          }
+  467   1          else
+  468   1          {
+  469   2              pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock;
+  470   2          }
+  471   1      
+  472   1          /* If the block being inserted plugged a gab, so was merged with the block
+  473   1           * before and the block after, then it's pxNextFreeBlock pointer will have
+  474   1           * already been set, and should not be set here as that would make it point
+  475   1           * to itself. */
+  476   1          if( pxIterator != pxBlockToInsert )
+  477   1          {
+  478   2              pxIterator->pxNextFreeBlock = pxBlockToInsert;
+  479   2          }
+  480   1          else
+  481   1          {
+  482   2              mtCOVERAGE_TEST_MARKER();
+  483   2          }
+  484   1      }
+  485          /*-----------------------------------------------------------*/
+  486          
+  487          void vPortGetHeapStats( HeapStats_t * pxHeapStats )
+  488          {
+  489   1          BlockLink_t * pxBlock;
+  490   1          size_t xBlocks = 0, xMaxSize = 0, xMinSize = portMAX_DELAY; /* portMAX_DELAY used as a portable way o
+             -f getting the maximum value. */
+  491   1      
+  492   1          vTaskSuspendAll();
+  493   1          {
+  494   2              pxBlock = xStart.pxNextFreeBlock;
+  495   2      
+  496   2              /* pxBlock will be NULL if the heap has not been initialised.  The heap
+  497   2               * is initialised automatically when the first allocation is made. */
+  498   2              if( pxBlock != NULL )
+  499   2              {
+  500   3                  while( pxBlock != pxEnd )
+  501   3                  {
+  502   4                      /* Increment the number of blocks and record the largest block seen
+  503   4                       * so far. */
+  504   4                      xBlocks++;
+  505   4      
+  506   4                      if( pxBlock->xBlockSize > xMaxSize )
+  507   4                      {
+  508   5                          xMaxSize = pxBlock->xBlockSize;
+  509   5                      }
+C251 COMPILER V5.60.0,  heap_4                                                             03/12/25  17:09:38  PAGE 9   
+
+  510   4      
+  511   4                      if( pxBlock->xBlockSize < xMinSize )
+  512   4                      {
+  513   5                          xMinSize = pxBlock->xBlockSize;
+  514   5                      }
+  515   4      
+  516   4                      /* Move to the next block in the chain until the last block is
+  517   4                       * reached. */
+  518   4                      pxBlock = pxBlock->pxNextFreeBlock;
+  519   4                  }
+  520   3              }
+  521   2          }
+  522   1          ( void ) xTaskResumeAll();
+  523   1      
+  524   1          pxHeapStats->xSizeOfLargestFreeBlockInBytes = xMaxSize;
+  525   1          pxHeapStats->xSizeOfSmallestFreeBlockInBytes = xMinSize;
+  526   1          pxHeapStats->xNumberOfFreeBlocks = xBlocks;
+  527   1      
+  528   1          taskENTER_CRITICAL();
+  529   1          {
+  530   2              pxHeapStats->xAvailableHeapSpaceInBytes = xFreeBytesRemaining;
+  531   2              pxHeapStats->xNumberOfSuccessfulAllocations = xNumberOfSuccessfulAllocations;
+  532   2              pxHeapStats->xNumberOfSuccessfulFrees = xNumberOfSuccessfulFrees;
+  533   2              pxHeapStats->xMinimumEverFreeBytesRemaining = xMinimumEverFreeBytesRemaining;
+  534   2          }
+  535   1          taskEXIT_CRITICAL();
+  536   1      }
+  537          /*-----------------------------------------------------------*/
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      1060     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =      2066     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        34     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

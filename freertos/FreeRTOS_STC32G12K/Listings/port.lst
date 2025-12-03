@@ -1,0 +1,271 @@
+C251 COMPILER V5.60.0,  port                                                               03/12/25  17:31:26  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE port
+NO OBJECT MODULE REQUESTED
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE FreeRTOS\portable\STC32G12K128\port.c XSMALL INTR2 FUNCTIONS(REENTRANT) BR
+                    -OWSE INCDIR(.\FreeRTOS\include;.\library;.\FreeRTOS\portable\STC32G12K128) DEBUG PRINT(.\Listings\port.lst) SRC(.\Object
+                    -s\port.SRC) 
+
+stmt  level    source
+
+    1          /*-----------------------------------------------------------*
+    2          FreeRTOS FOR 251
+    3          参考了STC的资料及程序进行改进
+    4          *-----------------------------------------------------------*/
+    5          #define  OS_CPU_GLOBALS
+    6          
+    7          
+    8          #include <stdlib.h>
+    9          #include "FreeRTOS.h"
+   10          #include "task.h"
+   11          
+   12          
+   13          /*-----------------------------------------------------------*
+   14          变量声明
+   15          *-----------------------------------------------------------*/
+   16          __asm   
+   17          {   
+   18              EXTRN         EDATA (pxCurrentTCB) 
+   19              ?STACK      SEGMENT   EDATA
+   20          }
+   21          
+   22          
+   23          /*-----------------------------------------------------------*
+   24          滴答时钟初始化
+   25          *-----------------------------------------------------------*/
+   26          #define portTM0PS_VALUE    ( configCPU_CLOCK_HZ / configTICK_RATE_HZ / 65536UL )
+   27          #define portRELOAD_VALUE   ( 65536UL - configCPU_CLOCK_HZ / (portTM0PS_VALUE+1) / configTICK_RATE_HZ )
+   28          static void prvPortSetupTimerInterrupt( void )
+   29          {
+   30   1              AUXR    |=      0x80;   //1T模式
+   31   1              TMOD    &=      0XF0;   //模式0
+   32   1              TM0PS   =       portTM0PS_VALUE;        //分频系数
+   33   1          TL0 = ( uint8_t )( portRELOAD_VALUE );              //装载值
+   34   1          TH0 = ( uint8_t )( portRELOAD_VALUE >> 8 ); //装载值
+   35   1              TF0 = 0;        //清除标志
+   36   1              ET0 = 1;        //使能中断
+   37   1              TR0 = 1;        //开启定时器
+   38   1      }
+   39          
+   40          /*-----------------------------------------------------------*
+   41          第一次切换到任务里去,使用这个函数
+   42          *-----------------------------------------------------------*/
+   43          BaseType_t xPortStartScheduler( void )
+   44          {
+   45   1          prvPortSetupTimerInterrupt();       //滴答时钟初始化
+   46   1          prvPortPendSvInit();                        //PendSv中断初始化
+   47   1          
+   48   1              //读取任务的SP
+   49   1          __asm   { MOV   DR4,pxCurrentTCB    }   
+   50   1          __asm   { MOV   WR2,@WR6+0x2        }   
+   51   1          __asm   { MOV   DR60,DR0    }
+   52   1          
+   53   1          //寄存器出栈
+   54   1          portRESTORE_CONTEXT();
+   55   1              
+   56   1          //把返回地址格式做成ERET的返回格试
+   57   1          //此处R4,R5,R6未被用于传递参数,可以使用,不影响结果
+C251 COMPILER V5.60.0,  port                                                               03/12/25  17:31:26  PAGE 2   
+
+   58   1          __asm   { POP   R4      }               
+   59   1          __asm   { POP   R6      }               
+   60   1          __asm   { POP   R5      }               
+   61   1          __asm   { POP   PSW1    }
+   62   1          __asm   { PUSH  R5    }               
+   63   1          __asm   { PUSH  R4    }               
+   64   1          __asm   { PUSH  R6    }
+   65   1          
+   66   1          //开中断,开中断后至少会往下执行一条指令,执行完ERET指令后才能响应中断.
+   67   1          __asm   { SETB  EA      }
+   68   1          
+   69   1          //用ERET指令转移到任务中去, 0XAA是ERET指令的编码
+   70   1          __asm   { DB    0AAH    } 
+   71   1                      
+   72   1          return pdTRUE;
+   73   1      }
+   74          
+   75          
+   76          /*-----------------------------------------------------------*
+   77          PendSv 中断做任务切换
+   78          *-----------------------------------------------------------*/
+   79          void PendSvIsr( void )
+   80          {
+   81   1          __asm{  PendSvIsr_Entrance:     }
+   82   1          __asm{  CLR     EA  }
+   83   1      
+   84   1          //寄存器入栈
+   85   1          portSAVE_CONTEXT();
+   86   1                      
+   87   1              //SP保存到任务控制块                        
+   88   1          __asm{  MOV   DR0,DR60          }           
+   89   1          __asm{  MOV   DR4,pxCurrentTCB  }   
+   90   1          __asm{  MOV   @WR6+0x2,WR2      }
+   91   1      
+   92   1          PendSv_ClearFlag(); 
+   93   1                      
+   94   1              //找出即将要运行的任务
+   95   1              vTaskSwitchContext();  
+   96   1                      
+   97   1              //读取任务的SP
+   98   1          __asm{  MOV   DR4,pxCurrentTCB  }   
+   99   1          __asm{  MOV   WR2,@WR6+0x2      }   
+  100   1          __asm{  MOV   DR60,DR0          }           
+  101   1                      
+  102   1          //寄存器出栈
+  103   1          portRESTORE_CONTEXT();
+  104   1              
+  105   1          __asm{  SETB    EA  }
+  106   1              __asm{  RETI        }              
+  107   1      }
+  108          
+  109          
+  110          /*-----------------------------------------------------------*
+  111          时钟滴答中断
+  112          *-----------------------------------------------------------*/
+  113          void Timer0_ISR_Handler (void) interrupt 1              
+  114          {
+  115   1          EA=0;
+  116   1          portYIELD_FROM_ISR( xTaskIncrementTick() );
+  117   1          EA=1;
+  118   1      }
+  119          
+  120          
+  121          /*-----------------------------------------------------------*
+  122          进出临界区(任务级,可嵌套)
+  123          *-----------------------------------------------------------*/
+C251 COMPILER V5.60.0,  port                                                               03/12/25  17:31:26  PAGE 3   
+
+  124          static uint8_t data uxCriticalNesting = 0;
+  125          static bit _bEA;
+  126          void vPortEnterCritical( void ){
+  127   1          if (!_testbit_(EA)) {
+  128   2              if (uxCriticalNesting == 0) {
+  129   3                  _bEA = 0;
+  130   3              }
+  131   2          } else {
+  132   2              if (uxCriticalNesting == 0) {
+  133   3                  _bEA = 1;
+  134   3              }
+  135   2          }
+  136   1          uxCriticalNesting++;
+  137   1      }
+  138          void vPortExitCritical( void ){
+  139   1          uxCriticalNesting--;
+  140   1              if(uxCriticalNesting==0)EA=_bEA;
+  141   1      }
+  142          
+  143          /*-----------------------------------------------------------*
+  144          以指针的形式返回#?STACK的值.
+  145          进入任务以后,主堆栈被闲置
+  146          实际上,函数返回一个大小为STACKSIZE的内存块可供自由使用.
+  147          *-----------------------------------------------------------*/
+  148          static StackType_t edata* c_stack =  0;
+  149          StackType_t* OS_Get_STACK_Addr(void)
+  150          {
+  151   1          __asm   { MOV   WR0,     #WORD0(?STACK)   } 
+  152   1          __asm   { MOV   c_stack, WR0                } 
+  153   1          return c_stack;
+  154   1      }
+  155          
+  156          
+  157          /*-----------------------------------------------------------*
+  158          关闭任务调度器,这里不适用
+  159          *-----------------------------------------------------------*/
+  160          void vPortEndScheduler( void )
+  161          {
+  162   1          /* Not implemented for this port. */
+  163   1      }
+  164          
+  165          /*-----------------------------------------------------------*
+  166          初始化任务的栈数据,(模仿中断的动作)
+  167          *-----------------------------------------------------------*/
+  168          StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters 
+             -)
+  169          {
+  170   1              uint32_t ulAddress;
+  171   1              uint8_t index;
+  172   1      
+  173   1              ulAddress = ( uint32_t ) pxCode;
+  174   1              *pxTopOfStack = 0;                                      /* PSW1 */
+  175   1              pxTopOfStack++;
+  176   1              *pxTopOfStack = ( StackType_t ) ( ulAddress >> 16 );    /* PC[23:16] */
+  177   1              pxTopOfStack++;
+  178   1              *pxTopOfStack = ( StackType_t ) ( ulAddress );          /* PC[7:0] */
+  179   1              pxTopOfStack++;
+  180   1              *pxTopOfStack = ( StackType_t ) ( ulAddress >> 8 );     /* PC[15:8] */
+  181   1      
+  182   1              pxTopOfStack++;
+  183   1              *pxTopOfStack = 0;                                      /* R56 */
+  184   1              pxTopOfStack++;
+  185   1              *pxTopOfStack = 1;                                      /* R57(DPXL) */
+  186   1              pxTopOfStack++;
+  187   1              *pxTopOfStack = 0;                                      /* R58(DPH) */
+  188   1              pxTopOfStack++;
+C251 COMPILER V5.60.0,  port                                                               03/12/25  17:31:26  PAGE 4   
+
+  189   1              *pxTopOfStack = 0;                                      /* R59(DPL) */
+  190   1      
+  191   1              for(index = 0; index < 28; index++)
+  192   1              {
+  193   2                      pxTopOfStack++;
+  194   2                      *pxTopOfStack = 0;
+  195   2              }
+  196   1      
+  197   1              pxTopOfStack++;
+  198   1              ulAddress = ( uint32_t ) pvParameters;
+  199   1              *pxTopOfStack = ( StackType_t ) ( ulAddress >> 24 );    /* R0 */
+  200   1              pxTopOfStack++;
+  201   1              *pxTopOfStack = ( StackType_t ) ( ulAddress >> 16 );    /* R1 */
+  202   1              pxTopOfStack++;
+  203   1              *pxTopOfStack = ( StackType_t ) ( ulAddress >> 8 );     /* R2 */
+  204   1              pxTopOfStack++;
+  205   1              *pxTopOfStack = ( StackType_t ) ( ulAddress );          /* R3 */
+  206   1              pxTopOfStack++;
+  207   1              *pxTopOfStack = ( StackType_t ) 0;                      /* PSW */
+  208   1      
+  209   1          return pxTopOfStack;
+  210   1      }
+  211          
+  212          /*-----------------------------------------------------------*
+  213          C51 地址结构混乱, 这里主要是占用地址 (xdata*)NULL 和 (xdata*)NULL+1,
+  214          有较小的机会正好一个OS变量分配到 ((xdata*) 0) 时 ,
+  215          判断空地址语句将会出错!
+  216          *-----------------------------------------------------------*/
+  217          static uint16_t xdata _bNULL _at_ 0;
+  218          
+  219          
+  220          /*-----------------------------------------------------------*
+  221          PendSv  向量入口引导
+  222          *-----------------------------------------------------------*/
+  223          __asm{ 
+  224              CSEG    AT  PendSv_EntryAddress  
+  225              JMP     PendSvIsr_Entrance
+  226          }
+  227             
+  228              
+  229              
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       469     ------
+  ecode size           =    ------     ------
+  data size            =         1     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =         2     ------
+  xdata-const size     =    ------     ------
+  edata size           =         2     ------
+  bit size             =         1     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

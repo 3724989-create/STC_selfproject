@@ -1,0 +1,1 @@
+"..\..\FreeRTOS_STC32G12K\FreeRTOS\portable\MemMang\heap_1.c" XSMALL INTR2 FUNCTIONS (REENTRANT) BROWSE INCDIR(.\FreeRTOS\include;.\library;.\FreeRTOS\portable\STC32G12K128) DEBUG PRINT(.\Listings\heap_1.lst) OBJECT(.\Objects\heap_1.obj)

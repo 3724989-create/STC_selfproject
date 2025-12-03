@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  main                                                               29/11/25  23:05:19  PAGE 1   
+C251 COMPILER V5.60.0,  main                                                               03/12/25  21:47:44  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE main
@@ -18,15 +18,15 @@ stmt  level    source
     7   1        all_init();
     8   1        while(1)
     9   1        {  
-   10   2            check_key_event();
+   10   2      //      check_key_event();
    11   2            //CCD_process();
    12   2            CCD_main_process();
    13   2            
-   14   2            if (lcd_refresh_flag)
-   15   2            {
-   16   3                lcd_refresh_flag = 0;
-   17   3                Self_LCD_Progress(); 
-   18   3            }
+   14   2      //      if (lcd_refresh_flag)
+   15   2      //      {
+   16   2      //          lcd_refresh_flag = 0;
+   17   2      //          Self_LCD_Progress(); 
+   18   2      //      }
    19   2      
    20   2        }
    21   1      }
@@ -34,7 +34,7 @@ stmt  level    source
 
 Module Information          Static   Overlayable
 ------------------------------------------------
-  code size            =        55     ------
+  code size            =        44     ------
   ecode size           =    ------     ------
   data size            =    ------     ------
   idata size           =    ------     ------

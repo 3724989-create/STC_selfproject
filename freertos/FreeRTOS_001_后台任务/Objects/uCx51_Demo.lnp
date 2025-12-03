@@ -1,0 +1,4 @@
+".\Objects\main.obj" 
+TO ".\Objects\uCx51_Demo" 
+PRINT(".\Listings\uCx51_Demo.m51") IXREF 
+RAMSIZE(256) 

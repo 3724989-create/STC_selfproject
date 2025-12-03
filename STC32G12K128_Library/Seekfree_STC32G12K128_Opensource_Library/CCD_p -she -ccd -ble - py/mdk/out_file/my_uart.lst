@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  my_uart                                                            29/11/25  23:05:16  PAGE 1   
+C251 COMPILER V5.60.0,  my_uart                                                            03/12/25  21:47:42  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE my_uart
@@ -66,7 +66,7 @@ stmt  level    source
    47   2                  uart_write_buffer(UART_INDEX, fifo_get_data, (uint16)fifo_data_count);       // 将读取到�
              -��数据发送出去
    48   2                  uart_write_string(UART_INDEX, "\r\n");                               // 输出测试信息
-C251 COMPILER V5.60.0,  my_uart                                                            29/11/25  23:05:16  PAGE 2   
+C251 COMPILER V5.60.0,  my_uart                                                            03/12/25  21:47:42  PAGE 2   
 
    49   2               }
    50   1               printf("hello\r\n");

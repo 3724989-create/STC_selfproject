@@ -1,0 +1,22 @@
+".\Objects\croutine.obj",
+".\Objects\event_groups.obj",
+".\Objects\list.obj",
+".\Objects\queue.obj",
+".\Objects\stream_buffer.obj",
+".\Objects\tasks.obj",
+".\Objects\timers.obj",
+".\Objects\port.obj",
+".\Objects\heap_4.obj",
+".\Objects\STC32G_Delay.obj",
+".\Objects\STC32G_Clock.obj",
+".\Objects\UART1.obj",
+".\Objects\START251.obj",
+".\Objects\main.obj",
+".\Objects\StatisticalOs.obj",
+".\Objects\isr.obj",
+".\Objects\StarTask.obj" 
+TO ".\Objects\FreeRTOS_STC32G12K" 
+PRINT(".\Listings\FreeRTOS_STC32G12K.map") CASE 
+REMOVEUNUSED 
+CLASSES (EDATA (0x0-0xFFF), 
+HDATA (0x0-0xFFF)) 

@@ -1,0 +1,135 @@
+C251 COMPILER V5.60.0,  StarTask                                                           03/12/25  17:30:46  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE StarTask
+OBJECT MODULE PLACED IN .\Objects\StarTask.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE StarTask.c XSMALL INTR2 FUNCTIONS(REENTRANT) BROWSE INCDIR(.\FreeRTOS\incl
+                    -ude;.\library;.\FreeRTOS\portable\STC32G12K128) DEBUG PRINT(.\Listings\StarTask.lst) OBJECT(.\Objects\StarTask.obj) 
+
+stmt  level    source
+
+    1          /*-------------------------------------------------------------
+    2          StarTask.c
+    3          -------------------------------------------------------------*/
+    4          
+    5          #include "StarTask.h"
+    6          #include "FreeRTOS.h"
+    7          #include "queue.h"
+    8          #include "semphr.h"
+    9          #include "UART1.H"
+   10          
+   11          
+   12          void Task2(void * pvParameters);
+   13          
+   14          
+   15          QueueHandle_t           testBinary; //二值信号量
+   16          xSemaphoreHandle        testSem;    //计数信号量
+   17          xSemaphoreHandle        Uart1Mutex; //RTOS 互斥信号量
+   18          
+   19          void StartTask(void * pvParameters)
+   20          {
+   21   1              UART1_Init(115200);
+   22   1              
+   23   1              vSemaphoreCreateBinary( testBinary );           //创建信号量
+   24   1              
+   25   1              testSem = xSemaphoreCreateCounting(255,0);      //创建信号量
+   26   1              
+   27   1              Uart1Mutex = xSemaphoreCreateMutex();           //创建信号量
+   28   1              
+   29   1              xTaskCreate((TaskFunction_t ) Task2,
+   30   1                      (const char*    ) "task2",
+   31   1                      (uint16_t       ) 256,
+   32   1                      (void*          ) NULL,                 //
+   33   1                      (UBaseType_t    ) 4,                    //优先级
+   34   1                      (TaskHandle_t*  ) NULL  );
+   35   1              
+   36   1              while(1)
+   37   1              {
+   38   2              u8 uart_dat[16],len;
+   39   2              
+   40   2              xSemaphoreTake(Uart1Mutex,portMAX_DELAY);
+   41   2              do{
+   42   3                  len = UART1_Receive(uart_dat,16);   
+   43   3                  UART1_Send(uart_dat,len);           //原路返回串口收到的数据
+   44   3              }while(len==16);
+   45   2              xSemaphoreGive(Uart1Mutex);
+   46   2      
+   47   2                      vTaskDelay(20);
+   48   2              }
+   49   1              
+   50   1              if(pvParameters);
+   51   1      }
+   52          
+   53          
+   54          
+   55          
+   56          /*-------------------------------------------------------------------- 
+   57          任务2
+   58          --------------------------------------------------------------------*/
+C251 COMPILER V5.60.0,  StarTask                                                           03/12/25  17:30:46  PAGE 2   
+
+   59          void Task2(void * pvParameters) 
+   60          {
+   61   1              while(1)
+   62   1              {
+   63   2                      static u8 xdata Visualization[512];
+   64   2              
+   65   2              xSemaphoreTake(Uart1Mutex,portMAX_DELAY);
+   66   2              
+   67   2              vTaskList(Visualization);   //获取任务信息 
+   68   2                      printf("任务信息：\r\n");    //
+   69   2                      printf(Visualization);      //
+   70   2              printf("\r\n");
+   71   2              
+   72   2                      printf("任务运行时间统计信息：\r\n");  //
+   73   2                      vTaskGetRunTimeStats(Visualization);    //获取任务运行时间统计信息
+   74   2                      printf(Visualization);                                  //输出到串口
+   75   2              
+   76   2              xSemaphoreGive(Uart1Mutex);
+   77   2                      
+   78   2                      vTaskDelay(1000);
+   79   2              
+   80   2                      P46 = !P46;
+   81   2              }
+   82   1              if(pvParameters);
+   83   1      }
+   84          
+   85          
+   86          void LED0_Task(void * pvParameters) 
+   87          {
+   88   1              while(1)
+   89   1              {
+   90   2              P46 = !P46;
+   91   2              vTaskDelay(500);
+   92   2              printf("read\r\n");
+   93   2              //UART1_Send(1,1);
+   94   2              }
+   95   1              if(pvParameters);
+   96   1      }
+   97          
+   98          
+   99          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       325     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =       512     ------
+  xdata-const size     =    ------     ------
+  edata size           =        12     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        54     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

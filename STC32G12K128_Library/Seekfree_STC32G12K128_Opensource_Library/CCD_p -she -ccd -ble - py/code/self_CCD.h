@@ -9,7 +9,6 @@ extern uint8 y3_boundary[128];
 
 void  CCD_init();   
 void ccd_process_data(void);
-void CCD_process(void);
 void CCD_main_process();
 void Menu_CCD_process();
 

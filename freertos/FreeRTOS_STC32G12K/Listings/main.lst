@@ -1,0 +1,100 @@
+C251 COMPILER V5.60.0,  main                                                               03/12/25  17:31:26  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE main.c XSMALL INTR2 FUNCTIONS(REENTRANT) BROWSE INCDIR(.\FreeRTOS\include;
+                    -.\library;.\FreeRTOS\portable\STC32G12K128) DEBUG PRINT(.\Listings\main.lst) OBJECT(.\Objects\main.obj) 
+
+stmt  level    source
+
+    1          /*---------------------------------------------------------
+    2          MAIN.C
+    3          ----------------------------------------------------------*/
+    4          
+    5          #include "Config.h"
+    6          #include "STC32G_GPIO.h"
+    7          #include "StarTask.h"
+    8          #include "task.h"
+    9          
+   10          
+   11          void XOSCClkConfig(u8 div);
+   12          
+   13          
+   14          /*---------------------------------------------------------
+   15          GPIO_config
+   16          ----------------------------------------------------------*/
+   17          void GPIO_config(void)
+   18          {
+   19   1              P0_MODE_IO_PU(GPIO_Pin_All);            //P0 设置为准双向口
+   20   1              P1_MODE_IO_PU(GPIO_Pin_All);            //P1 设置为准双向口
+   21   1              P2_MODE_IO_PU(GPIO_Pin_All);            //P2 设置为准双向口
+   22   1              P3_MODE_IO_PU(GPIO_Pin_All);            //P3 设置为准双向口
+   23   1              P4_MODE_IO_PU(GPIO_Pin_All);            //P4 设置为准双向口
+   24   1              P5_MODE_IO_PU(GPIO_Pin_All);            //P5 设置为准双向口
+   25   1              P6_MODE_IO_PU(GPIO_Pin_All);            //P6 设置为准双向口
+   26   1              P7_MODE_IO_PU(GPIO_Pin_All);            //P7 设置为准双向口
+   27   1              P7_MODE_IO_PU(GPIO_Pin_All);            //P7 设置为准双向口
+   28   1          
+   29   1          P4_MODE_OUT_PP(GPIO_Pin_6); //LED
+   30   1      }
+   31          
+   32          
+   33          /*---------------------------------------------------------
+   34          main
+   35          ----------------------------------------------------------*/
+   36          void main(void)
+   37          {
+   38   1              WTST = 0;               //设置程序指令延时参数，赋值为0可将CPU执行指令的速度设置为最快
+   39   1              EAXSFR();               //扩展SFR(XFR)访问使能 
+   40   1              CKCON = 0;      //提高访问XRAM速度
+   41   1          
+   42   1          GPIO_config();  //GPIO 初始化
+   43   1          
+   44   1          #if USE_Extern_Fosc
+                       XOSCClkConfig(1);       //切换时钟
+                   #endif
+   47   1          
+   48   1      //      /* 创建首个任务 */
+   49   1      //      xTaskCreate((TaskFunction_t )LED0_Task,
+   50   1      //                (const char*    )"LED0_Task",
+   51   1      //                (uint16_t       )256,
+   52   1      //                (void*          )NULL,
+   53   1      //                (UBaseType_t    )5,
+   54   1      //                (TaskHandle_t*  )NULL );
+   55   1      //      
+   56   1      //      vTaskStartScheduler();  /* 启动任务调度器开始任务调度 */
+   57   1          printf("123\r\n");
+   58   1      
+C251 COMPILER V5.60.0,  main                                                               03/12/25  17:31:26  PAGE 2   
+
+   59   1      }
+   60          
+   61          
+   62          
+   63          
+   64          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =        84     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =         6     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,135 @@
+C251 COMPILER V5.60.0,  STC32G_Clock                                                       03/12/25  17:09:38  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE STC32G_Clock
+OBJECT MODULE PLACED IN .\Objects\STC32G_Clock.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE library\STC32G_Clock.c XSMALL INTR2 FUNCTIONS(REENTRANT) BROWSE INCDIR(.\F
+                    -reeRTOS\include;.\library;.\FreeRTOS\portable\STC32G12K128) DEBUG PRINT(.\Listings\STC32G_Clock.lst) OBJECT(.\Objects\ST
+                    -C32G_Clock.obj) 
+
+stmt  level    source
+
+    1          /*---------------------------------------------------------------------*/
+    2          /* --- STC MCU Limited ------------------------------------------------*/
+    3          /* --- STC 1T Series MCU Demo Programme -------------------------------*/
+    4          /* --- Mobile: (86)13922805190 ----------------------------------------*/
+    5          /* --- Fax: 86-0513-55012956,55012947,55012969 ------------------------*/
+    6          /* --- Tel: 86-0513-55012928,55012929,55012966 ------------------------*/
+    7          /* --- Web: www.STCAI.com ---------------------------------------------*/
+    8          /* --- Web: www.STCMCUDATA.com  ---------------------------------------*/
+    9          /* --- BBS: www.STCAIMCU.com  -----------------------------------------*/
+   10          /* --- QQ:  800003751 -------------------------------------------------*/
+   11          /* 如果要在程序中使用此代码,请在程序中注明使用了STC的资料及程序            */
+   12          /*---------------------------------------------------------------------*/
+   13          
+   14          #include        "STC32G_Clock.h"
+   15          #include        "STC32G_Delay.h"
+   16          
+   17          //========================================================================
+   18          // 函数: void HIRCClkConfig(u8 div)
+   19          // 描述: 高速IRC时钟初始化程序.
+   20          // 参数: div: 时钟分频系数.
+   21          // 返回: none.
+   22          // 版本: V1.0, 2022-04-03
+   23          //========================================================================
+   24          void HIRCClkConfig(u8 div)
+   25          {
+   26   1              HIRCCR = 0x80; //启动内部 IRC
+   27   1              while (!(HIRCCR & 1)); //等待时钟稳定
+   28   1              CLKDIV = div;
+   29   1              CLKSEL = 0x00; //选择内部 IRC ( 默认 )
+   30   1      }
+   31          
+   32          //========================================================================
+   33          // 函数: void XOSCClkConfig(u8 div)
+   34          // 描述: 外部晶振时钟初始化程序.
+   35          // 参数: div: 时钟分频系数.
+   36          // 返回: none.
+   37          // 版本: V1.0, 2022-04-03
+   38          //========================================================================
+   39          void XOSCClkConfig(u8 div)
+   40          {
+   41   1              XOSCCR = 0xc0; //启动外部晶振
+   42   1              while (!(XOSCCR & 1)); //等待时钟稳定
+   43   1              CLKDIV = div;  //时钟分频
+   44   1              CLKSEL = 0x01; //选择外部晶振
+   45   1      }
+   46          
+   47          //========================================================================
+   48          // 函数: void IRC32KClkConfig(u8 div)
+   49          // 描述: 低速32K IRC时钟初始化程序.
+   50          // 参数: div: 时钟分频系数.
+   51          // 返回: none.
+   52          // 版本: V1.0, 2022-04-03
+   53          //========================================================================
+   54          void IRC32KClkConfig(u8 div)
+   55          {
+   56   1              IRC32KCR = 0x80; //启动内部 32K IRC
+   57   1              while (!(IRC32KCR & 1)); //等待时钟稳定
+C251 COMPILER V5.60.0,  STC32G_Clock                                                       03/12/25  17:09:38  PAGE 2   
+
+   58   1              CLKDIV = div;  //时钟分频
+   59   1              CLKSEL = 0x03; //选择内部 32K
+   60   1      }
+   61          
+   62          //========================================================================
+   63          // 函数: void HSPllClkConfig(u8 clksrc, u8 pcki, u8 pllsel, u8 div)
+   64          // 描述: 高速IO时钟初始化程序.
+   65          // 参数: clksrc: 系统时钟选择, MCLKSEL_HIRC/MCLKSEL_XIRC/MCLKSEL_X32K/MCLKSEL_I32K/MCLKSEL_PLL/MCLKSEL_PL
+             -L2/MCLKSEL_I48M.
+   66          // 参数: pllsel: PLL时钟选择, PLL_96M/PLL_144M.
+   67          // 参数: div: 高速IO时钟分频系数.
+   68          // 返回: none.
+   69          // 版本: V1.0, 2022-04-03
+   70          //========================================================================
+   71          void HSPllClkConfig(u8 clksrc, u8 pllsel, u8 div)
+   72          {
+   73   1              MainClockSel(clksrc);                   //系统时钟选择, MCLKSEL_HIRC/MCLKSEL_XIRC/MCLKSEL_X32K/MCLKSEL_I32K/MCLKSEL_PLL/
+             -MCLKSEL_PLL2/MCLKSEL_I48M
+   74   1      
+   75   1              //系统时钟 n 分频作为PLL时钟源,确保分频后为12M
+   76   1          USBCLK &= ~PCKI_MSK;
+   77   1      #if (MAIN_Fosc == 12000000UL)
+                   USBCLK |= PCKI_D1;          //PLL输入时钟1分频
+               #elif (MAIN_Fosc == 24000000UL)
+   80   1          USBCLK |= PCKI_D2;          //PLL输入时钟2分频
+   81   1      #elif (MAIN_Fosc == 48000000UL)
+                   USBCLK |= PCKI_D4;          //PLL输入时钟4分频
+               #elif (MAIN_Fosc == 96000000UL)
+                   USBCLK |= PCKI_D8;          //PLL输入时钟8分频
+               #else
+                   USBCLK |= PCKI_D1;          //默认PLL输入时钟1分频
+               #endif
+   88   1      
+   89   1              PLLClockSel(pllsel);                    //PLL时钟选择, PLL_96M/PLL_144M
+   90   1              PLLEnable(ENABLE);                              //PLL倍频使能, ENABLE/DISABLE
+   91   1              delay_ms(1);              //等待PLL锁频
+   92   1              HSIOClockSel(HSCK_PLL);         //高速IO时钟选择, HSCK_MCLK/HSCK_PLL
+   93   1              HSClockDiv(div);                                        //高速IO时钟分频系数
+   94   1      }
+   95          
+   96          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       238     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

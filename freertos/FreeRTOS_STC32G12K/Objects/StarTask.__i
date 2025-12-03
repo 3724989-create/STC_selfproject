@@ -1,0 +1,1 @@
+"StarTask.c" XSMALL INTR2 FUNCTIONS (REENTRANT) BROWSE INCDIR(.\FreeRTOS\include;.\library;.\FreeRTOS\portable\STC32G12K128) DEBUG PRINT(.\Listings\StarTask.lst) OBJECT(.\Objects\StarTask.obj)

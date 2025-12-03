@@ -1,7 +1,7 @@
 #include "self_menu.h"
 
 #define M_MENU_DISPLAY_MAX_LINES 4
-#define S_MENU_DISPLAY_MAX_LINES 1
+#define S_MENU_DISPLAY_MAX_LINES 2
 
 MenuNode_t *CurrentMenu=NULL;   //全局变量，指向当前菜单指针
 MenuNode_t *CurrentRoot = NULL; // 当前正在显示的菜单列表的起点（根节点）
@@ -25,7 +25,7 @@ MenuNode_t MenuNode_LED2 = {
 };
 
 MenuNode_t MenuNode_LED2_2 = {
-    "1.open_led2", 
+    "1.open_led2_2", 
      LED2_process
 };
 
@@ -56,7 +56,7 @@ void Menu_Init(void)
 {
     //建立双向环形连接
 // 1. 设置主菜单链表 (CCD <-> LED1 <-> LED2 <-> CCD)
-    MenuNode_CCD.prev = &MenuNode_LED2; 
+    MenuNode_CCD.prev = &Sub; 
     MenuNode_CCD.next = &MenuNode_LED1;
     
     MenuNode_LED1.prev = &MenuNode_CCD;
@@ -72,7 +72,7 @@ void Menu_Init(void)
     CurrentMenu = &MenuNode_CCD;
     CurrentRoot=&MenuNode_CCD;
     
-    Sub.childmenu = &Back; // 假设子菜单只有 Back 项
+    Sub.childmenu = &MenuNode_LED2_2; // 子菜单
 
     Menu_Display();
 }
@@ -80,17 +80,19 @@ void Menu_Init(void)
 void Sub_Menu_Link_Init(void)
 {
     // 假设子菜单列表只有 Back 一项，形成自环
+    MenuNode_LED2_2.prev=&Back;
+    MenuNode_LED2_2.next=&Back;
+
     Back.prev = &MenuNode_LED2_2;
     Back.next = &MenuNode_LED2_2;
-    
-    MenuNode_LED2_2.prev=&Back;
-    MenuNode_LED2_2.prev=&Back;
-    
+
     // 子菜单入口：让 Sub 节点指向 Back 节点
-    Sub.childmenu = &Back;
+    Sub.childmenu = &MenuNode_LED2_2;
     
     // Back 节点的父菜单入口：指向主菜单的起点
     Back.fathermenu = &MenuNode_CCD; 
+
+    Menu_Display();
 }
 // 移动到下一个菜单项 (例如 KEY1)
 void Menu_Move_Next(void)
@@ -125,16 +127,13 @@ void Menu_Select_Action(void)
         return; //没有return直接执行Back
         
     }
-    if(CurrentMenu->menu_name[0]=='B')
-    {
-        if (CurrentMenu->fathermenu != NULL) {
+    else if (CurrentMenu->fathermenu != NULL) {
             CurrentRoot = CurrentMenu->fathermenu; // 切换回父菜单的根节点
             CurrentMenu = CurrentRoot;              // 选中父菜单的第一个项
             Menu_Display();
             return; // 完成操作，退出函数
         }
-    }
-    if (CurrentMenu != NULL && CurrentMenu->action_func != NULL) {
+    else if (CurrentMenu != NULL && CurrentMenu->action_func != NULL) {
        // 执行当前菜单项绑定的功 能函数
         CurrentMenu->action_func();
         // 动作执行完毕后，可以停顿一下，或者回到菜单
@@ -158,7 +157,7 @@ void Menu_Display(void)
    
     //从currentRoot开始遍历需求
 
-    temp_node=CurrentMenu;
+    temp_node=CurrentRoot;
     current_line=START_LINE;
     
     if(temp_node==&MenuNode_CCD)
@@ -167,7 +166,7 @@ void Menu_Display(void)
        menu_num=M_MENU_DISPLAY_MAX_LINES;
     }
     
-    else if(temp_node==&Back)
+    else if(temp_node==&MenuNode_LED2_2)
     {
         
         menu_num=S_MENU_DISPLAY_MAX_LINES;

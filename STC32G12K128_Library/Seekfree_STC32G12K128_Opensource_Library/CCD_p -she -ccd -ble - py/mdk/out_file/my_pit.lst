@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  my_pit                                                             29/11/25  23:05:17  PAGE 1   
+C251 COMPILER V5.60.0,  my_pit                                                             03/12/25  21:47:42  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE my_pit
@@ -66,7 +66,7 @@ stmt  level    source
    52          {
    53   1          static u8 lcd_count=0;
    54   1          static u8 key_count=0;
-C251 COMPILER V5.60.0,  my_pit                                                             29/11/25  23:05:17  PAGE 2   
+C251 COMPILER V5.60.0,  my_pit                                                             03/12/25  21:47:42  PAGE 2   
 
    55   1      
    56   1          //pit_state = 1;                                                              // 周期中断触发 �

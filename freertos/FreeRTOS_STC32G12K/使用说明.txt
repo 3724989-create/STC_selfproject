@@ -1,0 +1,29 @@
+FreeTROS @STC32G	PendSv  移植版  tzz1983  2024/4/5
+
+
+简介: 用于STC MUC 251内核上的 FreeTROS_V10.5.1  移植版本.
+	　用一个硬件中断来模拟PendSv行为, 用于切换任务.　PendSv占用一个中断源.
+	　此版本弥补了 portYIELD_FROM_ISR() 缺失的问题．
+	　只对少量OS功能做了测试,请自行评估风险．
+
+
+使用需知:
+1.勾选 项目编译选项全局重入 "Generate reentrant functions",选项.
+2.局部变量不要强制指定存储类型.
+3.定时器0用作系统滴答,最低侁级.
+
+
+
+
+配制时钟源: 		请转到 Config.h
+
+
+配制PendSv： 	请转至　os_pendsv_config.h
+
+
+
+使用技巧: 
+		进入任务以后,主堆栈已被永久闲置. OS_Get_STACK_Addr()函数返回主堆栈的首址.
+		实际上,一个大小为STACKSIZE的内存块可供自由使用.
+
+

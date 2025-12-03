@@ -26,15 +26,26 @@ Project File Date:  11/29/2025
 
 <h2>Output:</h2>
 Build target 'STC32G'
-compiling self_menu.c...
-..\code\self_menu.c(164): warning C153: '==': different spaced pointers (far,xdata)
-..\code\self_menu.c(170): warning C153: '==': different spaced pointers (far,xdata)
-..\code\self_menu.c(150): warning C183: dead assignment eliminated
-..\code\self_menu.c(198): warning C184: value of 'menu_num' possibly undefined
+compiling self_CCD.c...
+..\code\self_CCD.c(177): warning C98: parameter 1: pointer to different objects
+..\code\self_CCD.c(203): warning C98: parameter 1: pointer to different objects
+..\code\self_CCD.c(194): warning C47: 'temp_data': unreferenced local variable
+..\code\self_CCD.c(248): warning C98: parameter 1: pointer to different objects
+..\code\self_CCD.c(249): warning C98: parameter 1: pointer to different objects
+..\code\self_CCD.c(249): warning C98: parameter 2: pointer to different objects
+..\code\self_CCD.c(249): warning C91: '&': pointer to different objects
+..\code\self_CCD.c(249): warning C91: '&': pointer to different objects
+..\code\self_CCD.c(241): warning C47: 'i': unreferenced local variable
+..\code\self_CCD.c(241): warning C47: 'j': unreferenced local variable
+..\code\self_CCD.c(58): warning C183: dead assignment eliminated
+..\code\self_CCD.c(152): warning C183: dead assignment eliminated
+..\code\self_CCD.c(153): warning C183: dead assignment eliminated
+..\code\self_CCD.c(174): warning C183: dead assignment eliminated
+..\code\self_CCD.c(175): warning C183: dead assignment eliminated
 linking...
-Program Size: data=9.4 edata+hdata=2048 xdata=2407 const=14715 code=61245
+Program Size: data=9.4 edata+hdata=2048 xdata=3179 const=14756 code=61161
 creating hex file from ".\out_file\SEEKFREE"...
-".\out_file\SEEKFREE" - 0 Error(s), 4 Warning(s).
+".\out_file\SEEKFREE" - 0 Error(s), 15 Warning(s).
 Build Time Elapsed:  00:00:01
 </pre>
 </body>

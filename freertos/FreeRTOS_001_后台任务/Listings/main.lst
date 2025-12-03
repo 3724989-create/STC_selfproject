@@ -1,0 +1,108 @@
+C51 COMPILER V9.60.7.0   MAIN                                                              12/01/2025 17:24:39 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\MDK\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND SYMBOLS PRINT(.\Lis
+                    -tings\main.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /* ---------------------------------------------
+   2          
+   3                  前后台任务范例
+   4                  后台任务
+   5          
+   6                  作者： 杨为民   2022-05
+   7                  QQ：   86547995
+   8          
+   9          --------------------------------------------- */
+  10          
+  11          // **** 系统定义 ****************
+  12          // ==== 单片机 SFR定义 ==========================
+  13          #include "uCx51_SFR_STC8H.h"
+  14          
+  15          // ==== 库函数 ==========================
+  16          #include "stdio.h"
+  17          
+  18          // **** 主函数 单片机程序入口 ****************
+  19          void main(void){                
+  20   1              float           X, Y, Z;
+  21   1              
+  22   1      // ==== 单片机系统 初始化 ===========
+  23   1      // ---- 系统串口1 波特率 115200 Timer2 33.1776MHz -------------
+  24   1                              SCON = 0x50;            // 8位数据,可变波特率
+  25   1                              AUXR |= 0x01;           // 串口1选择定时器2为波特率发生器
+  26   1                              AUXR &= 0xFB;           // 定时器时钟12T模式
+  27   1                              T2L = 0xFA;                     // 设置定时初始值
+  28   1                              T2H = 0xFF;                     // 设置定时初始值
+  29   1                              AUXR |= 0x10;           // 定时器2开始计时
+  30   1                              PS   =0x01;                     // 最高优先级
+  31   1                              ES  = 0;                                // 不允许串口中断                       
+  32   1                              TI      = 1;                            // 发送缓冲区已清空
+  33   1              
+  34   1      // ==== 后台任务主循环 ====================
+  35   1      Main_Loop:                              
+  36   1                              printf("\r\n 请输入 X,Y<CR>");
+  37   1                              scanf("%f,%f", &X, &Y);
+  38   1              
+  39   1                              Z=X+Y;
+  40   1                              printf("X+Y=%f", Z);
+  41   1                                      
+  42   1      // ---- 后台任务主循环 结束 -----------------
+  43   1                              goto Main_Loop;         
+  44   1      }
+C51 COMPILER V9.60.7.0   MAIN                                                              12/01/2025 17:24:39 PAGE 2   
+
+NAME                                    CLASS   MSPACE  TYPE    OFFSET  SIZE
+====                                    =====   ======  ====    ======  ====
+
+
+P0 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   0080H  1
+P1 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   0090H  1
+P2 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00A0H  1
+P3 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00B0H  1
+P4 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00C0H  1
+P5 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00C8H  1
+P6 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00E8H  1
+P7 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00F8H  1
+_scanf . . . . . . . . . . . . . . . .  EXTERN   CODE   PROC     -----  -----
+IE . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00A8H  1
+size_t . . . . . . . . . . . . . . . .  TYPEDEF  -----  U_INT    -----  2
+_printf. . . . . . . . . . . . . . . .  EXTERN   CODE   PROC     -----  -----
+ES . . . . . . . . . . . . . . . . . .  ABSBIT   -----  BIT      00ACH  1
+IP . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00B8H  1
+TI . . . . . . . . . . . . . . . . . .  ABSBIT   -----  BIT      0099H  1
+i8 . . . . . . . . . . . . . . . . . .  TYPEDEF  -----  CHAR     -----  1
+PS . . . . . . . . . . . . . . . . . .  ABSBIT   -----  BIT      00BCH  1
+main . . . . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  X. . . . . . . . . . . . . . . . . .  AUTO     XDATA  FLOAT    0000H  4
+  Y. . . . . . . . . . . . . . . . . .  AUTO     XDATA  FLOAT    0004H  4
+  Z. . . . . . . . . . . . . . . . . .  AUTO     XDATA  FLOAT    0008H  4
+  Main_Loop. . . . . . . . . . . . . .  LABEL    CODE   LABEL    -----  -----
+u8 . . . . . . . . . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+SCON . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   0098H  1
+TCON . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   0088H  1
+AUXR . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   008EH  1
+f32. . . . . . . . . . . . . . . . . .  TYPEDEF  -----  FLOAT    -----  4
+i32. . . . . . . . . . . . . . . . . .  TYPEDEF  -----  LONG     -----  4
+T2H. . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00D6H  1
+i16. . . . . . . . . . . . . . . . . .  TYPEDEF  -----  INT      -----  2
+T2L. . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00D7H  1
+u32. . . . . . . . . . . . . . . . . .  TYPEDEF  -----  U_LONG   -----  4
+u16. . . . . . . . . . . . . . . . . .  TYPEDEF  -----  U_INT    -----  2
+PSW. . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00D0H  1
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    136    ----
+   CONSTANT SIZE    =     31    ----
+   XDATA SIZE       =   ----      12
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
