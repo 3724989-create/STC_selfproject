@@ -240,11 +240,11 @@ void CCD_G_process(void)
 {
     uint8 i,j;
             
-//   for(j = 0; j < 128; j++)
-//   {
-//     y1_boundary[j] =tsl1401_data[0][j];
-//   }
-//    
+  for(j = 0; j < 128; j++)
+  {
+    averaged_pixels[j] =(u8)(MAX_NOMPRESSED_VALUE-tsl1401_data[0][j] / COMPRESSION_DIVER);;
+  }
+   
   //apply_frame_averaging(tsl1401_data[0]); //计算量太大丢数据
   apply_gussian_smoothing(averaged_pixels,y1_boundary,TSl140_LEN);
 
