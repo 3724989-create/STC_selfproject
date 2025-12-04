@@ -1,0 +1,58 @@
+C251 COMPILER V5.60.0,  my_servo                                                           03/12/25  21:47:43  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE my_servo
+OBJECT MODULE PLACED IN .\out_file\my_servo.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\my_servo.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BR
+                    -OWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;
+                    -..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\my_servo.lst) OBJECT(.\out_file\my_servo.obj) 
+
+stmt  level    source
+
+    1          #include "my_servo.h"
+    2          
+    3          #define S_PWM_Fre 50    //舵机频率
+    4          #define S_PWM_Min 300   //最小舵机值
+    5          #define S_PWM_Max 730   //最大舵机值
+    6          #define S_PWM_Mid 515   //中间舵机值
+    7          
+    8          void Servo_init()
+    9          {
+   10   1          pwm_init(PWM_SERVO, S_PWM_Fre, 0); 
+   11   1      }
+   12          
+   13          void Servo_test_Process()   //本身有延时
+   14          {
+   15   1              pwm_set_duty(PWM_SERVO, S_PWM_Min);
+   16   1              system_delay_ms(500);
+   17   1              pwm_set_duty(PWM_SERVO, S_PWM_Mid);
+   18   1              system_delay_ms(500);
+   19   1              pwm_set_duty(PWM_SERVO, S_PWM_Max);
+   20   1              system_delay_ms(500);
+   21   1              pwm_set_duty(PWM_SERVO, S_PWM_Mid);
+   22   1              system_delay_ms(500);
+   23   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =        95     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

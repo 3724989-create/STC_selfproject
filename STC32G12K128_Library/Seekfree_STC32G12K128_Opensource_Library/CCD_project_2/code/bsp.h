@@ -1,0 +1,52 @@
+#ifndef _BSP_H_
+#define _BSP_H_
+
+#define PIT_CH                  (TIM0_PIT )                	// 使用的周期中断编号 如果修改 需要同步对应修改周期中断编号与 isr.c 中的调用
+#define PIT_PRIORITY            (TIMER0_IRQn)              	// 对应周期中断的中断编号
+#define CCD_CH                  (TIM1_PIT)
+#define CCD_PRIORITY            (TIMER1_IRQn)
+
+#define LED1                    (IO_P46)
+#define LED2                    (IO_P45)
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include "intrins.h"
+
+#include "zf_common_headfile.h"
+#include "bsp.h"
+#include "my_pit.h"
+#include "my_uart.h"
+//#include "IIC.h"
+#include "my_servo.h"
+#include "self_LCD.h"
+#include "self_CCD.h"
+#include "self_menu.h"
+#include "self_ble.h"
+#include "self_button.h"
+
+typedef 	unsigned char	u8;
+typedef 	unsigned int	u16;
+typedef 	unsigned long	u32;
+
+extern bit lcd_refresh_flag ;   //LCD刷新标志位
+extern bit ccd_data_ready_flag; //CCD数据采集标志位
+
+#define MAIN_Fosc        24000000UL
+#define Timer0_Reload   (65536UL -(MAIN_Fosc / 1000))       //Timer 0 中断频率, 1000次/秒
+#define DIS_DOT     0x20
+#define DIS_BLACK   0x10
+#define DIS_        0x11
+
+#define TSl140Dyn 650   //表示ds1401动态参数 
+#define TSl140_up 150  //表示ds1401动态参数 
+#define TSl140_down 50  //表示ds1401动态参数 
+#define TSl140_LEN 128  //表示ds1401动态参数 
+
+void delay_cpu_cycle(u8 cycles);
+void all_init(void);
+void scheduler_run(void);
+
+#endif // DEBUG

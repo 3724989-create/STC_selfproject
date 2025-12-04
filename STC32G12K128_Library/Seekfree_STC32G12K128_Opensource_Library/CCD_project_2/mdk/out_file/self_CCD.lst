@@ -1,0 +1,335 @@
+C251 COMPILER V5.60.0,  self_CCD                                                           04/12/25  21:47:05  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE self_CCD
+OBJECT MODULE PLACED IN .\out_file\self_CCD.obj
+COMPILER INVOKED BY: D:\MDK\C251\BIN\C251.EXE ..\code\self_CCD.c LARGE NOALIAS FLOAT64 WARNINGLEVEL(3) OPTIMIZE(SIZE) BR
+                    -OWSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;
+                    -..\user;..\code;..\Hardware) DEBUG PRINT(.\out_file\self_CCD.lst) OBJECT(.\out_file\self_CCD.obj) 
+
+stmt  level    source
+
+    1          #include "self_CCD.h"
+    2          
+    3          //高斯核参数
+    4          #define Guess_kernel_size 5
+    5          #define Guess_Kernel_weight 25
+    6          
+    7          // --- 配置参数 ---
+    8          #define CCD_PIXEL_COUNT 128     // CCD 像素点数量
+    9          #define NUM_FRAMES_TO_AVERAGE 5 // 帧平均的帧数 N
+   10          //#define TSL1401_MAX_VALUE 255   // 假设 ADC 数据的最大值 (如果是 10bit 或 12bit，请修改
+             -)
+   11          //#define COMPRESSION_DIVER 8
+   12          
+   13          uint8 y1_boundary[128];
+   14          uint8 y2_boundary[128];
+   15          uint8 y3_boundary[128];
+   16          uint16 Tsl_the=0;
+   17          bit CCD_flag=0;
+   18          
+   19          // --- 数据缓冲区 ---
+   20          // 历史数据存储区：存储最近 N 帧的原始像素值
+   21          // 帧数 * 像素数
+   22          // 使用 uint16_t 是为了防止像素值在求和时溢出 (N * MaxValue)
+   23          // 假设 MaxValue=255, N=5. 255 * 5 = 1275, 仍在 uint16_t (65535) 范围内。
+   24          static uint8 frame_history_buffer[NUM_FRAMES_TO_AVERAGE][CCD_PIXEL_COUNT];
+   25          // 最终平均后的像素值（送给高斯平滑或直接发送）
+   26          static uint8 averaged_pixels[CCD_PIXEL_COUNT];
+   27          
+   28          // 用于跟踪当前存储的是哪一帧，作为环形缓冲区的索引
+   29          static size_t current_frame_index = 0;
+   30          
+   31          // 用于跟踪目前缓冲区中存储了多少帧数据
+   32          static size_t frames_count = 0;
+   33          
+   34          static const uint8 Guess_kernel[Guess_kernel_size]={5,5,5,5,5};
+   35          
+   36          void ccd_handler (void);
+   37          
+   38          void CCD_init(void)
+   39          {
+   40   1          gpio_init(LED2, GPO, GPIO_HIGH, GPO_PUSH_PULL);             // 初始化 LED2 输出 默认低电平 推挽输
+             -出模式
+   41   1          tsl1401_init();
+   42   1          seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_BLE6A20);          //初始化蓝牙串口
+   43   1              
+   44   1          seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, NULL, 128, 256);
+   45   1          // 设置一个边线用于显示CCD波形
+   46   1          seekfree_assistant_camera_boundary_config(Y_BOUNDARY, 128, NULL, NULL ,NULL, y1_boundary, y2_boundary
+             -, y3_boundary);
+   47   1          // 边线3用于显示中线
+   48   1          memset(y3_boundary, 0x80, sizeof(y3_boundary));   //黄色的那根是中线
+   49   1      
+   50   1          pit_ms_init(CCD_CH, 10);
+   51   1          interrupt_set_priority(CCD_PRIORITY, 0);
+   52   1          tim1_irq_handler = ccd_handler;
+   53   1      }
+   54          
+C251 COMPILER V5.60.0,  self_CCD                                                           04/12/25  21:47:05  PAGE 2   
+
+   55          int apply_gussian_smoothing(const uint16 *data_in,uint16*data_out,int length)
+   56          {
+   57   1          int i,j;
+   58   1          long sum;
+   59   1          int kernel_offset=Guess_kernel_size/2;
+   60   1          int data_index;
+   61   1      
+   62   1          //参数检查
+   63   1          if(data_in==NULL||data_out==NULL||length<Guess_kernel_size)
+   64   1          {
+   65   2              printf("something oversize.");
+   66   2              return 1;
+   67   2          }
+   68   1      
+   69   1          for(i=0;i<length;i++)
+   70   1          {
+   71   2              sum=0;
+   72   2              for(j=0;j<Guess_kernel_size;j++)
+   73   2              {
+   74   3                 // 计算当前核权重对应的输入数据索引
+   75   3                 // j=0 -> i-2, j=1 -> i-1, j=2 -> i, j=3 -> i+1, j=4 -> i+2
+   76   3                 data_index= i+(j-kernel_offset);
+   77   3                 if(data_index<=0)
+   78   3                 {
+   79   4                      //左边界使用第一个值
+   80   4                      data_index=0;
+   81   4                 }
+   82   3                 else if(data_index>=length)
+   83   3                 {
+   84   4                      data_index=length-1;
+   85   4                 }
+   86   3                 sum+=(long)data_in[data_index]*Guess_kernel[j];
+   87   3              }
+   88   2              //在被除数上增加权重的一半实现四舍五入
+   89   2              data_out[i]=(int)(sum+Guess_Kernel_weight/2)/Guess_Kernel_weight;
+   90   2      //       if(data_out[i]==0&&i!=0&&data_out[i-1]!=0)
+   91   2      //       {
+   92   2      //         data_out[i]=data_out[i-1];  
+   93   2      //       }
+   94   2          }
+   95   1          return 0; // 成功返回 0
+   96   1      }
+   97          
+   98          void apply_frame_averaging(const uint8 *new_frame_data)
+   99          {
+  100   1          uint32 pixel_sum;
+  101   1          uint8 i,j,z;
+  102   1      
+  103   1          //将新帧存入缓存区
+  104   1          for( i=0;i<CCD_PIXEL_COUNT;i++)
+  105   1          {
+  106   2              frame_history_buffer[current_frame_index][i]=new_frame_data[i];
+  107   2          }
+  108   1          //更新帧计数
+  109   1          if(frames_count<NUM_FRAMES_TO_AVERAGE)
+  110   1          {
+  111   2              frames_count++;
+  112   2          }
+  113   1          
+  114   1          current_frame_index=(frames_count+1)%NUM_FRAMES_TO_AVERAGE;
+  115   1          //计算平均值
+  116   1          if(frames_count==NUM_FRAMES_TO_AVERAGE)
+  117   1          {
+  118   2              //遍历像素点
+  119   2              for(j=0;j<CCD_PIXEL_COUNT;j++)
+  120   2              {
+C251 COMPILER V5.60.0,  self_CCD                                                           04/12/25  21:47:05  PAGE 3   
+
+  121   3                  pixel_sum=0;
+  122   3                  for(z=0;z<NUM_FRAMES_TO_AVERAGE;z++)
+  123   3                  {
+  124   4                      pixel_sum+=frame_history_buffer[z][j];
+  125   4                  }
+  126   3                  averaged_pixels[i]=(uint8)(pixel_sum/NUM_FRAMES_TO_AVERAGE);
+  127   3              }
+  128   2      
+  129   2          }
+  130   1      }
+  131          
+  132          uint16 calculate_threshold(const uint8 *dat, uint8 count)
+  133          {
+  134   1          uint32 sum=0;
+  135   1          uint8 i;
+  136   1          uint16 result;
+  137   1          for(i=0;i<count;i++)
+  138   1          {
+  139   2             sum += *(dat + i);
+  140   2          }
+  141   1          result=(uint16)(sum / count);
+  142   1          return result;
+  143   1      }
+  144          
+  145          void ccd_process_data(void)
+  146          {
+  147   1          // 检查是否有数据采集完成 (此检查冗余，因为外部已检查 tsl1401_finish_flag)
+  148   1          // if (!tsl1401_finish_flag) return; 
+  149   1          
+  150   1          // TSL1401_AD_RESOLUTION 被定义为 ADC_12BIT (0-4095)
+  151   1          // 压缩系数为 4096 / 128 = 32
+  152   1          uint8 j;
+  153   1          const uint16 COMPRESSION_DIVER=32;
+  154   1          const uint8 MAX_NOMPRESSED_VALUE=128;
+  155   1      
+  156   1          for(j=0;j<128;j++)
+  157   1          {
+  158   2               // 压缩逻辑: 128 - (ADC_VALUE / 32)
+  159   2               // 实现：高亮度 (高 ADC 值) 对应低压缩值 (接近 0)
+  160   2               // ADC 值 4095 -> 128 - 128 = 0
+  161   2               // ADC 值 0 -> 128 - 0 = 128
+  162   2               y1_boundary[j]=(u8)(MAX_NOMPRESSED_VALUE-tsl1401_data[0][j] / COMPRESSION_DIVER);
+  163   2          }
+  164   1           // 此时 y1_boundary 已经准备好供 LCD 绘制
+  165   1      }
+  166          
+  167          void ccd_avarage_data(void)
+  168          {
+  169   1          // 检查是否有数据采集完成 (此检查冗余，因为外部已检查 tsl1401_finish_flag)
+  170   1          // if (!tsl1401_finish_flag) return; 
+  171   1          
+  172   1          // TSL1401_AD_RESOLUTION 被定义为 ADC_12BIT (0-4095)
+  173   1          // 压缩系数为 4096 / 128 = 32
+  174   1          u8 j;
+  175   1          const u16 COMPRESSION_DIVER=32;
+  176   1          const u8 MAX_NOMPRESSED_VALUE=128;
+  177   1      
+  178   1          apply_frame_averaging(tsl1401_data[0]);
+*** WARNING C98 IN LINE 178 OF ..\code\self_CCD.c: parameter 1: pointer to different objects
+  179   1          for( j=0;j<128;j++)
+  180   1          {
+  181   2               // 压缩逻辑: 128 - (ADC_VALUE / 32)
+  182   2               // 实现：高亮度 (高 ADC 值) 对应低压缩值 (接近 0)
+  183   2               // ADC 值 4095 -> 128 - 128 = 0
+  184   2               // ADC 值 0 -> 128 - 0 = 128
+  185   2               y1_boundary[j]=averaged_pixels[j];
+C251 COMPILER V5.60.0,  self_CCD                                                           04/12/25  21:47:05  PAGE 4   
+
+  186   2          }
+  187   1           // 此时 y1_boundary 已经准备好供 LCD 绘制
+  188   1           ble_send_ccd_frame();
+  189   1      }
+  190          
+  191          void CCD_binary_process(void)
+  192          {
+  193   1          uint8 i,j;
+  194   1          uint16 threshold;
+  195   1          uint8 temp_data[TSl140_LEN];
+  196   1          uint8 pre_dat;
+  197   1          uint8 now_dat;
+  198   1          uint8 pass_dat;
+  199   1                  
+  200   1                      //tsl1401_binary_data(DEBUG_UART_INDEX,0,10);
+  201   1              
+  202   1                  //tsl1401_send_data(DEBUG_UART_INDEX, 1);
+  203   1                              //threshold=calculate_threshold(tsl1401_data[0],TSl140_LEN)+TSl140Dyn;
+  204   1                  threshold=calculate_threshold(tsl1401_data[0],TSl140_LEN);
+*** WARNING C98 IN LINE 204 OF ..\code\self_CCD.c: parameter 1: pointer to different objects
+  205   1                   for(j = 0; j < 128; j++)
+  206   1                   {
+  207   2                       if (tsl1401_data[0][j] >=threshold)
+  208   2                      {
+  209   3                          // 假设高 ADC 值代表亮区（背景）
+  210   3                          y1_boundary[j] = 1; 
+  211   3                      }
+  212   2      
+  213   2                      else
+  214   2                      {
+  215   3                          y1_boundary[j] = 0;
+  216   3                      }
+  217   2                  }
+  218   1                         
+  219   1                  for(i=1;i<TSl140_LEN-1;i++) //去掉头尾避免越界
+  220   1                  {
+  221   2                      pre_dat= y1_boundary[i-1];
+  222   2                      now_dat=y1_boundary[i];
+  223   2                      pass_dat=y1_boundary[i+1];
+  224   2                      //消除独立的点
+  225   2                      if(pre_dat==1&&now_dat==0&&pass_dat==1)
+  226   2                      {
+  227   3                          y1_boundary[i] = 1;     
+  228   3                      }
+  229   2                      if(pre_dat==0&&now_dat==1&&pass_dat==0)
+  230   2                      {
+  231   3                          y1_boundary[i] = 0;     
+  232   3                      }
+  233   2                  }
+  234   1      
+  235   1      
+  236   1                  // 发送图像
+  237   1                    ble_send_ccd_frame();
+  238   1      }
+*** WARNING C47 IN LINE 195 OF ..\code\self_CCD.c: 'temp_data': unreferenced local variable
+  239          
+  240          void CCD_G_process(void)
+  241          {
+  242   1          uint8 i,j;
+  243   1          const u16 TSL1401_MAX_VALUE=225;
+  244   1          const u8 COMPRESSION_DIVER=32;
+  245   1        for(j = 0; j < 128; j++)
+  246   1        {
+  247   2          y1_boundary[j] =(u8)(TSL1401_MAX_VALUE-tsl1401_data[0][j] / COMPRESSION_DIVER);;
+  248   2        }
+  249   1         
+C251 COMPILER V5.60.0,  self_CCD                                                           04/12/25  21:47:05  PAGE 5   
+
+  250   1        //apply_frame_averaging(tsl1401_data[0]); //计算量太大丢数据
+  251   1        //apply_gussian_smoothing(averaged_pixels,y1_boundary,TSl140_LEN);
+  252   1      
+  253   1        // 发送图像
+  254   1        ble_send_ccd_frame();
+  255   1      }
+*** WARNING C47 IN LINE 242 OF ..\code\self_CCD.c: 'i': unreferenced local variable
+  256          
+  257          void ccd_handler (void)
+  258          {
+  259   1          tsl1401_finish_flag = 1;
+  260   1      }
+  261          
+  262          void Menu_CCD_process()
+  263          {
+  264   1          CCD_flag=!CCD_flag;
+  265   1      }
+  266          
+  267          void CCD_main_process()
+  268          {
+  269   1      //    if(CCD_flag)
+  270   1      //    {
+  271   1            if (tsl1401_finish_flag)
+  272   1            {
+  273   2                tsl1401_finish_flag = 0;
+  274   2                tsl1401_collect_pit_handler();
+  275   2                CCD_G_process();
+  276   2            }
+  277   1      //    }
+  278   1      }
+*** WARNING C183 IN LINE 59 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 153 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 154 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 175 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 176 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 243 OF ..\code\self_CCD.c: dead assignment eliminated
+*** WARNING C183 IN LINE 244 OF ..\code\self_CCD.c: dead assignment eliminated
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =       956     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =      1158          2
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =         1     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        46     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  11 WARNING(S),  0 ERROR(S)

@@ -1,1 +1,2 @@
 *.zip filter=lfs diff=lfs merge=lfs -text
+LQ_AI8051U_LIB filter=lfs diff=lfs merge=lfs -text
